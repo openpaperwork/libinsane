@@ -34,8 +34,6 @@ Main features
 * Cross-scanner and cross-driver: Because a lot of them all have their quirks (and sometimes bugs).
 * Cross-compiled: Windows version is built on a GNU/Linux system.
 
-Let the insanity begin !
-
 .. _Pyinsane: https://github.com/openpaperwork/pyinsane/
 .. _Sane: http://sane-project.org/
 .. _WIA2: https://msdn.microsoft.com/en-us/library/windows/desktop/ms630368(v=vs.85).aspx
@@ -45,6 +43,8 @@ Let the insanity begin !
 
 Overall view
 ------------
+
+Let the insanity begin !
 
 .. image:: design.png
     :alt: Design of Libinsane
