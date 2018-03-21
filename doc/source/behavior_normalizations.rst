@@ -6,8 +6,18 @@ Behavior normalizations
     TWAIN
 
 
-Ensuring there is at least one source
--------------------------------------
+Ensure that sources are represented as node
+-------------------------------------------
+
+.. note
+
+WIA2: For each scanner, provide a device tree (see :ref:`WIA2` description).
+
+Sane: There is no tree (see :ref:`Sane` description). Children nodes (sources) must be simulated.
+
+
+Ensure there is at least one source
+-----------------------------------
 
 .. note::
 
@@ -18,20 +28,16 @@ Sane: `Some scanner do not provide the option "source"`_.
 
 WIA2: `Some scanners do not always provide a source`_. Scan is done directly on them.
 
+If there is no source at all, this normalization will create a fake one.
+
+
 .. _Some scanner do not provide the option "source": https://openpaper.work/en-us/scanner_db/report/57
 .. _Some scanners do not always provide a source: https://openpaper.work/en/scanner_db/report/28
 
 
-Ensuring that sources are represented as node
----------------------------------------------
 
-WIA2: For each scanner, provide a device tree (see :ref:`WIA2` description).
-
-Sane: There is no tree (see :ref:`Sane` description). Children nodes (sources) must be simulated.
-
-
-Ensuring all options are available on sources
----------------------------------------------
+Ensure all options are available on sources
+-------------------------------------------
 
 .. note::
 
@@ -48,8 +54,8 @@ WIA: Some options are on the scanner itself, some options are on the
 sources. Scanner options must be mapped on all its sources.
 
 
-Ensuring scan area option names are all the same
-------------------------------------------------
+Ensure scan area option names are all the same
+----------------------------------------------
 
 Sane: `Sane scan area options`_ are used as reference.
 
@@ -59,8 +65,8 @@ options, and any change to these options is applied back to the WIA2 options.
 .. _Sane scan area options: http://sane.alioth.debian.org/sane2/0.08/doc014.html#s4.5.4
 
 
-Ensuring resolution constraint is always in the same format
------------------------------------------------------------
+Ensure resolution constraint is always in the same format
+---------------------------------------------------------
 
 .. note::
 
@@ -73,8 +79,8 @@ a list. If the range has an interval < 25dpi, the interval used to generate the
 list will be 25dpi.
 
 
-Identifying source types
-------------------------
+Ensure source types are clearly identified
+------------------------------------------
 
 .. note::
 
@@ -86,8 +92,8 @@ Sane: Sources have "name", but the exact names are up to the drivers.
 WIA2: source types are already clearly defined.
 
 
-Ensuring there is only supported devices
-----------------------------------------
+Ensure there is only supported devices
+--------------------------------------
 
 .. note::
 
