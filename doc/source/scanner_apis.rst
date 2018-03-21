@@ -66,37 +66,37 @@ WIA2
 .. uml::
 
     @startuml
-    object "Scanner (node)" as scanner
+    object "Scanner (WIAItem)" as scanner
     object "Optiom 'image format'" as format
     object "Option 'mode'" as mode1
     object "Option 'mode'" as mode2
     object "Option 'resolution'" as res1
     object "Option 'resolution'" as res2
 
-    scanner *-- "Flatbed (node)"
-    scanner *-- "Feeder (node)"
+    scanner *-- "Flatbed (WIAItem)"
+    scanner *-- "Feeder (WIAItem)"
 
     scanner *-- format
     format : value type
     format : constraint
     format : value
 
-    "Flatbed (node)" *-- res1
+    "Flatbed (WIAItem)" *-- res1
     res1 : value type
     res1 : constraint
     res1 : value
 
-    "Flatbed (node)" *-- mode1
+    "Flatbed (WIAItem)" *-- mode1
     mode1 : value type
     mode1 : constraint
     mode1 : value
 
-    "Feeder (node)" *-- res2
+    "Feeder (WIAItem)" *-- res2
     res2 : value type
     res2 : constraint
     res2 : value
 
-    "Feeder (node)" *-- mode2
+    "Feeder (WIAItem)" *-- mode2
     mode2 : value type
     mode2 : constraint
     mode2 : value
@@ -104,8 +104,8 @@ WIA2
 
 `Windows Image Acquisition`_ is a Microsoft API.
 
-For each scanner, there are many scan sources.
-The scanner itself and each of its scan sources have their own options.
+For each scanner, there are many scan sources. The scanner itself and each of
+its scan sources are all WIAItems. They all have their own options.
 
 Possible options are limited to what is defined in `wia.h`. However
 value types and constraint types are not.
