@@ -22,6 +22,13 @@ WIA2: `Some scanners do not always provide a source`_. Scan is done directly on 
 .. _Some scanners do not always provide a source: https://openpaper.work/en/scanner_db/report/28
 
 
+Ensuring that sources are represented as node
+---------------------------------------------
+
+WIA2: For each scanner, provide a device tree (see :ref:`WIA2` description).
+
+Sane: There is no tree (see :ref:`Sane` description). Children nodes (sources) must be simulated.
+
 
 Ensuring all options are available on sources
 ---------------------------------------------

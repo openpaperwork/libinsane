@@ -6,8 +6,8 @@ Welcome to LibInsane's documentation!
     :caption: Contents:
 
     introduction
-    normalized_api
     scanner_apis
+    normalized_api
     behavior_normalizations
     workarounds
     gobject_introspection_api

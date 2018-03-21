@@ -11,9 +11,31 @@ All scanner APIs provides similar features:
 Some APIs provide extra features but it is simply not humanely possible
 to support them all in this library.
 
+.. _Sane:
 
 Sane
 ----
+
+.. uml::
+
+    @startuml
+    object Scanner
+
+    Scanner *-- "Option 'resolution'"
+    "Option 'resolution'" : value type
+    "Option 'resolution'" : constraint
+    "Option 'resolution'" : value
+
+    Scanner *-- "Option 'mode'"
+    "Option 'mode'" : value type
+    "Option 'mode'" : constraint
+    "Option 'mode'" : value
+
+    Scanner *-- "Option 'source'"
+    "Option 'source'" : value type
+    "Option 'source'" : constraint: ['Flatbed', 'Feeder', etc]
+    "Option 'source'" : value
+    @enduml
 
 `Sane API`_ is a simple and flexible API.
 
@@ -36,8 +58,49 @@ TWAIN
 
     TODO
 
+.. _WIA2:
+
 WIA2
 ----
+
+.. uml::
+
+    @startuml
+    object "Scanner (node)" as scanner
+    object "Optiom 'image format'" as format
+    object "Option 'mode'" as mode1
+    object "Option 'mode'" as mode2
+    object "Option 'resolution'" as res1
+    object "Option 'resolution'" as res2
+
+    scanner *-- "Flatbed (node)"
+    scanner *-- "Feeder (node)"
+
+    scanner *-- format
+    format : value type
+    format : constraint
+    format : value
+
+    "Flatbed (node)" *-- res1
+    res1 : value type
+    res1 : constraint
+    res1 : value
+
+    "Flatbed (node)" *-- mode1
+    mode1 : value type
+    mode1 : constraint
+    mode1 : value
+
+    "Feeder (node)" *-- res2
+    res2 : value type
+    res2 : constraint
+    res2 : value
+
+    "Feeder (node)" *-- mode2
+    mode2 : value type
+    mode2 : constraint
+    mode2 : value
+    @enduml
 
 `Windows Image Acquisition`_ is a Microsoft API.
 
@@ -61,6 +124,6 @@ WIA2 provide also features that LibInsane doesn't support:
 
 * Access to devices other than scanners (camera, etc)
 * Access to file storages on devices
-* Dialogs (Why in hell are there dialogs in a scan API in a first place !?)
+* Windows Dialogs (why in hell are there dialogs in a scan API in a first place !?)
 
 .. _Windows Image Acquisition: https://msdn.microsoft.com/en-us/library/windows/desktop/ms630368(v=vs.85).aspx

@@ -13,7 +13,7 @@ build_c:
 version:
 
 doc:
-	(cd doc && make html)
+	(cd doc && DISPLAY="" make html)
 	cp doc/index.html doc/build/index.html
 
 check:

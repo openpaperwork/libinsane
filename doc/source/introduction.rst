@@ -4,6 +4,30 @@ What is LibInsane ?
 LibInsane is a library allowing access to image scanners. It is the successor of
 `Pyinsane`_.
 
+
+Image scanners you said ?
+-------------------------
+
+Yep, those things:
+
+.. image:: flatbed.png
+    :alt: Simple flatbed scanner
+.. image:: flatbed_and_feeder.png
+    :alt: Multi-functions printer, including a scanner with feeder
+.. image:: handheld.png
+    :alt: Old-school portable scanner
+.. image:: portable.png
+    :alt: New-school portable scanner
+.. image:: adf.png
+    :alt: Scanner with only a feeder
+
+Basically, paper eaters. Not webcams, not your smartphone, not USB keys, not
+other weird thingies that could acquire or generate images.
+
+
+Main features
+-------------
+
 * Cross-platform: Linux, \*BSD and Windows.
 * Cross-API: `Sane`_ (Linux, \*BSD), `WIA2`_ (Windows), `TWAIN`_ (Windows).
 * Cross-language: Thanks to `GObject introspection`_.
@@ -20,7 +44,7 @@ Let the insanity begin !
 
 
 Overall view
-============
+------------
 
 .. image:: design.png
     :alt: Design of Libinsane
@@ -36,6 +60,9 @@ C API. This API provides a generic way to access scanners and their options.
   provide themselves an implementation of the normalized API.
 * Behavior normalization components wraps too the normalized API provided
   by others, and provide themselves an implementation of the normalized API.
+* A component to manage access to multiple components at the same time:
+  wraps multiple implementations the normalized API and provides an
+  implem.. well you get the idea ?
 * The GObject Introspection support wraps the normalized API.
 
 While this may sound like a lot of wrapping and layers, this approach allows
