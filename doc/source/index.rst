@@ -2,16 +2,16 @@ Welcome to LibInsane's documentation!
 =====================================
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :caption: Contents:
 
     introduction
     quickstart
     scanner_apis
     normalized_api
+    gobject_introspection_api
     behavior_normalizations
     workarounds
-    gobject_introspection_api
     dev_rules
 
 

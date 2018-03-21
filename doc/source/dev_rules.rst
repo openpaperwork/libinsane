@@ -14,8 +14,8 @@ Linux first
 -----------
 
 
-Code convention
----------------
+Code style convention
+---------------------
 
 
 Buildbot is always right

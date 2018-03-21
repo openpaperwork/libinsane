@@ -5,23 +5,41 @@ TL;DR
 
     TODO
 
-Installation for a C project
-----------------------------
+Compilation
+~~~~~~~~~~~
+
+GNU/Linux and *BSD
+------------------
 
 
-Installation for a project in any other programming language
-------------------------------------------------------------
+Microsoft Windows
+-----------------
+
+
+Installation
+~~~~~~~~~~~~
+
+For use in a C project
+----------------------
+
+
+For use in a project in any other programming language
+------------------------------------------------------
 
 Example: Python 3
 
 
-Usage in a C project
---------------------
+Usage
+~~~~~
+
+
+In a C project
+--------------
 
 Example: With CMake
 
 
-Usage in a project in any other programming language
-----------------------------------------------------
+In a project in any other programming language
+----------------------------------------------
 
 Example: Python 3

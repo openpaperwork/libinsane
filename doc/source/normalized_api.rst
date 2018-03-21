@@ -6,8 +6,15 @@ Description
 
 C API.
 
+Detailed documentation
+----------------------
 
-How to use it
--------------
+.. todo::
+
+    Link to Doxygen
+
+
+Usage examples
+--------------
 
 
