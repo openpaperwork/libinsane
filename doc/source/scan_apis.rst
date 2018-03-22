@@ -1,7 +1,7 @@
-Scanner APIs
-============
+Scan APIs
+=========
 
-All scanner APIs provides similar features:
+All scan APIs provides similar features:
 
 * Read/write access to scanner/sources options
 * Access to scanner/sources options constraint (valid resolution range, valid
@@ -15,6 +15,15 @@ to support them all in this library.
 
 Sane
 ----
+
+.. note::
+
+    Operating systems:
+
+    * Linux
+    * FreeBSD, OpenBSD, NetBSD, etc
+    * MacOSX (not supported)
+    * Microsoft Windows (network scanners only ; not supported)
 
 .. uml::
 
@@ -41,27 +50,64 @@ Sane
 
 Each scanner is always a single scan source.
 For each scanner, there are a list of options that can be set.
-Each option has its constraints. Option names are not hard-coded.
-There are however some `well-known options`_ that are found on most
-scanners (.. but not all).
+Each option has its constraints. Option names are not hard-coded and may
+differ from one driver to another. There are however some
+`well-known options`_ that are found on most drivers and scanners
+(.. but not all).
 
-All features of Sane are supported by LibInsane.
+Most features of Sane are supported by LibInsane.
+
+Sane on Windows is not supported by LibInsane. Contributions are welcome.
+
+Sane on MacOSX is not supported by LibInsane. Contributions are welcome.
+Please note that I (Jerome Flesch) don't own a Mac so if you do add this
+support, you will have to:
+
+* Deploy a `buildslave`_ to run the tests automatically.
+* Maintain it.
 
 .. _Sane API: http://sane-project.org/html/doc009.html
 .. _well-known options: http://sane.alioth.debian.org/sane2/0.08/doc014.html
+.. _buildslave: https://buildbot.net/
 
 
 TWAIN
 -----
 
+.. note::
+
+    Operating systems:
+
+    * Microsoft Windows
+    * MacOSX (half-dead ? ; not supported)
+    * Linux (dead ? ; not supported)
+
 .. todo::
 
     TODO
+
+TWAIN on Linux is not supported by LibInsane. Contributions are welcome.
+
+Sane on MacOSX is not supported by LibInsane. Contributions are welcome.
+Please note that I (Jerome Flesch) don't own a Mac so if you do add this
+support, you will have to:
+
+* Deploy a `buildslave`_ to run the tests automatically.
+* Maintain it.
+
+.. _buildslave: https://buildbot.net/
+
 
 .. _WIA2:
 
 WIA2
 ----
+
+.. note::
+
+    Operating systems:
+
+    * Microsoft Windows
 
 .. uml::
 
@@ -127,3 +173,27 @@ WIA2 provide also features that LibInsane doesn't support:
 * Windows Dialogs (why in hell are there dialogs in a scan API in a first place !?)
 
 .. _Windows Image Acquisition: https://msdn.microsoft.com/en-us/library/windows/desktop/ms630368(v=vs.85).aspx
+
+.. _Cocoa:
+
+
+ImageKit
+--------
+
+.. https://developer.apple.com/library/content/documentation/Carbon/Conceptual/ImageCaptureServicesProgrammingGuide/02Overview/02Overview.html
+
+.. note::
+
+    Operating systems:
+
+    * MacOSX (not supported)
+
+
+Not supported by LibInsane. Contributions are welcome.
+Please note that I (Jerome Flesch) don't own a Mac so if you do add this
+support, you will have to:
+
+* Deploy a `buildslave`_ to run the tests automatically.
+* Maintain it.
+
+.. _buildslave: https://buildbot.net/

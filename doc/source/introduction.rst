@@ -4,6 +4,11 @@ What is LibInsane ?
 LibInsane is a library allowing access to image scanners. It is the successor of
 `Pyinsane`_.
 
+Its name is a reference to the library `Sane`_.
+
+.. _Sane: http://sane-project.org/
+.. _Pyinsane: https://github.com/openpaperwork/pyinsane/
+
 
 Image scanners you said ?
 -------------------------
@@ -34,7 +39,6 @@ Main features
 * Cross-scanner and cross-driver: Because a lot of them all have their quirks (and sometimes bugs).
 * Cross-compiled: Windows version is built on a GNU/Linux system.
 
-.. _Pyinsane: https://github.com/openpaperwork/pyinsane/
 .. _Sane: http://sane-project.org/
 .. _WIA2: https://msdn.microsoft.com/en-us/library/windows/desktop/ms630368(v=vs.85).aspx
 .. _TWAIN: https://www.twain.org/

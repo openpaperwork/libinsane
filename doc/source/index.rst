@@ -7,7 +7,7 @@ Welcome to LibInsane's documentation!
 
     introduction
     quickstart
-    scanner_apis
+    scan_apis
     normalized_api
     gobject_introspection_api
     behavior_normalizations
