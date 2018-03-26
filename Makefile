@@ -14,6 +14,7 @@ version:
 
 doc:
 	(cd doc && DISPLAY="" make html)
+	doxygen doc/doxygen.conf
 	cp doc/index.html doc/build/index.html
 
 check:
