@@ -111,3 +111,28 @@ Device model name may contain '_' instead of spaces
     * API: Sane
     * Culprit: HP
     * Seen on: `all HP devices <https://openpaper.work/en/scanner_db/vendor/7/>`_
+
+
+
+Do not let application access value of inactive options
+-------------------------------------------------------
+
+.. note::
+
+    * API: Sane
+    * Culprit: Can't remember
+
+Some drivers allows access to inactive options (even just for reading).
+Some may even crash if the user application tries to set a value on an inactive option.
+
+
+Do not let application set value on read-only options
+-----------------------------------------------------
+
+.. note::
+
+    * API: Sane
+    * Culprit: Can't remember
+
+Behavior is undefined when trying to set read-only values.
+This workaround makes it defined: it always returns an error.

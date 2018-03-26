@@ -105,8 +105,8 @@ Sane: Remove v4l devices (video for linux ; Camera).
 WIA: Video devices are directly stripped by the WIA support module of LibInsane.
 
 
-Ensure the output format is RAW24
----------------------------------
+Ensure the output format is RAW
+-------------------------------
 
 .. note::
 
@@ -116,13 +116,26 @@ Ensure the output format is RAW24
 Always getting the image as RAW24 is much more handy if you want to
 display the scan on-the-fly.
 
-Sane: Image is always outputed as RAW24 (unless some scanner-specific
+Sane: Image is always returned as RAW (unless some scanner-specific
 options are set to non-default values).
 
 WIA2: Drivers may return the image in a variety of file formats: RAW, BMP,
 JPEG, PNG, etc. Not all drivers support returning the image as RAW24.
 LibInsane supports only BMP (luckily, all WIA drivers appear to support
 this one) and will output the image as RAW24.
+
+
+Ensure the output format is RAW24
+---------------------------------
+
+.. note::
+
+    Culprit: Sane
+
+Sane can return the image as various raw formats:
+RAW1 (B&W), RAW8 (Grayscale), RAW24 (RGB), etc.
+
+This normalization ensures the output image is always in RAW24 (RGB).
 
 
 Ensure the behavior is always the same whenever we scan from a flatbed or a feeder

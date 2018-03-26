@@ -10,8 +10,8 @@ Welcome to LibInsane's documentation!
     scan_apis
     normalized_api
     gobject_introspection_api
-    behavior_normalizations
     workarounds
+    behavior_normalizations
     dev_rules
 
 
