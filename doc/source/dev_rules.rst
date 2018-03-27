@@ -6,7 +6,7 @@ Development rules
     TODO
 
 
-Documentation driver tests, test driven development
+Documentation driven tests, test driven development
 ---------------------------------------------------
 
 
