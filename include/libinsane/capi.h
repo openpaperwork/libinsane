@@ -8,6 +8,8 @@ extern "C" {
 #endif
 
 struct lis_device_description {
+	const char *api_name; /*!< "Sane", "WIA", "TWAIN", etc */
+
 	const char *dev_id;
 
 	const char *vendor;

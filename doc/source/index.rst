@@ -8,6 +8,7 @@ Welcome to LibInsane's documentation!
     introduction
     quickstart
     scan_apis
+    api_multiplexer
     normalized_api
     gobject_introspection_api
     workarounds

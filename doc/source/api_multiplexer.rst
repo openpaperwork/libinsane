@@ -1,0 +1,9 @@
+API multiplexer
+===============
+
+LibInsane must be able to handle many APIs at once. For instance, on Windows,
+it must be able to use WIA2 (low-level and automation) and TWAIN, at the same
+time. So it includes an API multiplexer.
+
+The API multiplexer takes many API implementations in input, and merge them
+to present them as a single one.
