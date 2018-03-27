@@ -4,7 +4,6 @@
 #include "capi.h"
 #include "error.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
