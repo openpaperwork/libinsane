@@ -113,7 +113,7 @@ WIA2
 
     @startuml
     object "Scanner (WIAItem)" as scanner
-    object "Optiom 'image format'" as format
+    object "Option 'image format'" as format
     object "Option 'mode'" as mode1
     object "Option 'mode'" as mode2
     object "Option 'resolution'" as res1
