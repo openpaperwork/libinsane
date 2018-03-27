@@ -35,6 +35,9 @@ extern enum lis_error lis_api_workaround_no_read_access_to_inactive_opt(
 extern enum lis_error lis_api_workaround_no_write_on_readonly_opt(
 	struct lis_api *to_wrap, struct lis_api **api
 );
+extern enum lis_error lis_api_workaround_dedicated_thread(
+	struct lis_api *to_wrap, struct lis_api **api
+);
 
 #ifdef __cplusplus
 }

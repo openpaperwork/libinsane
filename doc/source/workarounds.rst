@@ -136,3 +136,17 @@ Do not let application set value on read-only options
 
 Behavior is undefined when trying to set read-only values.
 This workaround makes it defined: it always returns an error.
+
+
+Thread-safety
+-------------
+
+.. note::
+
+    * API: Sane, WIA, TWAIN
+
+Most scanner APIs are not thread-safe. If you're lucky, they may work
+from different threads anyway. If you're not, they will crash your program.
+
+This workaround works around this issue by creating a dedicated thread for
+the job and making all the request go through this thread.
