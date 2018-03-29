@@ -122,7 +122,7 @@ struct lis_api {
 	);
 
 	enum lis_error (*dev_open)(const char *dev_id, struct lis_item **item);
-	void *(*dev_close)(struct lis_item *dev);
+	void (*dev_close)(struct lis_item *dev);
 
 	enum lis_error (*dev_get_children)(struct lis_item *item, struct lis_item ***children);
 
