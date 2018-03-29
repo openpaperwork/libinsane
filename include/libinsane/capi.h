@@ -1,6 +1,8 @@
 #ifndef __LIBINSANE_CAPI_H
 #define __LIBINSANE_CAPI_H
 
+#include <stdlib.h>
+
 #include "error.h"
 
 #ifdef __cplusplus
@@ -18,12 +20,10 @@ struct lis_device_description {
 };
 
 enum lis_value_type {
-		enum {
-			LIS_TYPE_BOOL, /*!< int: 0 (false) or 1 (true)*/
-			LIS_TYPE_INTEGER, /*!< int */
-			LIS_TYPE_FLOAT, /*!< float */
-			LIS_TYPE_STRING, /*!< (char *) */
-		} type;
+	LIS_TYPE_BOOL, /*!< int: 0 (false) or 1 (true)*/
+	LIS_TYPE_INTEGER, /*!< int */
+	LIS_TYPE_FLOAT, /*!< float */
+	LIS_TYPE_STRING, /*!< (char *) */
 };
 
 union lis_value {
@@ -110,6 +110,9 @@ struct lis_scan_parameters {
 	int height;
 };
 
+struct lis_item;
+struct lis_scan_session;
+
 struct lis_api {
 	void (*api_init)(struct lis_api *api);
 	void (*api_cleanup)(struct lis_api *api);
@@ -125,7 +128,7 @@ struct lis_api {
 
 	enum lis_error (*item_get_options)(struct lis_item *item, struct lis_option_description **descs);
 	enum lis_error (*item_reload_option_description)(struct lis_item *item, struct lis_option_description *desc);
-	enum lis_error (*item_get_scan_parameters)(struct list_item *item, struct lis_scan_parameters **parameters);
+	enum lis_error (*item_get_scan_parameters)(struct lis_item *item, struct lis_scan_parameters **parameters);
 
 	enum lis_error (*scan_start)(struct lis_item *item, struct lis_scan_session **session);
 	enum lis_error (*scan_read)(struct lis_scan_session *session, void *out_buffer, size_t out_buffer_size);
