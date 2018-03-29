@@ -111,25 +111,25 @@ struct lis_scan_parameters {
 };
 
 struct lis_api {
-	void (*init)(struct lis_api *api);
-	void (*cleanup)(struct lis_api *api);
+	void (*api_init)(struct lis_api *api);
+	void (*api_cleanup)(struct lis_api *api);
 
-	enum lis_error (*get_devices)(
+	enum lis_error (*api_get_devices)(
 		struct lis_api *api, struct lis_device_description ***dev_infos, int nb_devices
 	);
 
-	enum lis_error (*open)(const char *dev_id, struct lis_item **item);
-	void *(*close)(struct lis_item *dev);
+	enum lis_error (*dev_open)(const char *dev_id, struct lis_item **item);
+	void *(*dev_close)(struct lis_item *dev);
 
-	enum lis_error (*get_children)(struct lis_item *item, struct lis_item ***children);
+	enum lis_error (*dev_get_children)(struct lis_item *item, struct lis_item ***children);
 
-	enum lis_error (*get_options)(struct lis_item *item, struct lis_option_description **descs);
-	enum lis_error (*reload_option_description)(struct lis_item *item, struct lis_option_description *desc);
-	enum lis_error (*get_scan_parameters)(struct list_item *item, struct lis_scan_parameters **parameters);
+	enum lis_error (*item_get_options)(struct lis_item *item, struct lis_option_description **descs);
+	enum lis_error (*item_reload_option_description)(struct lis_item *item, struct lis_option_description *desc);
+	enum lis_error (*item_get_scan_parameters)(struct list_item *item, struct lis_scan_parameters **parameters);
 
-	enum lis_error (*start)(struct lis_item *item, struct lis_scan_session **session);
-	enum lis_error (*read)(struct lis_scan_session *session, void *out_buffer, size_t out_buffer_size);
-	enum lis_error (*cancel)(struct lis_scan_session *session);
+	enum lis_error (*scan_start)(struct lis_item *item, struct lis_scan_session **session);
+	enum lis_error (*scan_read)(struct lis_scan_session *session, void *out_buffer, size_t out_buffer_size);
+	enum lis_error (*scan_cancel)(struct lis_scan_session *session);
 };
 
 #ifdef __cplusplus
