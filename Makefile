@@ -1,4 +1,6 @@
 PYTHON ?= python3
+VERBOSE ?=
+DESTDIR ?=
 
 build: build_c build_py
 
@@ -6,14 +8,23 @@ install: install_py install_c
 
 uninstall: uninstall_py
 
-cmake:
-	mkdir -p build
-	(cd build ; cmake ..)
+cmake_linux:
+	mkdir -p build_linux
+	(cd build_linux ; OS=linux cmake ..)
+
+cmake_windows:
+	mkdir -p build_windows
+	(cd build_windows ; OS=mingw cmake ..)
 
 build_py:
 
-build_c: cmake
-	(cd build ; make)
+build_linux_c: cmake_linux
+	(cd build_linux ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR})
+
+build_windows_c: cmake_windows
+	(cd build_windows ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR})
+
+build_c: build_linux_c build_windows_c
 
 version:
 
@@ -21,9 +32,9 @@ doxygen:
 	mkdir -p doc/build
 	doxygen doc/doxygen.conf
 
-gtkdoc: cmake
+gtkdoc: cmake_linux
 	# Does not work yet
-	# (cd build ; make doc-libinsane)
+	# (cd build_linux ; make doc-libinsane)
 
 doc: doxygen gtkdoc
 	cp doc/index.html doc/build/index.html
@@ -51,18 +62,33 @@ endif
 
 clean:
 	rm -rf doc/build
-	rm -rf build
+	rm -rf build_linux
+	rm -rf build_windows
 
 install_py:
 
-install_c:
+ifeq ($(OS),Windows_NT)
+
+install_linux_c: build_linux_c
+	(cd build_linux ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
+
+install_c: install_linux_c
+
+else
+
+install_windows_c: build_windows_c
+	(cd build_windows ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
+
+install_c: install_windows_c
+
+endif
 
 uninstall_py:
 
 uninstall_c:
 
 help:
-	@echo "make build || make build_py"
+	@echo "make build || make build_c || make build_py"
 	@echo "make check"
 	@echo "make doc"
 	@echo "make help: display this message"
@@ -74,9 +100,11 @@ help:
 .PHONY: \
 	build \
 	build_c \
+	build_linux_c \
+	build_windows_c \
 	build_py \
 	check \
-	cmake \
+	cmake_linux \
 	doc \
 	doxygen \
 	gtkdoc \
@@ -85,6 +113,7 @@ help:
 	help \
 	install \
 	install_c \
+	install_linux_c \
 	install_py \
 	release \
 	test \

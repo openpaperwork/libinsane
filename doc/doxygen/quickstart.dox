@@ -8,16 +8,53 @@
 
 ## GNU/Linux and *BSD
 
+```
+sudo apt install cmake build-essential libsane-dev
+make build_linux_c
+```
+
 ## Microsoft Windows
 
+Build is done on Linux using Mingw64.
+
+```
+sudo apt install \
+    cmake \
+    mingw-w64-x86-64-dev \
+    gcc-mingw-w64-x86-64 \
+make build_windows_c
+```
 
 # Installation
 
 ## For use in a C project
 
+### Linux
+
+```
+make install_c
+```
+
+Will install the headers in /usr/local/include/libinsane.
+Will install dynamic (libinsane.so) and static library (libinsane.a) in /usr/local/lib.
+
+
+### Windows
+
+In the folder 'build_windows', you will find
+[LibInsane compiled statically: libinsane.a](https://stackoverflow.com/questions/2096519/from-mingw-static-library-a-to-visual-studio-static-library-lib)
+and dynamically.
+
+Headers are in 'include/libinsane'.
+
+In a Mingw/Msys2 environment, `make install_c` will work too.
+
+
 ## For use in a project in any other programming language
 
 Example: Python 3
+
+\todo TODO
 
 
 # Usage
@@ -31,4 +68,7 @@ Example: With CMake
 ## In a project in any other programming language
 
 Example: Python 3
+
+\todo TODO
+
 */
