@@ -6,7 +6,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 
-add_library(libinsane src/sane.c)
+aux_source_directory(src/libinsane LIBINSANE_SRCS)
+add_library(libinsane ${LIBINSANE_SRCS})
 
 target_include_directories(libinsane PUBLIC include)
 
