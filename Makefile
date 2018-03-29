@@ -6,15 +6,29 @@ install: install_py install_c
 
 uninstall: uninstall_py
 
+cmake:
+	mkdir -p build
+	(cd build ; cmake ..)
+
 build_py:
 
-build_c:
+build_c: cmake
+	(cd build ; make)
 
 version:
 
-doc:
-	(cd doc && DISPLAY="" make html)
+doxygen:
+	mkdir -p doc/build
 	doxygen doc/doxygen.conf
+
+sphinx:
+	(cd doc && DISPLAY="" make html)
+
+gtkdoc: cmake
+	# Does not work yet
+	# (cd build ; make doc-libinsane)
+
+doc: doxygen sphinx gtkdoc
 	cp doc/index.html doc/build/index.html
 
 check:
@@ -40,6 +54,7 @@ endif
 
 clean:
 	rm -rf doc/build
+	rm -rf build
 
 install_py:
 
@@ -64,7 +79,10 @@ help:
 	build_c \
 	build_py \
 	check \
+	cmake \
 	doc \
+	doxygen \
+	gtkdoc \
 	linux_exe \
 	windows_exe \
 	help \
@@ -72,6 +90,7 @@ help:
 	install_c \
 	install_py \
 	release \
+	sphinx \
 	test \
 	uninstall \
 	uninstall_c \
