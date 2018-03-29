@@ -25,6 +25,12 @@ sudo apt install \
 make build_windows_c
 ```
 
+## Both
+
+```
+make
+```
+
 # Installation
 
 ## For use in a C project
@@ -32,7 +38,7 @@ make build_windows_c
 ### Linux
 
 ```
-make install_c
+make install
 ```
 
 Will install the headers in /usr/local/include/libinsane.
@@ -47,14 +53,7 @@ and dynamically.
 
 Headers are in 'include/libinsane'.
 
-In a Mingw/Msys2 environment, `make install_c` will work too.
-
-
-## For use in a project in any other programming language
-
-Example: Python 3
-
-\todo TODO
+In a Mingw/Msys2 environment, `make install` may work too.
 
 
 # Usage
