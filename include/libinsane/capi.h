@@ -224,8 +224,16 @@ struct lis_scan_parameters {
 	size_t image_size;
 };
 
+struct lis_item {
+	enum {
+		LIS_ITEM_DEVICE,
+		LIS_ITEM_FLATBED,
+		LIS_ITEM_ADF,
+		LIS_ITEM_UNIDENTIFIED = -1,
+	} type;
+};
+
 /* Private: Content of the following structures is implementation-dependant */
-struct lis_item;
 struct lis_scan_session;
 /* /Private */
 
