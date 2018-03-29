@@ -21,14 +21,11 @@ doxygen:
 	mkdir -p doc/build
 	doxygen doc/doxygen.conf
 
-sphinx:
-	(cd doc && DISPLAY="" make html)
-
 gtkdoc: cmake
 	# Does not work yet
 	# (cd build ; make doc-libinsane)
 
-doc: doxygen sphinx gtkdoc
+doc: doxygen gtkdoc
 	cp doc/index.html doc/build/index.html
 
 check:
@@ -90,7 +87,6 @@ help:
 	install_c \
 	install_py \
 	release \
-	sphinx \
 	test \
 	uninstall \
 	uninstall_c \

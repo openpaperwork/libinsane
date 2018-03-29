@@ -1,48 +1,31 @@
-Behavior normalizations
-=======================
+/*!
 
-.. todo::
+\page behavior_normalizations Behavior normalizations
 
-    TWAIN
+\todo TWAIN
 
 
-Ensure that sources are represented as node
--------------------------------------------
-
-.. note
+# Ensure that sources are represented as node
 
 WIA2: For each scanner, provide a device tree (see :ref:`WIA2` description).
 
 Sane: There is no tree (see :ref:`Sane` description). Children nodes (sources) must be simulated.
 
 
-Ensure there is at least one source
------------------------------------
+# Ensure there is at least one source
 
-.. note::
+- Culprits: Microsoft, Sane project
 
-    Culprits: Microsoft, Sane project
+Sane: [Some scanner do not provide the option "source"](https://openpaper.work/en-us/scanner_db/report/57).
 
-
-Sane: `Some scanner do not provide the option "source"`_.
-
-WIA2: `Some scanners do not always provide a source`_. Scan is done directly on them.
+WIA2: [Some scanners do not always provide a source](https://openpaper.work/en/scanner_db/report/28). Scan is done directly on them.
 
 If there is no source at all, this normalization will create a fake one.
 
 
-.. _Some scanner do not provide the option "source": https://openpaper.work/en-us/scanner_db/report/57
-.. _Some scanners do not always provide a source: https://openpaper.work/en/scanner_db/report/28
+# Ensure all options are available on sources
 
-
-
-Ensure all options are available on sources
--------------------------------------------
-
-.. note::
-
-    Culprits: Microsoft, Sane project
-
+- Culprits: Microsoft, Sane project
 
 Goal: Makes sure the application can find easily options by making
 the scanner options available on all its sources.
@@ -54,24 +37,17 @@ WIA: Some options are on the scanner itself, some options are on the
 sources. Scanner options must be mapped on all its sources.
 
 
-Ensure scan area option names are all the same
-----------------------------------------------
+# Ensure scan area option names are all the same
 
-Sane: `Sane scan area options`_ are used as reference.
+Sane: [Sane scan area options](http://sane.alioth.debian.org/sane2/0.08/doc014.html#s4.5.4) are used as reference.
 
 WIA2: Fake options are added to simulate Sane options. They act like Sane
 options, and any change to these options is applied back to the WIA2 options.
 
-.. _Sane scan area options: http://sane.alioth.debian.org/sane2/0.08/doc014.html#s4.5.4
 
+# Ensure resolution constraint is always in the same format
 
-Ensure resolution constraint is always in the same format
----------------------------------------------------------
-
-.. note::
-
-    Culprits: Microsoft, Sane project
-
+- Culprits: Microsoft, Sane project
 
 Sane and WIA: Resolution constraint can be expressed as a range or as a list
 of possible values. This normalization makes sure they are always expressed as
@@ -79,39 +55,27 @@ a list. If the range has an interval < 25dpi, the interval used to generate the
 list will be 25dpi.
 
 
-Ensure source types are clearly identified
-------------------------------------------
+# Ensure source types are clearly identified
 
-.. note::
-
-    Culprit: Sane project
-
+- Culprit: Sane project
 
 Sane: Sources have "name", but the exact names are up to the drivers.
 
 WIA2: source types are already clearly defined.
 
 
-Ensure there is only supported devices
---------------------------------------
+# Ensure there is only supported devices
 
-.. note::
-
-    Culprits: Sane project, Microsoft
-
+- Culprits: Sane project, Microsoft
 
 Sane: Remove v4l devices (video for linux ; Camera).
 
 WIA: Video devices are directly stripped by the WIA support module of LibInsane.
 
 
-Ensure the output format is RAW
--------------------------------
+# Ensure the output format is RAW
 
-.. note::
-
-    Culprit: Microsoft.
-
+- Culprit: Microsoft.
 
 Always getting the image as RAW24 is much more handy if you want to
 display the scan on-the-fly.
@@ -125,12 +89,9 @@ LibInsane supports only BMP (luckily, all WIA drivers appear to support
 this one) and will output the image as RAW24.
 
 
-Ensure the output format is RAW24
----------------------------------
+# Ensure the output format is RAW24
 
-.. note::
-
-    Culprit: Sane
+- Culprit: Sane
 
 Sane can return the image as various raw formats:
 RAW1 (B&W), RAW8 (Grayscale), RAW24 (RGB), etc.
@@ -138,21 +99,18 @@ RAW1 (B&W), RAW8 (Grayscale), RAW24 (RGB), etc.
 This normalization ensures the output image is always in RAW24 (RGB).
 
 
-Ensure the behavior is always the same whenever we scan from a flatbed or a feeder
-----------------------------------------------------------------------------------
+# Ensure the behavior is always the same whenever we scan from a flatbed or a feeder
 
-.. note::
-
-    Culprits: Sane project, Microsoft
+- Culprits: Sane project, Microsoft
 
 On both Sane and WIA:
 
-* When scanning from feeder: at the end of a scan, we get an error code
+- When scanning from feeder: at the end of a scan, we get an error code
   (or a function call) telling us when the whole page has been scanned.
   When requesting another scan, it will scan the next page. It no next
   page is available, another error code (or function call) will tell
   us we have reached the end.
-* When scanning from flatbed: at the end of a scan, we get an error code
+- When scanning from flatbed: at the end of a scan, we get an error code
   (or a function call) telling us when the whole page has been scanned.
   Requesting another scan, it will scan again the very same page. It will
   never tell us that there is no paper left to scan
@@ -162,7 +120,9 @@ is just bug-prone.
 
 Wanted behavior:
 
-* When scanning from feeder: unchanged
-* When scanning from flatbed: the first scan is unchanged. When requesting
+- When scanning from feeder: unchanged
+- When scanning from flatbed: the first scan is unchanged. When requesting
   a second scan, it must return an error code indicating that there is
   no paper left to scan.
+
+*/

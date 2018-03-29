@@ -1,0 +1,22 @@
+/*!
+\mainpage LibInsane documentation
+
+\ref introduction
+
+\ref quickstart
+
+\ref scan_apis
+
+\ref api_multiplexer
+
+\ref normalized_api
+
+\ref gobject_introspection_api
+
+\ref workarounds
+
+\ref behavior_normalizations
+
+\ref dev_rules
+
+*/
