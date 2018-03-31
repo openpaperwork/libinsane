@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 
-set(LIBINSANE_SRCS)
+set(LIBINSANE_SRCS src/libinsane/safebet.c)
 set(LIBINSANE_HEADERS
     include/libinsane/capi.h
     include/libinsane/error.h
