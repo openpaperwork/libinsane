@@ -9,6 +9,7 @@
 extern "C" {
 #endif
 
+#define LIS_UNUSED(x) (void)(x)
 
 /*!
  * \brief Copy a value.
