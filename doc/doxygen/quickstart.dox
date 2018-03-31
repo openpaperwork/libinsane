@@ -38,7 +38,7 @@ make
 ### Linux
 
 ```
-make install
+sudo make install
 ```
 
 Will install the headers in /usr/local/include/libinsane.
@@ -47,13 +47,13 @@ Will install dynamic (libinsane.so) and static library (libinsane.a) in /usr/loc
 
 ### Windows
 
-In the folder 'build_windows', you will find
+In the folder 'build\_windows', you will find
 [LibInsane compiled statically: libinsane.a](https://stackoverflow.com/questions/2096519/from-mingw-static-library-a-to-visual-studio-static-library-lib)
 and dynamically.
 
 Headers are in 'include/libinsane'.
 
-In a Mingw/Msys2 environment, `make install` may work too.
+In a Mingw/Msys2 environment, `make install` will work too.
 
 
 # Usage
@@ -61,8 +61,102 @@ In a Mingw/Msys2 environment, `make install` may work too.
 
 ## In a C project
 
-Example: With CMake
+```
+#include <libinsane/capi.h>
+#include <libinsane/error.h>
+#include <libinsane/safebet.h>
+#include <libinsane/util.h>
 
+#define CHECK_ERR(call) do { \
+    err = call;
+    if (LIS_IS_ERROR(err)) {
+        fprintf(stderr, "%s(L%d): ERROR: %X, %s\n", \
+            __FILE__, __LINE__, \
+            err, lis_strerror(err)); \
+        goto end;
+    } \
+} while(0)
+
+void lets_scan(void)
+{
+    enum lis_error err;
+    struct lis_api *impl = NULL;
+    struct lis_device_description **dev_infos;
+    struct lis_item *device = NULL;
+    struct lis_item **sources;
+    struct lis_scan_parameters parameters;
+    struct lis_scan_session *scan_session;
+    char img_buffer[4096];
+    size_t bufsize;
+
+    CHECK_ERR(lis_api_safebet(&impl));
+    CHECK_ERR(impl->api_init(impl));
+    CHECK_ERR(impl->api_get_devices(impl, &dev_infos));
+
+    if (dev_infos[0] == NULL) {
+        fprintf(stderr, "No scan device found\n");
+        return;
+    }
+
+    // let's use the first scan device found, because it looks cool.
+    printf("Will use %s %s (%s ; %s:%s)\n",
+        dev_infos[0]->vendor, dev_infos[0]->model,
+        dev_infos[0]->type,
+        dev_infos[0]->dev_id,
+        dev_infos[0]->api_name);
+    CHECK_ERR(impl->dev_open(impl, dev_infos[0]->dev_id, &device));
+
+    CHECK_ERR(device->get_children(device, &sources));
+
+    // Normalizers ensure us that there is at least one source,
+    // so let us the first one because it looks cool too.
+    printf("Will use source %s", sources[0]->name);
+
+    // Setting resolution: This one may or may not work, depending on the scanner
+    CHECK_ERR(lis_set_option(sources[0], "resolution", "300");
+    // Normalizers ensure us that the mode option can take the value "Color"
+    CHECK_ERR(lis_set_option(sources[0], "mode", "Color");
+    CHECK_ERR(lis_set_maximum_scan_area(sources[0], device));
+
+    CHECK_ERR(sources[0]->get_scan_parameters(sources[0], &parameters));
+    printf("Scan will be: %dpx x %dpx (%zd bytes)\n",
+        parameters.width, parameters.height, parameters.image_size);
+
+    CHECK_ERR(sources[0]->scan_start(sources[0], &scan_session));
+
+    do {
+        bufsize = sizeof(img_buffer);
+        err = scan_session->scan_read(scan_session, img_buffer, &bufsize);
+        CHECK_ERR(err);
+
+        switch(err) {
+            case LIS_WARMING_UP:
+                // old scanners need warming time
+                sleep(1);
+                break;
+            case LIS_OK:
+                // do something with the chunk of the image/page that has just be read
+                break;
+            case LIS_CANCELLED:
+                // user cancelled
+                goto end;
+            case LIS_END_OF_PAGE:
+                // one page scanned
+                break;
+            default:
+                break;
+        };
+    } while(err != LIS_END_OF_FEED);
+
+end:
+    if (device != NULL) {
+        device->dev_close(device);
+    }
+    if (impl != NULL) {
+        impl->api_cleanup(impl);
+    }
+}
+```
 
 ## In a project in any other programming language
 

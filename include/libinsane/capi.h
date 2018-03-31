@@ -224,120 +224,8 @@ struct lis_scan_parameters {
 	size_t image_size;
 };
 
-struct lis_item {
-	enum {
-		LIS_ITEM_DEVICE,
-		LIS_ITEM_FLATBED,
-		LIS_ITEM_ADF,
-		LIS_ITEM_UNIDENTIFIED = -1,
-	} type;
-};
 
-/* Private: Content of the following structures is implementation-dependant */
-struct lis_scan_session;
-/* /Private */
-
-/*!
- * \brief LibInsane C API.
- */
-struct lis_api {
-
-	/*!
-	 * \brief initialize the implementation.
-	 *
-	 * Exact meaning depends on the implementation (call to `sane_init()`, starting a thread, etc).
-	 */
-	void (*api_init)(struct lis_api *api);
-
-	/*!
-	 * \brief cleanup the implementation.
-	 *
-	 * Exact meaning depends on the implementation (call to `sane_cleanup()`, stopping a thread,
-	 * etc).
-	 */
-	void (*api_cleanup)(struct lis_api *api);
-
-	/*!
-	 * \brief Look for scanners.
-	 *
-	 * If you already know the device identifier of the scanner you want to use, you do not need
-	 * to call this function. You can call directly \ref dev_open.
-	 *
-	 * \warning This operation may take many seconds.
-	 * \param[out] dev_infos will point to a list of device descriptions, NULL terminated.
-	 * \retval LIS_OK dev_infos has been set to a list of devices. See \ref LIS_IS_OK.
-	 */
-	enum lis_error (*api_get_devices)(
-		struct lis_api *api, struct lis_device_description ***dev_infos
-	);
-
-	/*!
-	 * \brief Open the access to a scanner.
-	 * \param[in] dev_id Device identifier. See \ref api_get_devices().
-	 * \param[out] item Item representing the scanner.
-	 * \warning This operation may take many seconds.
-	 * \retval LIS_OK item has been set to ta valid list of items. List is NULL terminated.
-	 *		You *must* use \ref dev_close() on it later. See \ref LIS_IS_OK.
-	 * \retval LIS_ERR_DEVICE_BUSY Another process is already using this scanner. item may or may
-	 *		not be modified. See \ref LIS_IS_ERROR.
-	 * \retval LIS_ERR_IO_ERROR Didn't work but don't know why ... Item may or may not be modified.
-	 *		See \ref LIS_IS_ERROR.
-	 * \retval LIS_ERR_ACCESS_DENIED Permission denied. See \ref LIS_IS_ERROR.
-	 */
-	enum lis_error (*dev_open)(const char *dev_id, struct lis_item ***item);
-
-	/*!
-	 * \brief Close the access to a scanner.
-	 */
-	void (*dev_close)(struct lis_item *dev);
-
-	/*!
-	 * \brief Get item's children.
-	 *
-	 * Without workarounds or normalizers:
-	 * - Sane: will return an empty list.
-	 * - WIA: will return device sources (Flatbed, Automatic Document Feeder, etc).
-	 *
-	 * \param[in] parent Usually a scanner (see \ref dev_open()).
-	 * \param[out] children Usually scanner sources. List will be NULL terminated.
-	 * \retval LIS_OK children has been set to a valid array of items. See \ref LIS_IS_OK.
-	 */
-	enum lis_error (*dev_get_children)(struct lis_item *parent, struct lis_item ***children);
-
-	/*!
-	 * \brief Get item's options.
-	 * \param[in] item Item from which we want the option list.
-	 * \param[out] descs Option list. NULL terminated.
-	 * \retval LIS_OK descs has been set.
-	 */
-	enum lis_error (*item_get_options)(
-		struct lis_item *item, struct lis_option_description ***descs
-	);
-
-	/*!
-	 * \brief Returns a description of what will be returned when scanning.
-	 *
-	 * This is only an estimation. While the image format and the width of the image are certain,
-	 * the height may actually vary. Application must handle the case where something different
-	 * will be scanned (longer or shorter image).
-	 *
-	 * \param[in] item Item from which the scan will be done.
-	 * \param[out] parameters Estimation of what will be scanned.
-	 * \retval LIS_OK parameters has been set.
-	 */
-	enum lis_error (*item_get_scan_parameters)(
-		struct lis_item *item, struct lis_scan_parameters **parameters
-	);
-
-	/*!
-	 * \brief Starts a scan session.
-	 * \warning This operation may take many seconds.
-	 * \param[in] item Item from which to scan.
-	 * \param[out] session Scan session.
-	 * \retval LIS_OK Scan of the first page has started.
-	 */
-	enum lis_error (*scan_start)(struct lis_item *item, struct lis_scan_session **session);
-
+struct lis_scan_session {
 	/*!
 	 * \brief Read a chunk of the scanned image.
 	 * \param[in] session Scan session.
@@ -358,7 +246,7 @@ struct lis_api {
 	 * \retval LIS_ERR_WARMING_UP Scanner is warming up. No data available yet. Keep calling
 	 *		\ref scan_read() until there is.
 	 */
-	enum lis_error (*scan_read)(
+	enum lis_error (*scan_read) (
 		struct lis_scan_session *session, void *out_buffer, size_t *buffer_size
 	);
 
@@ -369,6 +257,121 @@ struct lis_api {
 	 * session.
 	 */
 	void (*scan_cancel)(struct lis_scan_session *session);
+};
+
+
+struct lis_item {
+	const char *name; /*!< Item name */
+
+	enum {
+		LIS_ITEM_DEVICE,
+		LIS_ITEM_FLATBED,
+		LIS_ITEM_ADF,
+		LIS_ITEM_UNIDENTIFIED = -1,
+	} type;
+
+	/*!
+	 * \brief Get item's children.
+	 *
+	 * Without workarounds or normalizers:
+	 * - Sane: will return an empty list.
+	 * - WIA: will return device sources (Flatbed, Automatic Document Feeder, etc).
+	 *
+	 * \param[in] parent Usually a scanner (see \ref dev_open()).
+	 * \param[out] children Usually scanner sources. List will be NULL terminated.
+	 * \retval LIS_OK children has been set to a valid array of items. See \ref LIS_IS_OK.
+	 */
+	enum lis_error (*get_children)(struct lis_item *parent, struct lis_item ***children);
+
+	/*!
+	 * \brief Get item's options.
+	 * \param[in] item Item from which we want the option list.
+	 * \param[out] descs Option list. NULL terminated.
+	 * \retval LIS_OK descs has been set.
+	 */
+	enum lis_error (*get_options)(
+		struct lis_item *item, struct lis_option_description ***descs
+	);
+
+	/*!
+	 * \brief Returns a description of what will be returned when scanning.
+	 *
+	 * This is only an estimation. While the image format and the width of the image are certain,
+	 * the height may actually vary. Application must handle the case where something different
+	 * will be scanned (longer or shorter image).
+	 *
+	 * \param[in] item Item from which the scan will be done.
+	 * \param[out] parameters Estimation of what will be scanned.
+	 * \retval LIS_OK parameters has been set.
+	 */
+	enum lis_error (*get_scan_parameters)(
+		struct lis_item *item, struct lis_scan_parameters *parameters
+	);
+
+	/*!
+	 * \brief Starts a scan session.
+	 * \warning This operation may take many seconds.
+	 * \param[in] item Item from which to scan.
+	 * \param[out] session Scan session.
+	 * \retval LIS_OK Scan of the first page has started.
+	 */
+	enum lis_error (*scan_start)(struct lis_item *item, struct lis_scan_session **session);
+
+	/*!
+	 * \brief Close the access to a scanner.
+	 */
+	void (*close)(struct lis_item *dev);
+};
+
+
+/*!
+ * \brief LibInsane C API.
+ */
+struct lis_api {
+
+	/*!
+	 * \brief initialize the implementation.
+	 *
+	 * Exact meaning depends on the implementation (call to `sane_init()`, starting a thread, etc).
+	 */
+	enum lis_error (*api_init)(struct lis_api *impl);
+
+	/*!
+	 * \brief cleanup the implementation.
+	 *
+	 * Exact meaning depends on the implementation (call to `sane_cleanup()`, stopping a thread,
+	 * etc).
+	 */
+	void (*api_cleanup)(struct lis_api *impl);
+
+	/*!
+	 * \brief Look for scanners.
+	 *
+	 * If you already know the device identifier of the scanner you want to use, you do not need
+	 * to call this function. You can call directly \ref dev_open.
+	 *
+	 * \warning This operation may take many seconds.
+	 * \param[out] dev_infos will point to a list of device descriptions, NULL terminated.
+	 * \retval LIS_OK dev_infos has been set to a list of devices. See \ref LIS_IS_OK.
+	 */
+	enum lis_error (*api_get_devices)(
+		struct lis_api *impl, struct lis_device_description ***dev_infos
+	);
+
+	/*!
+	 * \brief Open the access to a scanner.
+	 * \param[in] dev_id Device identifier. See \ref api_get_devices().
+	 * \param[out] item Item representing the scanner.
+	 * \warning This operation may take many seconds.
+	 * \retval LIS_OK item has been set to ta valid list of items. List is NULL terminated.
+	 *		You *must* use \ref dev_close() on it later. See \ref LIS_IS_OK.
+	 * \retval LIS_ERR_DEVICE_BUSY Another process is already using this scanner. item may or may
+	 *		not be modified. See \ref LIS_IS_ERROR.
+	 * \retval LIS_ERR_IO_ERROR Didn't work but don't know why ... Item may or may not be modified.
+	 *		See \ref LIS_IS_ERROR.
+	 * \retval LIS_ERR_ACCESS_DENIED Permission denied. See \ref LIS_IS_ERROR.
+	 */
+	enum lis_error (*dev_open)(struct lis_api *impl, const char *dev_id, struct lis_item **item);
 };
 
 #ifdef __cplusplus
