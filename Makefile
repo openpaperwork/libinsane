@@ -2,6 +2,9 @@ PYTHON ?= python3
 VERBOSE ?=
 DESTDIR ?=
 
+SRCS = $(wildcard src/libinsane/*.c)
+HEADERS = $(wildcard include/libinsane/*.h)
+
 build: build_c build_py
 
 install: install_py install_c
@@ -39,7 +42,15 @@ gtkdoc: cmake_linux
 doc: doxygen gtkdoc
 	cp doc/index.html doc/build/index.html
 
-check:
+%.c_check:
+	splint -f splint.rc $(patsubst %_check,%,$@)
+
+%.h_check:
+	splint -f splint.rc $(patsubst %_check,%,$@)
+
+check: \
+	$(patsubst %.h,%.h_check,${HEADERS}) \
+	$(patsubst %.c,%.c_check,${SRCS})
 
 test:
 
