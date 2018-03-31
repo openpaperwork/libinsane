@@ -1,16 +1,101 @@
 /*!
-\page normalized_api Normalized scan API
+\page normalized_api Normalized C scan API (aka the solutions)
+
 
 # Description
 
-\todo TODO
+LibInsane has one C API. It is implemented by a variety of components:
+- \ref sane.h "Wrapper for libsane API"
+- \ref wia_ll.h "Wrapper for WIA2 low-level API"
+- \ref wia_automation.h "Wrapper for WIA2 automation layer"
+- \ref twain.h "Wrapper for TWAIN API"
+- \ref workarounds.h "Various wrappers that allow working transparently around bugs"
+- \ref normalizers.h "Various wrappers that normalize the behaviors of scanners and drivers
+  from an application standpoint"
 
-# Detailed documentation
+The function \ref lis_api_safebet "lis_api_safebet()" stacks all the required implementations.
+It is your recommended entry point to LibInsane.
+Since all the components implements the same API, you can use the one provided by
+\ref lis_api_safebet "lis_api_safebet()" without ever worrying about which components are used.
 
-\todo TODO
+
+# Expected use of LibInsane
+
+Expected order of calling when most of the normalizers are enabled:
+
+- \ref lis_api_safebet "impl = lis_api_safebet()"
+- \ref lis_api.init "impl->init()"
+- \ref lis_api.get_devices "impl->get_devices()"
+- \ref lis_item "dev" = \ref lis_api.dev_open "impl->dev_open()"
+  - \ref lis_item "sources" = \ref lis_item.get_children "dev->get_children()"
+    - \ref lis_option_description "options" = \ref lis_item.get_options "sources[a]->get_options()"
+      - \ref lis_option_description.get_value "options[x]->fn.get_value()".
+      - \ref lis_option_description.set_value "options[x]->fn.set_value()".<br>
+        Options that should always be set:
+        - \ref lis_api_normalizer_resolution_constraint_format "scan resolution (option \"resolution\")"
+        - \ref lis_maximize_scan_area "scan area"
+      - \ref lis_option_description.get_value "options[y]->fn.get_value()".
+      - \ref lis_option_description.set_value "options[y]->fn.set_value()".
+      - \ref lis_option_description.get_value "options[z]->fn.get_value()".
+      - \ref lis_option_description.set_value "options[z]->fn.set_value()".
+    - \ref lis_item.get_scan_parameters "sources[a]->get_scan_parameters()"
+    - \ref lis_scan_session "scan_session" = \ref lis_item.scan_start "sources[a]->scan_start()"<br>
+      From this point and until \ref LIS_END_OF_FEED, \ref lis_scan_session.scan_start "scan_session->scan_start()"
+      can be called at any moment.
+      - \ref lis_scan_session.scan_read "scan_session->scan_read()" until \ref LIS_END_OF_PAGE.<br>
+        At least one \ref LIS_END_OF_PAGE will be returned on a successful scan.
+        \ref LIS_END_OF_FEED is returned immediately on an empty feeder.
+      - \ref lis_scan_session.scan_read "scan_session->scan_read()" until \ref LIS_END_OF_PAGE
+      - \ref lis_scan_session.scan_read "scan_session->scan_read()" -> \ref LIS_END_OF_FEED.<br>
+        No new data since the previous \ref LIS_END_OF_PAGE. Also returned when using a FlatBed.
+        At this point, \ref lis_scan_session "the scan_session" becomes unusable.
+  - \ref lis_item.close "dev->close()"
+- \ref lis_api.cleanup "cleanup()"
+
+See \ref capi.h.
 
 # Usage examples
 
-\todo TODO
+## Scanning
+
+See \ref quickstart.
+
+
+## Stacking API implementations
+
+If you don't want to use \ref lis_api_safebet, you can stack the API implementation
+yourself.
+
+Please note that you should use \ref lis_api_safebet in most applications. There shouldn't
+be any reason not to use it. Don't hesitate to report a bug if \ref lis_api_safebet
+makes you troubles.
+
+Once you have wrapped an implementation with another, you don't have to worry about the
+first implementation. The wrapping one will take care of the wrapped one.
+
+```
+#include <libinsane/capi.h>
+#include <libinsane/error.h>
+#include <libinsane/normalizers.h>
+#include <libinsane/sane.h>
+#include <libinsane/workarounds.h>
+
+struct lis_api *lets_stack(void)
+{
+    struct lis_api *impl;
+    enum lis_error err;
+
+    CHECK_ERR(lis_api_sane(&impl));
+    CHECK_ERR(lis_api_workaround_opt_scan_resolution(impl, &impl));
+    CHECK_ERR(lis_api_workaround_opt_doc_source(impl, &impl));
+    CHECK_ERR(lis_api_workaround_opt_mode_values(impl, &impl));
+    CHECK_ERR(lis_api_normalizer_source_nodes(impl, &impl));
+    CHECK_ERR(lis_api_normalizer_has_source(impl, &impl));
+    CHECK_ERR(lis_api_normalizer_all_opts_on_all_sources(impl, &impl));
+
+    // impl is ready to roll
+    return impl;
+}
+```
 
 */

@@ -332,9 +332,9 @@ struct lis_api {
 	/*!
 	 * \brief initialize the implementation.
 	 *
-	 * Exact meaning depends on the implementation (call to `sane_init()`, starting a thread, etc).
+	 * Exact meaning depends on the implementation (call to `sane_nit()`, starting a thread, etc).
 	 */
-	enum lis_error (*api_init)(struct lis_api *impl);
+	enum lis_error (*init)(struct lis_api *impl);
 
 	/*!
 	 * \brief cleanup the implementation.
@@ -342,7 +342,7 @@ struct lis_api {
 	 * Exact meaning depends on the implementation (call to `sane_cleanup()`, stopping a thread,
 	 * etc).
 	 */
-	void (*api_cleanup)(struct lis_api *impl);
+	void (*cleanup)(struct lis_api *impl);
 
 	/*!
 	 * \brief Look for scanners.
@@ -354,7 +354,7 @@ struct lis_api {
 	 * \param[out] dev_infos will point to a list of device descriptions, NULL terminated.
 	 * \retval LIS_OK dev_infos has been set to a list of devices. See \ref LIS_IS_OK.
 	 */
-	enum lis_error (*api_get_devices)(
+	enum lis_error (*get_devices)(
 		struct lis_api *impl, struct lis_device_description ***dev_infos
 	);
 

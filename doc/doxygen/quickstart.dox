@@ -67,15 +67,19 @@ In a Mingw/Msys2 environment, `make install` will work too.
 #include <libinsane/safebet.h>
 #include <libinsane/util.h>
 
+
 #define CHECK_ERR(call) do { \
-    err = call;
-    if (LIS_IS_ERROR(err)) {
-        fprintf(stderr, "%s(L%d): ERROR: %X, %s\n", \
-            __FILE__, __LINE__, \
-            err, lis_strerror(err)); \
-        goto end;
-    } \
-} while(0)
+        err = call;
+        if (LIS_IS_ERROR(err)) {
+            fprintf( \
+                stderr, "%s(L%d): ERROR: %X, %s\n", \
+                __FILE__, __LINE__, \
+                err, lis_strerror(err) \
+            ); \
+            goto end; \
+        } \
+    } while(0)
+
 
 void lets_scan(void)
 {
@@ -90,8 +94,8 @@ void lets_scan(void)
     size_t bufsize;
 
     CHECK_ERR(lis_api_safebet(&impl));
-    CHECK_ERR(impl->api_init(impl));
-    CHECK_ERR(impl->api_get_devices(impl, &dev_infos));
+    CHECK_ERR(impl->init(impl));
+    CHECK_ERR(impl->get_devices(impl, &dev_infos));
 
     if (dev_infos[0] == NULL) {
         fprintf(stderr, "No scan device found\n");
@@ -116,7 +120,7 @@ void lets_scan(void)
     CHECK_ERR(lis_set_option(sources[0], "resolution", "300");
     // Normalizers ensure us that the mode option can take the value "Color"
     CHECK_ERR(lis_set_option(sources[0], "mode", "Color");
-    CHECK_ERR(lis_set_maximum_scan_area(sources[0], device));
+    CHECK_ERR(lis_maximize_scan_area(sources[0], device));
 
     CHECK_ERR(sources[0]->get_scan_parameters(sources[0], &parameters));
     printf("Scan will be: %dpx x %dpx (%zd bytes)\n",
@@ -131,7 +135,8 @@ void lets_scan(void)
 
         switch(err) {
             case LIS_WARMING_UP:
-                // old scanners need warming time
+                // old scanners need warming time. No data has been returned.
+                assert(bufsize == 0);
                 sleep(1);
                 break;
             case LIS_OK:
@@ -139,9 +144,15 @@ void lets_scan(void)
                 break;
             case LIS_CANCELLED:
                 // user cancelled
+                assert(bufsize == 0);
                 goto end;
             case LIS_END_OF_PAGE:
                 // one page scanned
+                assert(bufsize == 0);
+                break;
+            case LIS_END_OF_FEED:
+                // end of scan session
+                assert(bufsize == 0);
                 break;
             default:
                 break;
@@ -153,7 +164,7 @@ end:
         device->dev_close(device);
     }
     if (impl != NULL) {
-        impl->api_cleanup(impl);
+        impl->cleanup(impl);
     }
 }
 ```

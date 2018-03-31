@@ -7,11 +7,11 @@
 
 \ref scan_apis
 
+\ref normalized_api
+
 \ref safebet
 
 \ref api_multiplexer
-
-\ref normalized_api
 
 \ref gobject_introspection_api
 

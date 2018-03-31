@@ -39,7 +39,7 @@ enum lis_error lis_set_option(struct lis_item *item, const char *opt_name, const
 /*!
  * \brief set the scan area to the maximum that the device can do
  */
-enum lis_error lis_set_maximum_scan_area(struct lis_item *item);
+enum lis_error lis_maximize_scan_area(struct lis_item *item);
 
 #ifdef __cplusplus
 }
