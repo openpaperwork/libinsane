@@ -6,14 +6,14 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 
-set(LIBINSANE_SRCS src/libinsane/safebet.c)
+set(LIBINSANE_SRCS libinsane/src/safebet.c)
 set(LIBINSANE_HEADERS
-    include/libinsane/capi.h
-    include/libinsane/error.h
-    include/libinsane/multiplexer.h
-    include/libinsane/normalizers.h
-    include/libinsane/util.h
-    include/libinsane/workarounds.h
+    libinsane/include/capi.h
+    libinsane/include/error.h
+    libinsane/include/multiplexer.h
+    libinsane/include/normalizers.h
+    libinsane/include/util.h
+    libinsane/include/workarounds.h
 )
 
 if($ENV{OS} MATCHES "linux")
@@ -21,8 +21,8 @@ if($ENV{OS} MATCHES "linux")
     MESSAGE(STATUS "Target OS: Unix-like")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DOS_LINUX -DCOMPILER_GCC")
     set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -DOS_LINUX -DCOMPILER_GCC")
-    set(LIBINSANE_SRCS ${LIBINSANE_SRCS} src/libinsane/sane.c)
-    set(LIBINSANE_HEADERS ${LIBINSANE_HEADERS} include/libinsane/sane.h)
+    set(LIBINSANE_SRCS ${LIBINSANE_SRCS} libinsane/src/sane.c)
+    set(LIBINSANE_HEADERS ${LIBINSANE_HEADERS} libinsane/include/sane.h)
     include(GtkDoc)
     include(Sane)
 
@@ -31,11 +31,11 @@ elseif($ENV{OS} MATCHES "mingw")
     MESSAGE(STATUS "Target OS: Microsoft Windows (Mingw)")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DOS_WINDOWS -DCOMPILER_GCC")
     set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -DOS_WINDOWS -DCOMPILER_GCC")
-    set(LIBINSANE_SRCS ${LIBINSANE_SRCS} src/libinsane/wia_ll.c src/libinsane/wia_automation.c src/libinsane/twain.c)
+    set(LIBINSANE_SRCS ${LIBINSANE_SRCS} libinsane/src/wia_ll.c libinsane/src/wia_automation.c libinsane/src/twain.c)
     set(LIBINSANE_HEADERS ${LIBINSANE_HEADERS}
-        include/libinsane/twain.h
-        include/libinsane/wia_ll.h
-        include/libinsane/wia_automation.h
+        libinsane/include/twain.h
+        libinsane/include/wia_ll.h
+        libinsane/include/wia_automation.h
     )
     include(Mingw)
 
@@ -47,7 +47,7 @@ endif()
 
 # dynamic
 add_library(libinsane_dynamic SHARED ${LIBINSANE_SRCS})
-target_include_directories(libinsane_dynamic PUBLIC include)
+target_include_directories(libinsane_dynamic PUBLIC libinsane/include)
 set_target_properties(libinsane_dynamic PROPERTIES OUTPUT_NAME insane)
 INSTALL(TARGETS libinsane_dynamic
     ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
@@ -57,7 +57,7 @@ INSTALL(TARGETS libinsane_dynamic
 
 # static
 add_library(libinsane_static STATIC ${LIBINSANE_SRCS})
-target_include_directories(libinsane_static PUBLIC include)
+target_include_directories(libinsane_static PUBLIC libinsane/include)
 set_target_properties(libinsane_static PROPERTIES OUTPUT_NAME insane)
 INSTALL(TARGETS libinsane_static
     ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
