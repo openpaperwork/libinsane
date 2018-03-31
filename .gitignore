@@ -2,6 +2,7 @@
 .*
 build_windows/
 build_linux/
+build/
 venv/
 
 # Prerequisites
