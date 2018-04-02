@@ -1,7 +1,8 @@
 /*!
 \page quickstart TL;DR
 
-\todo TODO
+To simplify [continous integration](https://origami.openpaper.work),
+Makefiles in all [OpenPaper.work](https://openpaper.work) projects present similar targets.
 
 
 # Compilation
@@ -13,17 +14,30 @@ sudo apt install cmake build-essential libsane-dev
 make build_linux_c
 ```
 
+
 ## Microsoft Windows
 
-Build is done on Linux using Mingw64.
+Build is done on Linux using [MXE](http://mxe.cc/) which itself is based
+on [MingW](http://www.mingw.org/).
 
+As root, to install the required MXE packages:
 ```
-sudo apt install \
-    cmake \
-    mingw-w64-x86-64-dev \
-    gcc-mingw-w64-x86-64 \
+echo "deb http://pkg.mxe.cc/repos/apt/debian jessie main" > \
+    /etc/apt/sources.list.d/mxeapt.list
+apt-key adv --keyserver keyserver.ubuntu.com \
+    --recv-keys D43A795B73B16ABE9643FE1AFD8FFF16DB45C6AB
+apt update
+apt install \
+    mxe-x86-64-w64-mingw32.static-glib \
+    mxe-x86-64-unknown-linux-gnu-cmake \
+    mxe-x86-64-w64-mingw32.static-gcc
+```
+
+As user:
+```
 make build_windows_c
 ```
+
 
 ## Both
 
@@ -35,10 +49,17 @@ make
 
 ## For use in a C project
 
+
 ### Linux
 
 ```
 sudo make install
+```
+
+or
+
+```
+sudo make install_linux_c
 ```
 
 Will install the headers in /usr/local/include/libinsane.
@@ -53,7 +74,7 @@ and dynamically.
 
 Headers are in 'include/libinsane'.
 
-In a Mingw/Msys2 environment, `make install` will work too.
+In a Mingw/Msys2 environment, `make install` or `make install_windows_c` will work too.
 
 
 # Usage

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.5)
 
 project(Libinsane)
 
@@ -37,7 +37,6 @@ elseif($ENV{OS} MATCHES "mingw")
         libinsane/include/wia_ll.h
         libinsane/include/wia_automation.h
     )
-    include(Mingw)
 
 else()
 

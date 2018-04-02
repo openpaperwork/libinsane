@@ -2,6 +2,9 @@ PYTHON ?= python3
 VERBOSE ?=
 DESTDIR ?=
 
+# See MXE project
+WIN_CMAKE ?= /usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static-cmake
+
 SRCS = $(wildcard src/libinsane/*.c)
 HEADERS = $(wildcard include/libinsane/*.h)
 
@@ -17,7 +20,7 @@ cmake_linux:
 
 cmake_windows:
 	mkdir -p build_windows
-	(cd build_windows ; OS=mingw cmake ..)
+	(cd build_windows ; OS=mingw ${WIN_CMAKE} ..)
 
 build_py:
 
@@ -37,7 +40,6 @@ doxygen:
 
 gtkdoc: cmake_linux
 	# Does not work yet
-	# (cd build_linux ; make doc-libinsane)
 
 doc: doxygen gtkdoc
 	cp doc/index.html doc/build/index.html
@@ -78,19 +80,22 @@ clean:
 
 install_py:
 
-ifeq ($(OS),Windows_NT)
-
-install_linux_c: build_linux_c
-	(cd build_linux ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
-
-install_c: install_linux_c
-
-else
 
 install_windows_c: build_windows_c
 	(cd build_windows ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
 
+
+install_linux_c: build_linux_c
+	(cd build_linux ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
+
+
+ifeq ($(OS),Windows_NT)
+
 install_c: install_windows_c
+
+else
+
+install_c: install_linux_c
 
 endif
 
