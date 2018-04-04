@@ -6,6 +6,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 
+include(GLib)
+
 set(LIBINSANE_SRCS libinsane/src/safebet.c)
 set(LIBINSANE_HEADERS
     libinsane/include/capi.h
@@ -15,6 +17,9 @@ set(LIBINSANE_HEADERS
     libinsane/include/util.h
     libinsane/include/workarounds.h
 )
+
+set(LIBINSANE_GOBJECT_SRCS libinsane-gobject/src/libinsane.c)
+set(LIBINSANE_GOBJECT_HEADERS libinsane-gobject/include/libinsane.h)
 
 if($ENV{OS} MATCHES "linux")
 
@@ -44,7 +49,7 @@ else()
 
 endif()
 
-# dynamic
+# libinsane: dynamic
 add_library(libinsane_dynamic SHARED ${LIBINSANE_SRCS})
 target_include_directories(libinsane_dynamic PUBLIC libinsane/include)
 set_target_properties(libinsane_dynamic PROPERTIES OUTPUT_NAME insane)
@@ -53,8 +58,13 @@ INSTALL(TARGETS libinsane_dynamic
     LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include
 )
+if (DEFINED(SANE_INCLUDED_DIR))
+    target_include_directories(libinsane_dynamic SYSTEM PUBLIC ${SANE_INCLUDE_DIR})
+    target_link_libraries(libinsane_dynamic ${SANE_LIBRARY})
+endif()
 
-# static
+
+# libinsane: static
 add_library(libinsane_static STATIC ${LIBINSANE_SRCS})
 target_include_directories(libinsane_static PUBLIC libinsane/include)
 set_target_properties(libinsane_static PROPERTIES OUTPUT_NAME insane)
@@ -63,8 +73,31 @@ INSTALL(TARGETS libinsane_static
     LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include
 )
-
 if (DEFINED(SANE_INCLUDED_DIR))
-    target_include_directories(libinsane SYSTEM PUBLIC ${SANE_INCLUDE_DIR})
-    target_link_libraries(libinsane ${SANE_LIBRARY})
+    target_include_directories(libinsane_static SYSTEM PUBLIC ${SANE_INCLUDE_DIR})
+    target_link_libraries(libinsane_static ${SANE_LIBRARY})
 endif()
+
+
+# libinsane-gobject: dynamic
+add_library(libinsane_gobject_dynamic SHARED ${LIBINSANE_GOBJECT_SRCS})
+target_include_directories(libinsane_gobject_dynamic PUBLIC libinsane-gobject/include)
+set_target_properties(libinsane_gobject_dynamic PROPERTIES OUTPUT_NAME insane-gobject)
+INSTALL(TARGETS libinsane_gobject_dynamic
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+)
+target_include_directories(libinsane_gobject_dynamic SYSTEM PUBLIC ${GLIB_INCLUDE_DIRS})
+
+
+# libinsane-gobject: static
+add_library(libinsane_gobject_static STATIC ${LIBINSANE_GOBJECT_SRCS})
+target_include_directories(libinsane_gobject_static PUBLIC libinsane-gobject/include)
+set_target_properties(libinsane_gobject_static PROPERTIES OUTPUT_NAME insane-gobject)
+INSTALL(TARGETS libinsane_gobject_static
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+)
+target_include_directories(libinsane_gobject_static SYSTEM PUBLIC ${GLIB_INCLUDE_DIRS})
