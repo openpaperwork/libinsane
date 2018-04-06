@@ -8,9 +8,13 @@ set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 
 include(GLib)
 
-set(LIBINSANE_SRCS libinsane/src/safebet.c)
+set(LIBINSANE_SRCS
+    libinsane/src/dumb.c
+    libinsane/src/safebet.c
+)
 set(LIBINSANE_HEADERS
     libinsane/include/capi.h
+    libinsane/include/dumb.h
     libinsane/include/error.h
     libinsane/include/multiplexer.h
     libinsane/include/normalizers.h

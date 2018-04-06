@@ -31,6 +31,7 @@ enum lis_error {
 	 * \brief Image format is not supported by LibInsane.
 	 */
 	LIS_ERR_INTERNAL_IMG_FORMAT_NOT_SUPPORTED = LIS_ERR_BIT | LIS_ERR_INTERNAL_BIT,
+	LIS_ERR_INTERNAL_NOT_IMPLEMENTED,
 };
 
 #define LIS_IS_OK(err) (!((err) & LIS_ERR_BIT))

@@ -1,0 +1,65 @@
+#include <libinsane/capi.h>
+#include <libinsane/dumb.h>
+#include <libinsane/error.h>
+#include <libinsane/util.h>
+
+
+static enum lis_error dumb_init(struct lis_api *impl);
+static void dumb_cleanup(struct lis_api *impl);
+static enum lis_error dumb_get_devices(
+	struct lis_api *impl, struct lis_device_description ***dev_infos
+);
+static enum lis_error dumb_dev_open(
+	struct lis_api *impl, const char *dev_id, struct lis_item **item
+);
+
+
+static struct lis_device_description *g_dev_infos[] = {
+	NULL
+};
+
+
+static struct lis_api g_dumb_api = {
+	.init = dumb_init,
+	.cleanup = dumb_cleanup,
+	.get_devices = dumb_get_devices,
+	.dev_open = dumb_dev_open,
+};
+
+
+static enum lis_error dumb_init(struct lis_api *impl)
+{
+	LIS_UNUSED(impl);
+	return LIS_OK;
+}
+
+
+static void dumb_cleanup(struct lis_api *impl)
+{
+	LIS_UNUSED(impl);
+}
+
+
+static enum lis_error dumb_get_devices(
+	struct lis_api *impl, struct lis_device_description ***dev_infos
+) {
+	LIS_UNUSED(impl);
+	*dev_infos = g_dev_infos;
+	return LIS_OK;
+}
+
+
+static enum lis_error dumb_dev_open(
+	struct lis_api *impl, const char *dev_id, struct lis_item **item
+) {
+	LIS_UNUSED(impl);
+	LIS_UNUSED(dev_id);
+	LIS_UNUSED(item);
+	return LIS_ERR_INTERNAL_NOT_IMPLEMENTED;
+}
+
+
+enum lis_error lis_api_dumb(struct lis_api **api) {
+	*api = &g_dumb_api;
+	return LIS_OK;
+}
