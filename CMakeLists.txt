@@ -55,7 +55,7 @@ if($ENV{OS} MATCHES "linux")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DOS_LINUX -DCOMPILER_GCC")
     set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -DOS_LINUX -DCOMPILER_GCC")
     set(LIBINSANE_SRCS ${LIBINSANE_SRCS}
-        libinsane/src/sane.c
+        libinsane/src/bases/sane.c
     )
     set(LIBINSANE_HEADERS ${LIBINSANE_HEADERS}
         libinsane/include/sane.h
@@ -69,9 +69,9 @@ elseif($ENV{OS} MATCHES "mingw")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DOS_WINDOWS -DCOMPILER_GCC")
     set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -DOS_WINDOWS -DCOMPILER_GCC")
     set(LIBINSANE_SRCS ${LIBINSANE_SRCS}
-        libinsane/src/twain.c
-        libinsane/src/wia_automation.c
-        libinsane/src/wia_ll.c
+        libinsane/src/bases/twain.c
+        libinsane/src/bases/wia_automation.c
+        libinsane/src/bases/wia_ll.c
     )
     set(LIBINSANE_HEADERS ${LIBINSANE_HEADERS}
         libinsane/include/twain.h
