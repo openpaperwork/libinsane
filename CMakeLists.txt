@@ -9,7 +9,7 @@ set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 include(GLib)
 
 set(LIBINSANE_SRCS
-    libinsane/src/dumb.c
+    libinsane/src/bases/dumb.c
     libinsane/src/normalizers/all_opts_on_all_sources.c
     libinsane/src/normalizers/flatbed_and_feeder_behavior.c
     libinsane/src/normalizers/min_one_source.c
