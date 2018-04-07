@@ -41,7 +41,7 @@ enum lis_value_type {
 /*!
  * \brief Image format.
  *
- * Used to defined the type of content that will be returned by \ref scan_read() .
+ * Used to defined the type of content that will be returned by \ref lis_scan_session.scan_read() .
  */
 enum lis_img_format {
 	 /*!
@@ -135,12 +135,12 @@ struct lis_option_description {
 		} type; /*!< Type of constaint */
 
 		/*!
-		 * Content undefined if \ref lis_option_description.constraint.type ==
+		 * Content undefined if \ref lis_option_description.type ==
 		 * \ref LIS_CONSTRAINT_NONE.
 		 */
 		union {
 			/*!
-			 * If \ref lis_option_description.constraint.type == \ref LIS_CONSTRAINT_RANGE.
+			 * If \ref lis_option_description.type == \ref LIS_CONSTRAINT_RANGE.
 			 */
 			struct {
 				int min;
@@ -148,7 +148,7 @@ struct lis_option_description {
 				int interval;
 			} range;
 			/*!
-			 * If \ref lis_option_description.constraint.type == \ref LIS_CONSTRAINT_LIST.
+			 * If \ref lis_option_description.type == \ref LIS_CONSTRAINT_LIST.
 			 */
 			struct {
 				enum lis_value_type type;
@@ -169,7 +169,7 @@ struct lis_option_description {
 		 *
 		 * \param[in] opt option for which we want the value.
 		 * \param[out] value option value. Type is defined by
-		 *		\ref lis_option_description.value.type .
+		 *		\ref lis_option_description.type .
 		 * \retval LIS_OK value successful read. See \ref LIS_IS_OK.
 		 * \retval LIS_ACCESS_DENIED value cannot be read because the option is inactive.
 		 *		\ref value may or may not be set. See \ref LIS_IS_ERROR.
@@ -182,7 +182,7 @@ struct lis_option_description {
 		 * \brief set the option value.
 		 *
 		 * \param[in] opt option for which we want the value.
-		 * \param[out] value option value. Type is defined by \ref lis_option_description.value.type.
+		 * \param[out] value option value. Type is defined by \ref lis_option_description.type.
 		 * \retval LIS_OK value has been successfully set. See \ref LIS_IS_OK.
 		 * \retval LIS_APPROXIMATE_VALUE value has been successfully set, but value has been
 		 *		approximated. See \ref LIS_IS_OK.
@@ -277,7 +277,7 @@ struct lis_item {
 	 * - Sane: will return an empty list.
 	 * - WIA: will return device sources (Flatbed, Automatic Document Feeder, etc).
 	 *
-	 * \param[in] parent Usually a scanner (see \ref dev_open()).
+	 * \param[in] parent Usually a scanner (see \ref lis_api.dev_open()).
 	 * \param[out] children Usually scanner sources. List will be NULL terminated.
 	 * \retval LIS_OK children has been set to a valid array of items. See \ref LIS_IS_OK.
 	 */
@@ -360,11 +360,11 @@ struct lis_api {
 
 	/*!
 	 * \brief Open the access to a scanner.
-	 * \param[in] dev_id Device identifier. See \ref api_get_devices().
+	 * \param[in] dev_id Device identifier. See \ref get_devices().
 	 * \param[out] item Item representing the scanner.
 	 * \warning This operation may take many seconds.
 	 * \retval LIS_OK item has been set to ta valid list of items. List is NULL terminated.
-	 *		You *must* use \ref dev_close() on it later. See \ref LIS_IS_OK.
+	 *		You *must* use \ref lis_item.close() on it later. See \ref LIS_IS_OK.
 	 * \retval LIS_ERR_DEVICE_BUSY Another process is already using this scanner. item may or may
 	 *		not be modified. See \ref LIS_IS_ERROR.
 	 * \retval LIS_ERR_IO_ERROR Didn't work but don't know why ... Item may or may not be modified.

@@ -50,8 +50,8 @@ extern enum lis_error lis_api_workaround_opt_doc_source(
  * - API: Sane
  * - Culprits: Brother, Samsung
  * - Seen on:
- *   -`Brother MFC-7360N <https://openpaper.work/en/scanner_db/report/20/>`_
- *   - `Samsung CLX-3300 <https://openpaper.work/en/scanner_db/report/31/>`_
+ *   - [Brother MFC-7360N](https://openpaper.work/en/scanner_db/report/20/)
+ *   - [Samsung CLX-3300](https://openpaper.work/en/scanner_db/report/31/)
  *
  * Override the option 'mode' so it changes the following possible values:
  *
@@ -67,7 +67,7 @@ extern enum lis_error lis_api_workaround_opt_doc_source(
  * \param[in] to_wrap Base implementation to wrap.
  * \param[out] api Implementation of the API including the workaround.
  */
-extern enum lis_error lis_api_workaround_opt_mode_values(
+extern enum lis_error lis_api_workaround_opt_mode(
 	struct lis_api *to_wrap, struct lis_api **api
 );
 

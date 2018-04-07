@@ -13,17 +13,17 @@ LibInsane has one C API. It is implemented by a variety of components:
 - \ref normalizers.h "Various wrappers that normalize the behaviors of scanners and drivers
   from an application standpoint"
 
-The function \ref lis_api_safebet "lis_api_safebet()" stacks all the required implementations.
+The function \ref lis_safebet "lis_safebet()" stacks all the required implementations.
 It is your recommended entry point to LibInsane.
 Since all the components implements the same API, you can use the one provided by
-\ref lis_api_safebet "lis_api_safebet()" without ever worrying about which components are used.
+\ref lis_safebet "lis_safebet()" without ever worrying about which components are used.
 
 
 # Expected use of LibInsane
 
 Expected order of calling when most of the normalizers are enabled:
 
-- \ref lis_api_safebet "impl = lis_api_safebet()"
+- \ref lis_safebet "impl = lis_safebet()"
 - \ref lis_api.init "impl->init()"
 - \ref lis_api.get_devices "impl->get_devices()"
 - \ref lis_item "dev" = \ref lis_api.dev_open "impl->dev_open()"
@@ -40,7 +40,7 @@ Expected order of calling when most of the normalizers are enabled:
       - \ref lis_option_description.set_value "options[z]->fn.set_value()".
     - \ref lis_item.get_scan_parameters "sources[a]->get_scan_parameters()"
     - \ref lis_scan_session "scan_session" = \ref lis_item.scan_start "sources[a]->scan_start()"<br>
-      From this point and until \ref LIS_END_OF_FEED, \ref lis_scan_session.scan_start "scan_session->scan_start()"
+      From this point and until \ref LIS_END_OF_FEED, \ref lis_scan_session.scan_cancel "scan_session->scan_cancel()"
       can be called at any moment.
       - \ref lis_scan_session.scan_read "scan_session->scan_read()" until \ref LIS_END_OF_PAGE.<br>
         At least one \ref LIS_END_OF_PAGE will be returned on a successful scan.
@@ -63,11 +63,11 @@ See \ref quickstart.
 
 ## Stacking API implementations
 
-If you don't want to use \ref lis_api_safebet, you can stack the API implementation
+If you don't want to use \ref lis_safebet, you can stack the API implementation
 yourself.
 
-Please note that you should use \ref lis_api_safebet in most applications. There shouldn't
-be any reason not to use it. Don't hesitate to report a bug if \ref lis_api_safebet
+Please note that you should use \ref lis_safebet in most applications. There shouldn't
+be any reason not to use it. Don't hesitate to report a bug if \ref lis_safebet
 makes you troubles.
 
 Once you have wrapped an implementation with another, you don't have to worry about the

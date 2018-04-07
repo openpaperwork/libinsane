@@ -42,7 +42,7 @@ extern enum lis_error lis_api_normalizer_source_nodes(
  * \param[in] to_wrap Base implementation to wrap.
  * \param[out] api Implementation of the API including the workaround.
  */
-extern enum lis_error lis_api_normalizer_has_source(
+extern enum lis_error lis_api_normalizer_min_one_source(
 	struct lis_api *to_wrap, struct lis_api **api
 );
 

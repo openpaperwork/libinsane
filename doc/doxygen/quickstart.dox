@@ -114,7 +114,7 @@ void lets_scan(void)
     char img_buffer[4096];
     size_t bufsize;
 
-    CHECK_ERR(lis_api_safebet(&impl));
+    CHECK_ERR(lis_safebet(&impl));
     CHECK_ERR(impl->init(impl));
     CHECK_ERR(impl->get_devices(impl, &dev_infos));
 

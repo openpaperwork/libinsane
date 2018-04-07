@@ -17,7 +17,7 @@ extern "C" {
  * This function also check various environment variables, making it possible
  * to disable individual workarounds or normalizers.
  */
-extern enum lis_error lis_api_safebet(struct lis_api **api);
+extern enum lis_error lis_safebet(struct lis_api **api);
 
 #ifdef __cplusplus
 }
