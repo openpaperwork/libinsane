@@ -22,6 +22,7 @@ set(LIBINSANE_SRCS
     libinsane/src/normalizers/strip_non_scanners.c
     libinsane/src/safebet.c
     libinsane/src/safebet.c
+    libinsane/src/str2impls.c
     libinsane/src/workarounds/clean_dev_model_char.c
     libinsane/src/workarounds/clean_dev_model_from_manufacturer.c
     libinsane/src/workarounds/dedicated_thread.c
@@ -40,6 +41,7 @@ set(LIBINSANE_HEADERS
     libinsane/include/multiplexer.h
     libinsane/include/normalizers.h
     libinsane/include/safebet.h
+    libinsane/include/str2impls.h
     libinsane/include/util.h
     libinsane/include/workarounds.h
 )
