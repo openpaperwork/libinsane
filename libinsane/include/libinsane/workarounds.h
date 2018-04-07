@@ -165,7 +165,7 @@ extern enum lis_error lis_api_workaround_clean_dev_model_char(
  * \param[in] to_wrap Base implementation to wrap.
  * \param[out] api Implementation of the API including the workaround.
  */
-extern enum lis_error lis_api_workaround_no_read_access_to_inactive_opt(
+extern enum lis_error lis_api_workaround_no_read_on_inactive_opt(
 	struct lis_api *to_wrap, struct lis_api **api
 );
 

@@ -10,7 +10,28 @@ include(GLib)
 
 set(LIBINSANE_SRCS
     libinsane/src/dumb.c
+    libinsane/src/normalizers/all_opts_on_all_sources.c
+    libinsane/src/normalizers/flatbed_and_feeder_behavior.c
+    libinsane/src/normalizers/min_one_source.c
+    libinsane/src/normalizers/raw.c
+    libinsane/src/normalizers/raw24.c
+    libinsane/src/normalizers/resolution_constraint_format.c
+    libinsane/src/normalizers/scan_area_opts.c
+    libinsane/src/normalizers/source_nodes.c
+    libinsane/src/normalizers/source_types.c
+    libinsane/src/normalizers/strip_non_scanners.c
     libinsane/src/safebet.c
+    libinsane/src/safebet.c
+    libinsane/src/workarounds/clean_dev_model_char.c
+    libinsane/src/workarounds/clean_dev_model_from_manufacturer.c
+    libinsane/src/workarounds/dedicated_thread.c
+    libinsane/src/workarounds/no_read_on_inactive_opt.c
+    libinsane/src/workarounds/no_write_on_readonly_opt.c
+    libinsane/src/workarounds/opt_doc_source.c
+    libinsane/src/workarounds/opt_mode.c
+    libinsane/src/workarounds/opt_scan_resolution.c
+    libinsane/src/workarounds/opts_page_size.c
+    libinsane/src/workarounds/strip_translations.c
 )
 set(LIBINSANE_HEADERS
     libinsane/include/capi.h
@@ -18,6 +39,7 @@ set(LIBINSANE_HEADERS
     libinsane/include/error.h
     libinsane/include/multiplexer.h
     libinsane/include/normalizers.h
+    libinsane/include/safebet.h
     libinsane/include/util.h
     libinsane/include/workarounds.h
 )
@@ -30,8 +52,12 @@ if($ENV{OS} MATCHES "linux")
     MESSAGE(STATUS "Target OS: Unix-like")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DOS_LINUX -DCOMPILER_GCC")
     set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -DOS_LINUX -DCOMPILER_GCC")
-    set(LIBINSANE_SRCS ${LIBINSANE_SRCS} libinsane/src/sane.c)
-    set(LIBINSANE_HEADERS ${LIBINSANE_HEADERS} libinsane/include/sane.h)
+    set(LIBINSANE_SRCS ${LIBINSANE_SRCS}
+        libinsane/src/sane.c
+    )
+    set(LIBINSANE_HEADERS ${LIBINSANE_HEADERS}
+        libinsane/include/sane.h
+    )
     include(GtkDoc)
     include(Sane)
 
@@ -40,7 +66,11 @@ elseif($ENV{OS} MATCHES "mingw")
     MESSAGE(STATUS "Target OS: Microsoft Windows (Mingw)")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DOS_WINDOWS -DCOMPILER_GCC")
     set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -DOS_WINDOWS -DCOMPILER_GCC")
-    set(LIBINSANE_SRCS ${LIBINSANE_SRCS} libinsane/src/wia_ll.c libinsane/src/wia_automation.c libinsane/src/twain.c)
+    set(LIBINSANE_SRCS ${LIBINSANE_SRCS}
+        libinsane/src/twain.c
+        libinsane/src/wia_automation.c
+        libinsane/src/wia_ll.c
+    )
     set(LIBINSANE_HEADERS ${LIBINSANE_HEADERS}
         libinsane/include/twain.h
         libinsane/include/wia_ll.h

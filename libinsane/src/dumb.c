@@ -4,7 +4,6 @@
 #include <libinsane/util.h>
 
 
-static enum lis_error dumb_init(struct lis_api *impl);
 static void dumb_cleanup(struct lis_api *impl);
 static enum lis_error dumb_get_devices(
 	struct lis_api *impl, struct lis_device_description ***dev_infos
@@ -20,18 +19,10 @@ static struct lis_device_description *g_dev_infos[] = {
 
 
 static struct lis_api g_dumb_api = {
-	.init = dumb_init,
 	.cleanup = dumb_cleanup,
 	.get_devices = dumb_get_devices,
 	.dev_open = dumb_dev_open,
 };
-
-
-static enum lis_error dumb_init(struct lis_api *impl)
-{
-	LIS_UNUSED(impl);
-	return LIS_OK;
-}
 
 
 static void dumb_cleanup(struct lis_api *impl)

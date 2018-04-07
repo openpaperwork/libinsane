@@ -326,18 +326,16 @@ struct lis_item {
 
 /*!
  * \brief LibInsane C API.
+ *
+ * Initialized as soon as you get it.
  */
 struct lis_api {
 
 	/*!
-	 * \brief initialize the implementation.
-	 *
-	 * Exact meaning depends on the implementation (call to `sane_nit()`, starting a thread, etc).
-	 */
-	enum lis_error (*init)(struct lis_api *impl);
-
-	/*!
 	 * \brief cleanup the implementation.
+	 *
+	 * Must be called once you're done with the implementation instance. Otherwise you will leak
+	 * file descriptors and memory.
 	 *
 	 * Exact meaning depends on the implementation (call to `sane_cleanup()`, stopping a thread,
 	 * etc).

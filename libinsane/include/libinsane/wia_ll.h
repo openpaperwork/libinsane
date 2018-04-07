@@ -13,7 +13,7 @@ extern "C" {
  * Windows Only.
  * It makes as few adjustments as possible (it's the jobs of the normalizers and the workarounds).
  */
-extern enum lis_error lis_api_wia_ll(struct lis_api **api);
+extern enum lis_error lis_api_wia_ll(struct lis_api **impl);
 
 #ifdef __cplusplus
 }

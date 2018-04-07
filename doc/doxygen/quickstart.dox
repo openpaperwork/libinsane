@@ -115,7 +115,6 @@ void lets_scan(void)
     size_t bufsize;
 
     CHECK_ERR(lis_safebet(&impl));
-    CHECK_ERR(impl->init(impl));
     CHECK_ERR(impl->get_devices(impl, &dev_infos));
 
     if (dev_infos[0] == NULL) {
