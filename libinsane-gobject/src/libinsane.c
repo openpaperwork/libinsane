@@ -1,2 +1,2 @@
-#include <libinsane-gobject/libinsane.h>
+#include <libinsane-gobject/libinsane-api.h>
 
