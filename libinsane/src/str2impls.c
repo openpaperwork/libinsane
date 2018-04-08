@@ -1,9 +1,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define LIS_PRIVATE
+
 #include <libinsane/capi.h>
 #include <libinsane/dumb.h>
 #include <libinsane/error.h>
+#include <libinsane/log.h>
 #include <libinsane/normalizers.h>
 #include <libinsane/str2impls.h>
 #include <libinsane/util.h>
@@ -55,7 +58,7 @@ enum lis_error lis_str2impls(const char *list_of_impls, struct lis_api **impls)
 				err = lis_api_wia_ll(&next);
 #endif
 			} else {
-				// TODO(Jflesch): ERROR
+				lis_error("Unknown base API: %s", tok);
 				err = LIS_ERR_INTERNAL_NOT_IMPLEMENTED;
 				goto error;
 			}
@@ -107,14 +110,14 @@ enum lis_error lis_str2impls(const char *list_of_impls, struct lis_api **impls)
 			} else if (strcmp(tok, "strip_translations") == 0) {
 				err = lis_api_workaround_strip_translations(*impls, &next);
 			} else {
-				// TODO(Jflesch): ERROR
+				lis_error("Unknown API wrapper: %s", tok);
 				err = LIS_ERR_INTERNAL_NOT_IMPLEMENTED;
 				goto error;
 			}
 		}
 
 		if (LIS_IS_ERROR(err)) {
-			// TODO(Jflesch): ERROR
+			lis_error("Failed to instanciate API implementation '%s'", tok);
 			goto error;
 		}
 

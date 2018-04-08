@@ -10,6 +10,7 @@ include(GLib)
 
 set(LIBINSANE_SRCS
     libinsane/src/bases/dumb.c
+    libinsane/src/log.c
     libinsane/src/normalizers/all_opts_on_all_sources.c
     libinsane/src/normalizers/flatbed_and_feeder_behavior.c
     libinsane/src/normalizers/min_one_source.c
@@ -38,6 +39,7 @@ set(LIBINSANE_HEADERS
     libinsane/include/capi.h
     libinsane/include/dumb.h
     libinsane/include/error.h
+    libinsane/include/log.h
     libinsane/include/multiplexer.h
     libinsane/include/normalizers.h
     libinsane/include/safebet.h
