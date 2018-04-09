@@ -24,7 +24,6 @@ Since all the components implements the same API, you can use the one provided b
 Expected order of calling when most of the normalizers are enabled:
 
 - \ref lis_safebet "impl = lis_safebet()"
-- \ref lis_api.init "impl->init()"
 - \ref lis_api.get_devices "impl->get_devices()"
 - \ref lis_item "dev" = \ref lis_api.dev_open "impl->dev_open()"
   - \ref lis_item "sources" = \ref lis_item.get_children "dev->get_children()"
