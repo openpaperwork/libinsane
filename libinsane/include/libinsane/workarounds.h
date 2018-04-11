@@ -31,7 +31,7 @@ extern enum lis_error lis_api_workaround_opt_scan_resolution(
  *
  * - API: Sane
  * - Culprit: Samsung
- * - Seen on: [Samsung CLX-3300](https://openpaper.work/en/scanner_db/report/31/)
+ * - Seen on: [Samsung CLX-3300](https://openpaper.work/scanner_db/report/31/)
  *
  * The option 'resolution' is mistakenly named 'scan-resolution'.
  * This workaround creates a mirror option 'resolution'.
@@ -50,8 +50,8 @@ extern enum lis_error lis_api_workaround_opt_doc_source(
  * - API: Sane
  * - Culprits: Brother, Samsung
  * - Seen on:
- *   - [Brother MFC-7360N](https://openpaper.work/en/scanner_db/report/20/)
- *   - [Samsung CLX-3300](https://openpaper.work/en/scanner_db/report/31/)
+ *   - [Brother MFC-7360N](https://openpaper.work/scanner_db/report/20/)
+ *   - [Samsung CLX-3300](https://openpaper.work/scanner_db/report/31/)
  *
  * Override the option 'mode' so it changes the following possible values:
  *
@@ -97,7 +97,7 @@ extern enum lis_error lis_api_workaround_opts_page_size(
  *
  * - API: Sane
  * - Culprits: Sane project, OKI
- * - Seen on: [OKI MC363](https://openpaper.work/en/scanner_db/report/56/)
+ * - Seen on: [OKI MC363](https://openpaper.work/scanner_db/report/56/)
  *
  * This workaround wraps a bunch of options, and try to revert the translations back to English.
  *
@@ -128,7 +128,7 @@ extern enum lis_error lis_api_workaround_strip_translations(
  * - Model: MFC-7360N
  *
  * Special case: HP. Manufacturer is "hewlett-packard", but
- * [model names contain the prefix "hp"](https://openpaper.work/en/scanner_db/vendor/7/).
+ * [model names contain the prefix "hp"](https://openpaper.work/scanner_db/vendor/7/).
  *
  * \param[in] to_wrap Base implementation to wrap.
  * \param[out] api Implementation of the API including the workaround.
@@ -143,7 +143,7 @@ extern enum lis_error lis_api_workaround_clean_dev_model_from_manufacturer(
  *
  * - API: Sane
  * - Culprit: HP
- * - Seen on: [all HP devices](https://openpaper.work/en/scanner_db/vendor/7/)
+ * - Seen on: [all HP devices](https://openpaper.work/scanner_db/vendor/7/)
  *
  * \param[in] to_wrap Base implementation to wrap.
  * \param[out] api Implementation of the API including the workaround.
@@ -183,6 +183,23 @@ extern enum lis_error lis_api_workaround_no_read_on_inactive_opt(
  * \param[out] api Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_workaround_no_write_on_readonly_opt(
+	struct lis_api *to_wrap, struct lis_api **api
+);
+
+
+/*!
+ * \brief Do not let application set value on option that can have only one value
+ *
+ * - API: Sane
+ * - Culprit: Epson
+ * - Seen on: [Epson DS-310](https://openpaper.work/scanner_db/report/120/)
+ *
+ * When trying to set a value on a property that accept only one value
+ * (ex: source=ADF), Sane driver may return SANE_STATUS_INVAL instead of success.
+ * This workaround makes sure the value provided matches the only one possible
+ * and doesn't even set it.
+ */
+extern enum lis_error lis_api_workaround_no_write_on_single_value_opt(
 	struct lis_api *to_wrap, struct lis_api **api
 );
 
