@@ -4,6 +4,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
+G_BEGIN_DECLS
+
 #define LIBINSANE_API_TYPE                \
      (libinsane_api_get_type())
 #define LIBINSANE_API(o)                  \
@@ -17,9 +19,9 @@
 #define LIBINSANE_API_GET_CLASS(o)        \
     (G_TYPE_INSTANCE_GET_CLASS ((o), LIBINSANE_API_TYPE, LibinsaneApiClass))
 
-typedef struct _LibinsaneApi              LibinsaneApi;
-typedef struct _LibinsaneApiPrivate       LibinsaneApiPrivate;
-typedef struct _LibinsaneApiClass         LibinsaneApiClass;
+typedef struct _LibinsaneApi LibinsaneApi;
+typedef struct _LibinsaneApiPrivate LibinsaneApiPrivate;
+typedef struct _LibinsaneApiClass LibinsaneApiClass;
 
 struct _LibinsaneApi {
     GObject parent;
@@ -33,7 +35,9 @@ GType           libinsane_api_get_type(void) G_GNUC_CONST;
 
 LibinsaneApi *    libinsane_api_new(void);
 
-void            libinsane_api_init(LibinsaneApi *api);
-void            libinsane_api_cleanup(LibinsaneApi *api);
+void            libinsane_api_init(LibinsaneApi *self);
+void            libinsane_api_cleanup(LibinsaneApi *self);
+
+G_END_DECLS
 
 #endif
