@@ -2,9 +2,6 @@ PYTHON ?= python3
 VERBOSE ?=
 DESTDIR ?=
 
-# See MXE project
-WIN_CMAKE ?= /usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static-cmake
-
 SRCS = $(wildcard src/libinsane/*.c)
 HEADERS = $(wildcard include/libinsane/*.h)
 
@@ -14,23 +11,12 @@ install: install_py install_c
 
 uninstall: uninstall_py
 
-cmake_linux:
-	mkdir -p build_linux
-	(cd build_linux ; OS=linux cmake ..)
-
-cmake_windows:
-	mkdir -p build_windows
-	(cd build_windows ; OS=mingw ${WIN_CMAKE} ..)
-
 build_py:
 
-build_linux_c: cmake_linux
-	(cd build_linux ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR})
-
-build_windows_c: cmake_windows
-	(cd build_windows ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR})
-
-build_c: build_linux_c build_windows_c
+build_c:
+	(cd libinsane && ./autogen.sh)
+	(cd libinsane && ./configure)
+	make -C libinsane
 
 version:
 
@@ -38,7 +24,7 @@ doxygen:
 	mkdir -p doc/build
 	doxygen doc/doxygen.conf
 
-gtkdoc: cmake_linux
+gtkdoc:
 	# Does not work yet
 
 doc: doxygen gtkdoc
@@ -75,33 +61,20 @@ endif
 
 clean:
 	rm -rf doc/build
-	rm -rf build_linux
-	rm -rf build_windows
+	make -C libinsane clean
 
 install_py:
 
 
-install_windows_c: build_windows_c
-	(cd build_windows ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
+install_c: build_linux_c
+	make -C libinsane install
 
-
-install_linux_c: build_linux_c
-	(cd build_linux ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
-
-
-ifeq ($(OS),Windows_NT)
-
-install_c: install_windows_c
-
-else
-
-install_c: install_linux_c
-
-endif
+install: install_c
 
 uninstall_py:
 
 uninstall_c:
+	make -C libinsane uninstall
 
 help:
 	@echo "make build || make build_c || make build_py"
@@ -116,11 +89,8 @@ help:
 .PHONY: \
 	build \
 	build_c \
-	build_linux_c \
-	build_windows_c \
 	build_py \
 	check \
-	cmake_linux \
 	doc \
 	doxygen \
 	gtkdoc \
@@ -129,7 +99,6 @@ help:
 	help \
 	install \
 	install_c \
-	install_linux_c \
 	install_py \
 	release \
 	test \
