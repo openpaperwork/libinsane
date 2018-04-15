@@ -5,6 +5,11 @@ build_linux/
 build/
 venv/
 
+GPATH
+GRTAGS
+GTAGS
+tags
+
 # Prerequisites
 *.d
 
