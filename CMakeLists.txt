@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(Libinsane)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
@@ -12,14 +14,17 @@ set(LIBINSANE_SRCS
     libinsane/src/bases/dumb.c
     libinsane/src/log.c
     libinsane/src/normalizers/all_opts_on_all_sources.c
+    libinsane/src/normalizers/end_of_feed.c
     libinsane/src/normalizers/flatbed_and_feeder_behavior.c
     libinsane/src/normalizers/min_one_source.c
     libinsane/src/normalizers/raw.c
     libinsane/src/normalizers/raw24.c
     libinsane/src/normalizers/resolution_constraint_format.c
     libinsane/src/normalizers/scan_area_opts.c
+    libinsane/src/normalizers/source_names.c
     libinsane/src/normalizers/source_nodes.c
     libinsane/src/normalizers/source_types.c
+    libinsane/src/normalizers/sources_order.c
     libinsane/src/normalizers/strip_non_scanners.c
     libinsane/src/safebet.c
     libinsane/src/safebet.c

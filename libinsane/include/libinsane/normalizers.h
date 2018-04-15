@@ -21,10 +21,10 @@ extern "C" {
  * simulated.
  *
  * \param[in] to_wrap Base implementation to wrap.
- * \param[out] api Implementation of the API including the workaround.
+ * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_source_nodes(
-		struct lis_api *to_wrap, struct lis_api **api
+		struct lis_api *to_wrap, struct lis_api **impl
 );
 
 
@@ -40,10 +40,10 @@ extern enum lis_error lis_api_normalizer_source_nodes(
  * If there is no source at all, this normalization will create a fake one.
  *
  * \param[in] to_wrap Base implementation to wrap.
- * \param[out] api Implementation of the API including the workaround.
+ * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_min_one_source(
-	struct lis_api *to_wrap, struct lis_api **api
+	struct lis_api *to_wrap, struct lis_api **impl
 );
 
 
@@ -62,10 +62,10 @@ extern enum lis_error lis_api_normalizer_min_one_source(
  * sources. Scanner options must be mapped on all its sources.
  *
  * \param[in] to_wrap Base implementation to wrap.
- * \param[out] api Implementation of the API including the workaround.
+ * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_all_opts_on_all_sources(
-	struct lis_api *to_wrap, struct lis_api **api
+	struct lis_api *to_wrap, struct lis_api **impl
 );
 
 
@@ -79,10 +79,10 @@ extern enum lis_error lis_api_normalizer_all_opts_on_all_sources(
  * options, and any change to these options is applied back to the WIA2 options.
  *
  * \param[in] to_wrap Base implementation to wrap.
- * \param[out] api Implementation of the API including the workaround.
+ * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_scan_area_opts(
-	struct lis_api *to_wrap, struct lis_api **api
+	struct lis_api *to_wrap, struct lis_api **impl
 );
 
 
@@ -97,10 +97,10 @@ extern enum lis_error lis_api_normalizer_scan_area_opts(
  * list will be 25dpi.
  *
  * \param[in] to_wrap Base implementation to wrap.
- * \param[out] api Implementation of the API including the workaround.
+ * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_resolution_constraint_format(
-	struct lis_api *to_wrap, struct lis_api **api
+	struct lis_api *to_wrap, struct lis_api **impl
 );
 
 
@@ -116,10 +116,10 @@ extern enum lis_error lis_api_normalizer_resolution_constraint_format(
  * See \ref lis_item.type.
  *
  * \param[in] to_wrap Base implementation to wrap.
- * \param[out] api Implementation of the API including the workaround.
+ * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_source_types(
-	struct lis_api *to_wrap, struct lis_api **api
+	struct lis_api *to_wrap, struct lis_api **impl
 );
 
 
@@ -133,10 +133,10 @@ extern enum lis_error lis_api_normalizer_source_types(
  * WIA: Video devices are directly stripped by the WIA support module of LibInsane.
  *
  * \param[in] to_wrap Base implementation to wrap.
- * \param[out] api Implementation of the API including the workaround.
+ * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_strip_non_scanners(
-	struct lis_api *to_wrap, struct lis_api **api
+	struct lis_api *to_wrap, struct lis_api **impl
 );
 
 
@@ -157,10 +157,10 @@ extern enum lis_error lis_api_normalizer_strip_non_scanners(
  * this one) and will output the image as RAW24.
  *
  * \param[in] to_wrap Base implementation to wrap.
- * \param[out] api Implementation of the API including the workaround.
+ * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_raw(
-	struct lis_api *to_wrap, struct lis_api **api
+	struct lis_api *to_wrap, struct lis_api **impl
 );
 
 
@@ -175,10 +175,10 @@ extern enum lis_error lis_api_normalizer_raw(
  * This normalization ensures the output image is always in RAW24 (RGB).
  *
  * \param[in] to_wrap Base implementation to wrap.
- * \param[out] api Implementation of the API including the workaround.
+ * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_raw24(
-	struct lis_api *to_wrap, struct lis_api **api
+	struct lis_api *to_wrap, struct lis_api **impl
 );
 
 
@@ -210,10 +210,10 @@ extern enum lis_error lis_api_normalizer_raw24(
  *   no paper left to scan.
  *
  * \param[in] to_wrap Base implementation to wrap.
- * \param[out] api Implementation of the API including the workaround.
+ * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_flatbed_and_feeder_behavior(
-	struct lis_api *to_wrap, struct lis_api **api
+	struct lis_api *to_wrap, struct lis_api **impl
 );
 
 
@@ -227,10 +227,10 @@ extern enum lis_error lis_api_normalizer_flatbed_and_feeder_behavior(
  * Requires: \ref lis_api_normalizer_scan_area_opts
  *
  * \param[in] to_wrap Base implementation to wrap.
- * \param[out] api Implementation of the API including the workaround.
+ * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_maximize_scan_area(
-	struct lis_api *to_wrap, struct lis_api **api
+	struct lis_api *to_wrap, struct lis_api **impl
 );
 
 
@@ -243,11 +243,76 @@ extern enum lis_error lis_api_normalizer_maximize_scan_area(
  * Requires: \ref lis_api_workaround_opt_mode
  *
  * \param[in] to_wrap Base implementation to wrap.
- * \param[out] api Implementation of the API including the workaround.
+ * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_default_mode_to_color(
-	struct lis_api *to_wrap, struct lis_api **api
+	struct lis_api *to_wrap, struct lis_api **iml
 );
+
+
+/*!
+ * \brief Ensure end of feed errors occurs only on \ref lis_scan_session.scan_read
+ *	and never on \ref lis_item.scan_start .
+ *
+ * Depending on the driver, LIS_END_OF_FEED may happen either on
+ * \ref lis_item.scan_start or on the first \ref lis_scan_session.scan_read.
+ * This workaround makes sure that is always happen only on
+ * \ref lis_scan_session.scan_read`.
+ *
+ * Example: https://openpaper.work/en-us/scanner_db/report/124/
+ *
+ * \param[in] to_wrap Base implementation to wrap.
+ * \param[out] impl Implementation of the API including the workaround.
+ */
+extern enum lis_error lis_api_normalizer_end_of_feed(
+	struct lis_api *to_wrap, struct lis_api **impl
+);
+
+
+/*!
+ * \brief Makes sure the source names all look the same accross OSes
+ *
+ * - All source names will be lower-case
+ * - No WIA prefix
+ * - All ADF will be called "feeder"
+ *
+ * Exanples when using WIA:
+ * - '0000\\Root\\Flatbed' --> 'flatbed'
+ * - '0000\\Root\\Feeder' --> 'feeder'
+ *
+ * Examples when using Sane:
+ * - 'Automatic document Feeder (left aligned)' --> 'feeder (left aligned)'
+ * - 'ADF Duplex' --> 'feeder duplex'
+ *
+ * \param[in] to_wrap Base implementation to wrap.
+ * \param[out] impl Implementation of the API including the workaround.
+ */
+extern enum lis_error lis_api_normalizer_source_names(
+	struct lis_api *to_wrap, struct lis_api **impl
+);
+
+
+/*!
+ * \brief Make sure the source order is always the same.
+ *
+ * Order:
+ * - "flatbed"
+ * - "feeder duplex"
+ * - "feeder"
+ * - "feeder (left aligned)"
+ * - "feeder front"
+ * - "feeder back"
+ * - "feeder (centrally aligned)"
+ *
+ * Dependency: \ref lis_api_normalizer_source_names
+ *
+ * \param[in] to_wrap Base implementation to wrap.
+ * \param[out] impl Implementation of the API including the workaround.
+ */
+extern enum lis_error lis_api_normalizer_sources_order(
+	struct lis_api *to_wrap, struct lis_api **impl
+);
+
 
 #ifdef __cplusplus
 }
