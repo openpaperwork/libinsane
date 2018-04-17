@@ -61,7 +61,7 @@ endif
 
 clean:
 	rm -rf doc/build
-	make -C libinsane clean
+	if [ -e libinsane/Makefile ]; then make -C libinsane clean ; fi
 
 install_py:
 
