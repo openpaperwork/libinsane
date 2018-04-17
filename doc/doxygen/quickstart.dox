@@ -90,8 +90,8 @@ In a Mingw/Msys2 environment, `make install` or `make install_windows_c` will wo
 
 
 #define CHECK_ERR(call) do { \
-        err = call;
-        if (LIS_IS_ERROR(err)) {
+        err = call; \
+        if (LIS_IS_ERROR(err)) { \
             fprintf( \
                 stderr, "%s(L%d): ERROR: %X, %s\n", \
                 __FILE__, __LINE__, \
