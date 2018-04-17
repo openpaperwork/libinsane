@@ -133,7 +133,7 @@ void lets_scan(void)
     CHECK_ERR(device->get_children(device, &sources));
 
     // Normalizers ensure us that there is at least one source,
-    // so let us the first one because it looks cool too.
+    // so let's use the first one because it looks cool too.
     printf("Will use source %s", sources[0]->name);
 
     // Setting resolution: This one may or may not work, depending on the scanner
