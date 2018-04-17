@@ -13,10 +13,18 @@ uninstall: uninstall_py
 
 build_py:
 
-build_c:
+libinsane/configure:
 	(cd libinsane && ./autogen.sh)
-	(cd libinsane && ./configure)
+
+build_linux_c: libinsane/configure
+	(cd libinsane && ./configure --enable-fatal-warnings --enable-debug)
 	make -C libinsane
+
+build_windows_c: libinsane/configure
+	(cd libinsane && ./configure --enable-fatal-warnings --enable-debug --host=x86_64-w64-mingw32)
+	make -C libinsane
+
+build_c: build_linux_c
 
 version:
 

@@ -10,7 +10,7 @@ Makefiles in all [OpenPaper.work](https://openpaper.work) projects present simil
 ## GNU/Linux and *BSD
 
 ```
-sudo apt install cmake build-essential libsane-dev
+sudo apt install build-essential libsane-dev autoconf
 make build_linux_c
 ```
 
@@ -29,7 +29,7 @@ apt-key adv --keyserver keyserver.ubuntu.com \
 apt update
 apt install \
     mxe-x86-64-w64-mingw32.static-glib \
-    mxe-x86-64-unknown-linux-gnu-cmake \
+    mxe-x86-64-unknown-linux-gnu-autoconf \
     mxe-x86-64-w64-mingw32.static-gcc
 ```
 

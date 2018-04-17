@@ -61,6 +61,19 @@ out_libinsane_0_1_la_LIBADD = \
     $(DEPS_LIBS) \
     $(AM_LIBADD)
 
+out_libinsane_0_1_la_LDFLAGS = \
+    $(AM_LDFLAGS) -no-undefined
+
+if WINDOWS
+    out_libinsane_0_1_la_SOURCES += \
+        src/bases/twain.c \
+        src/bases/wia_automation.c \
+        src/bases/wia_ll.c
+else
+    out_libinsane_0_1_la_SOURCES += \
+        src/bases/sane.c
+endif
+
 # Introspection
 # -include $(INTROSPECTION_MAKEFILE)
 # INTROSPECTION_GIRS =

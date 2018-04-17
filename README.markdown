@@ -1,6 +1,6 @@
 ```sh
 apt install \
-      cmake build-essential \
+      build-essential \
       libsane-dev \
       libgirepository1.0-dev gobject-introspection
 ```
