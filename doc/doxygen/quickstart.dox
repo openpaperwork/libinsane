@@ -160,7 +160,7 @@ void lets_scan(void)
                 sleep(1);
                 break;
             case LIS_OK:
-                // do something with the chunk of the image/page that has just be read
+                // do something with the chunk of the image/page that has just been read
                 break;
             case LIS_CANCELLED:
                 // user cancelled
