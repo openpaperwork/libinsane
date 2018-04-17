@@ -16,13 +16,20 @@ build_py:
 libinsane/configure:
 	(cd libinsane && ./autogen.sh)
 
-build_linux_c: libinsane/configure
-	(cd libinsane && ./configure --enable-fatal-warnings --enable-debug)
-	make -C libinsane
+libinsane-gobject/configure:
+	(cd libinsane-gobject && ./autogen.sh)
 
-build_windows_c: libinsane/configure
-	(cd libinsane && ./configure --enable-fatal-warnings --enable-debug --host=x86_64-w64-mingw32)
+build_linux_c: libinsane/configure libinsane-gobject/configure
+	(cd libinsane && ./configure --enable-fatal-warnings --enable-debug)
+	(cd libinsane-gobject && ./configure --enable-fatal-warnings --enable-debug)
 	make -C libinsane
+	make -C libinsane-gobject
+
+build_windows_c: libinsane/configure libinsane-gobject/configure
+	(cd libinsane && ./configure --enable-fatal-warnings --enable-debug --host=x86_64-w64-mingw32)
+	(cd libinsane-gobject && PKG_CONFIG_PATH=/usr/lib/mxe/usr/x86_64-w64-mingw32.shared/lib/pkgconfig ./configure --enable-fatal-warnings --enable-debug --host=x86_64-w64-mingw32)
+	make -C libinsane
+	make -C libinsane-gobject
 
 build_c: build_linux_c
 
@@ -70,18 +77,21 @@ endif
 clean:
 	rm -rf doc/build
 	if [ -e libinsane/Makefile ]; then make -C libinsane clean ; fi
+	if [ -e libinsane-gobject/Makefile ]; then make -C libinsane-gobject clean ; fi
 
 install_py:
 
 
 install_c: build_linux_c
 	make -C libinsane install
+	make -C libinsane-gobject install
 
 install: install_c
 
 uninstall_py:
 
 uninstall_c:
+	make -C libinsane-gobject uninstall
 	make -C libinsane uninstall
 
 help:

@@ -73,38 +73,3 @@ else
     out_libinsane_0_1_la_SOURCES += \
         src/bases/sane.c
 endif
-
-# Introspection
-# -include $(INTROSPECTION_MAKEFILE)
-# INTROSPECTION_GIRS =
-# INTROSPECTION_SCANNER_ARGS = --warn-all
-# INTROSPECTION_COMPILER_ARGS =
-# DISTCHECK_CONFIGURE_FLAGS += --enable-introspection
-# EXTRA_DIST += introspection.m4
-
-# if HAVE_INTROSPECTION
-# src/Insane-1.0.gir: src/libinsane.la
-# src_Insane_1_0_gir_INCLUDES = Gtk-3.0
-# src_Insane_1_0_gir_CFLAGS = $(DEPS_CFLAGS) $(src_libinsane_la_CPPFLAGS)
-# src_Insane_1_0_gir_LIBS = src/libinsane.la
-# src_Insane_1_0_gir_FILES = $(src_libinsane_la_SOURCES) $(insane_HEADERS)
-# src_Insane_1_0_gir_NAMESPACE = Insane
-# src_Insane_1_0_gir_EXPORT_PACKAGES = libinsane
-# src_Insane_1_0_gir_SCANNERFLAGS = 	\
-	# --nsversion=1.0 		\
-	# --symbol-prefix=insane 	\
-	# --c-include="libinsane-gobject/include/libinsane-gobject.h"
-#
-# INTROSPECTION_GIRS += src/Insane-1.0.gir
-#
-# girdir = $(datadir)/gir-1.0
-# gir_DATA = $(INTROSPECTION_GIRS)
-#
-# typelibdir = $(libdir)/girepository-1.0
-# typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
-#
-# CLEANFILES += $(gir_DATA) $(typelib_DATA)
-# 
-# DISTCHECK_CONFIGURE_FLAGS += --enable-introspection
-# EXTRA_DIST += introspection.m4
-# endif
