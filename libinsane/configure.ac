@@ -24,8 +24,7 @@ AC_HEADER_STDC
 build_linux=no
 build_windows=no
 build_mac=no
-
-# Detect the target system
+AC_MSG_NOTICE(["Host OS: ${host_os}"])
 case "${host_os}" in
     linux*)
         build_linux=yes
@@ -40,8 +39,6 @@ case "${host_os}" in
         AC_MSG_ERROR(["OS $host_os is not supported"])
         ;;
 esac
-
-# Pass the conditionals to automake
 AM_CONDITIONAL([LINUX], [test "$build_linux" = "yes"])
 AM_CONDITIONAL([WINDOWS], [test "$build_windows" = "yes"])
 AM_CONDITIONAL([OSX], [test "$build_mac" = "yes"])
