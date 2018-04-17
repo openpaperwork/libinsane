@@ -21,15 +21,17 @@ libinsane-gobject/configure:
 
 build_linux_c: libinsane/configure libinsane-gobject/configure
 	(cd libinsane && ./configure --enable-fatal-warnings --enable-debug)
-	(cd libinsane-gobject && ./configure --enable-fatal-warnings --enable-debug)
 	make -C libinsane
+	(cd libinsane-gobject && ./configure --enable-fatal-warnings --enable-debug)
 	make -C libinsane-gobject
 
 build_windows_c: libinsane/configure libinsane-gobject/configure
 	(cd libinsane && ./configure --enable-fatal-warnings --enable-debug --host=x86_64-w64-mingw32)
-	(cd libinsane-gobject && PKG_CONFIG_PATH=/usr/lib/mxe/usr/x86_64-w64-mingw32.shared/lib/pkgconfig ./configure --enable-fatal-warnings --enable-debug --host=x86_64-w64-mingw32)
 	make -C libinsane
-	make -C libinsane-gobject
+# Cannot cross-compile libinsane-gobject. gobject-introspection-1.0.pc and g-ir-scanner
+# are not available using MXE. It has to be compiled with Msys2
+# 	(cd libinsane-gobject && PKG_CONFIG_PATH=/usr/lib/mxe/usr/x86_64-w64-mingw32.shared/lib/pkgconfig ./configure --enable-fatal-warnings --enable-debug --host=x86_64-w64-mingw32)
+#	make -C libinsane-gobject
 
 build_c: build_linux_c
 
