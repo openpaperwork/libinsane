@@ -1,6 +1,3 @@
-```sh
-apt install \
-      build-essential \
-      libsane-dev \
-      libgirepository1.0-dev gobject-introspection
-```
+Work In Progress
+
+[Documentation](https://doc.openpaper.work/libinsane/latest/)

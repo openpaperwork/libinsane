@@ -7,41 +7,12 @@ Makefiles in all [OpenPaper.work](https://openpaper.work) projects present simil
 
 # Compilation
 
-## GNU/Linux and *BSD
-
 ```
-sudo apt install build-essential libsane-dev autoconf
-make build_linux_c
-```
-
-
-## Microsoft Windows
-
-Build is done on Linux using [MXE](http://mxe.cc/) which itself is based
-on [MingW](http://www.mingw.org/).
-
-As root, to install the required MXE packages:
-```
-echo "deb http://pkg.mxe.cc/repos/apt/debian jessie main" > \
-    /etc/apt/sources.list.d/mxeapt.list
-apt-key adv --keyserver keyserver.ubuntu.com \
-    --recv-keys D43A795B73B16ABE9643FE1AFD8FFF16DB45C6AB
-apt update
-apt install \
-    mxe-x86-64-w64-mingw32.static-glib \
-    mxe-x86-64-unknown-linux-gnu-autoconf \
-    mxe-x86-64-w64-mingw32.static-gcc
-```
-
-As user:
-```
-make build_windows_c
-```
-
-
-## Both
-
-```
+sudo apt install \
+        build-essential \
+        libsane-dev \
+        libtool \
+        libgirepository1.0-dev gobject-introspection
 make
 ```
 
@@ -49,32 +20,12 @@ make
 
 ## For use in a C project
 
-
-### Linux
-
 ```
 sudo make install
 ```
 
-or
-
-```
-sudo make install_linux_c
-```
-
 Will install the headers in /usr/local/include/libinsane.
 Will install dynamic (libinsane.so) and static library (libinsane.a) in /usr/local/lib.
-
-
-### Windows
-
-In the folder 'build\_windows', you will find
-[LibInsane compiled statically: libinsane.a](https://stackoverflow.com/questions/2096519/from-mingw-static-library-a-to-visual-studio-static-library-lib)
-and dynamically.
-
-Headers are in 'include/libinsane'.
-
-In a Mingw/Msys2 environment, `make install` or `make install_windows_c` will work too.
 
 
 # Usage

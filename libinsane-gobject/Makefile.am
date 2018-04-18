@@ -35,7 +35,7 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
 EXTRA_DIST = introspection.m4
 
 src/Insane-1.0.gir: out/libinsane-gobject-0.1.la
-src_Insane_1_0_gir_INCLUDES = Gtk-3.0
+src_Insane_1_0_gir_INCLUDES = GLib-2.0
 src_Insane_1_0_gir_CFLAGS = $(DEPS_CFLAGS) $(src_libinsane_gobject_0_1_la_CFLAGS)
 src_Insane_1_0_gir_LIBS = out/libinsane-gobject-0.1.la
 src_Insane_1_0_gir_FILES = $(src_libinsane_gobject_0_1_la_SOURCES) $(libinsane_gobject_HEADERS)
