@@ -3,7 +3,7 @@ AC_INIT([libinsane-gobject],[0.1])
 
 AC_CONFIG_MACRO_DIR([build])
 AC_CONFIG_AUX_DIR([build])
-AC_CONFIG_SRCDIR([src/libinsane.c])
+AC_CONFIG_SRCDIR([src/libinsane-api.c])
 
 AC_CONFIG_HEADERS([include/libinsane-gobject/config.h])
 

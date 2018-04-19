@@ -12,7 +12,7 @@ libinsane_gobject_HEADERS = \
     include/libinsane-gobject/libinsane-api.h
 
 out_libinsane_gobject_0_1_la_SOURCES = \
-    src/libinsane.c
+    src/libinsane-api.c
 
 out_libinsane_gobject_0_1_la_CFLAGS = \
     -Iinclude \
@@ -28,25 +28,24 @@ out_libinsane_gobject_0_1_la_LDFLAGS = \
 
 # Introspection
 -include $(INTROSPECTION_MAKEFILE)
-INTROSPECTION_GIRS =
-INTROSPECTION_SCANNER_ARGS = --warn-all
+INTROSPECTION_SCANNER_ARGS = --warn-all --warn-error
 INTROSPECTION_COMPILER_ARGS =
 DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
 EXTRA_DIST = introspection.m4
 
-src/Insane-1.0.gir: out/libinsane-gobject-0.1.la
-src_Insane_1_0_gir_INCLUDES = GLib-2.0
-src_Insane_1_0_gir_CFLAGS = $(DEPS_CFLAGS) $(src_libinsane_gobject_0_1_la_CFLAGS)
-src_Insane_1_0_gir_LIBS = out/libinsane-gobject-0.1.la
-src_Insane_1_0_gir_FILES = $(src_libinsane_gobject_0_1_la_SOURCES) $(libinsane_gobject_HEADERS)
-src_Insane_1_0_gir_NAMESPACE = Insane
-src_Insane_1_0_gir_EXPORT_PACKAGES = libinsane
-src_Insane_1_0_gir_SCANNERFLAGS = 	\
+out/Libinsane-1.0.gir: out/libinsane-gobject-0.1.la
+out_Libinsane_1_0_gir_INCLUDES = GLib-2.0
+out_Libinsane_1_0_gir_CFLAGS = $(DEPS_CFLAGS) $(src_libinsane_gobject_0_1_la_CFLAGS)
+out_Libinsane_1_0_gir_LIBS = out/libinsane-gobject-0.1.la
+out_Libinsane_1_0_gir_FILES = $(out_libinsane_gobject_0_1_la_SOURCES) $(libinsane_gobject_HEADERS)
+out_Libinsane_1_0_gir_NAMESPACE = Libinsane
+out_Libinsane_1_0_gir_EXPORT_PACKAGES = libinsane
+out_Libinsane_1_0_gir_SCANNERFLAGS = 	\
 	--nsversion=1.0 		\
-	--symbol-prefix=insane 	\
-	--c-include="libinsane-gobject/include/libinsane-gobject.h"
+	--symbol-prefix=insane \
+	--symbol-prefix=libinsane
 
-INTROSPECTION_GIRS += src/Insane-1.0.gir
+INTROSPECTION_GIRS = out/Libinsane-1.0.gir
 
 girdir = $(datadir)/gir-1.0
 gir_DATA = $(INTROSPECTION_GIRS)

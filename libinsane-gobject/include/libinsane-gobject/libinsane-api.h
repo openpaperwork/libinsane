@@ -31,12 +31,7 @@ struct _LibinsaneApiClass {
     GObjectClass parent;
 };
 
-GType           libinsane_api_get_type(void) G_GNUC_CONST;
-
-LibinsaneApi *    libinsane_api_new(void);
-
-void            libinsane_api_init(LibinsaneApi *self);
-void            libinsane_api_cleanup(LibinsaneApi *self);
+GType libinsane_api_get_type(void) G_GNUC_CONST;
 
 G_END_DECLS
 

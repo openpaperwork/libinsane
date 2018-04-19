@@ -4,6 +4,8 @@ build_windows/
 build_linux/
 build/
 venv/
+*.gir
+*.typelib
 
 Makefile.in
 libinsane/Makefile
