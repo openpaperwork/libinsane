@@ -30,7 +30,6 @@ other weird thingies that could acquire or generate images.
   [TWAIN](https://www.twain.org/) (Windows).
 - Cross-language: Thanks to [GObject introspection](https://wiki.gnome.org/action/show/Projects/GObjectIntrospection?action=show&redirect=GObjectIntrospection).
 - Cross-scanner and cross-driver: Because a lot of them all have their quirks (and sometimes bugs).
-- Cross-compiled: Windows version is built on a GNU/Linux system.
 
 
 # Overall view
