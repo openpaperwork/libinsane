@@ -7,7 +7,7 @@ noinst_PROGRAMS =
 
 lib_LTLIBRARIES = out/libinsane-gobject-0.1.la
 
-libinsane_gobjectdir = $(pkgincludedir)/src
+libinsane_gobjectdir = $(pkgincludedir)
 libinsane_gobject_HEADERS = \
     include/libinsane-gobject/libinsane-api.h
 

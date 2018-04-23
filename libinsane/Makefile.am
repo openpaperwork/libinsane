@@ -10,7 +10,7 @@ noinst_PROGRAMS =
 
 lib_LTLIBRARIES = out/libinsane-0.1.la
 
-libinsanedir = $(pkgincludedir)/src
+libinsanedir = $(pkgincludedir)
 libinsane_HEADERS = \
     include/libinsane/capi.h \
     include/libinsane/dumb.h \

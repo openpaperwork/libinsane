@@ -9,7 +9,7 @@ build: build_c build_py
 
 install: install_py install_c
 
-uninstall: uninstall_py
+uninstall: uninstall_py uninstall_c
 
 build_py:
 
