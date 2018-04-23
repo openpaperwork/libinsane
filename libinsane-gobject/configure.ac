@@ -16,7 +16,9 @@ AM_INIT_AUTOMAKE([1.11 -Wno-portability -Wall foreign no-define subdir-objects])
 AC_PROG_CC
 AC_HEADER_STDC
 
-PKG_CHECK_MODULES(DEPS, [gobject-2.0, glib-2.0])
+# runtime dependency: gobject-2.0
+# build dependency: gobject-introspection-1.0, glib-2.0
+PKG_CHECK_MODULES(DEPS, [gobject-2.0, gobject-introspection-1.0, glib-2.0])
 AC_SUBST(DEPS_CFLAGS)
 AC_SUBST(DEPS_LIBS)
 GOBJECT_INTROSPECTION_CHECK([1.29])
