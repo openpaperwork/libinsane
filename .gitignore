@@ -7,20 +7,6 @@ venv/
 *.gir
 *.typelib
 
-Makefile.in
-libinsane/Makefile
-libinsane-gobject/Makefile
-*.m4
-*.cache/
-config.log
-config.h
-config.status
-config.h.in
-stamp-h1
-configure
-*.pc
-libtool
-
 GPATH
 GRTAGS
 GTAGS

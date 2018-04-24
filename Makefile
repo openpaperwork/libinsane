@@ -2,6 +2,9 @@ PYTHON ?= python3
 VERBOSE ?=
 DESTDIR ?=
 
+# See MXE project
+WIN_CMAKE ?= /usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static-cmake
+
 SRCS = $(wildcard src/libinsane/*.c)
 HEADERS = $(wildcard include/libinsane/*.h)
 
@@ -11,29 +14,23 @@ install: install_py install_c
 
 uninstall: uninstall_py uninstall_c
 
+cmake_linux:
+	mkdir -p build_linux
+	(cd build_linux ; OS=linux cmake ..)
+
+cmake_windows:
+	mkdir -p build_windows
+	(cd build_windows ; OS=mingw ${WIN_CMAKE} ..)
+
 build_py:
 
-libinsane/configure:
-	(cd libinsane && ./autogen.sh)
+build_linux_c: cmake_linux
+	(cd build_linux ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR})
 
-libinsane-gobject/configure:
-	(cd libinsane-gobject && ./autogen.sh)
+build_windows_c: cmake_windows
+	(cd build_windows ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR})
 
-build_linux_c: libinsane/configure libinsane-gobject/configure
-	(cd libinsane && ./configure --enable-fatal-warnings --enable-debug)
-	make -j4 -C libinsane
-	(cd libinsane-gobject && ./configure --enable-fatal-warnings --enable-debug)
-	make -C libinsane-gobject
-
-build_windows_c: libinsane/configure libinsane-gobject/configure
-	(cd libinsane && ./configure --enable-fatal-warnings --enable-debug --host=x86_64-w64-mingw32)
-	make -j4 -C libinsane
-# Cannot cross-compile libinsane-gobject. gobject-introspection-1.0.pc and g-ir-scanner
-# are not available using MXE. It has to be compiled with Msys2
-# 	(cd libinsane-gobject && PKG_CONFIG_PATH=/usr/lib/mxe/usr/x86_64-w64-mingw32.shared/lib/pkgconfig ./configure --enable-fatal-warnings --enable-debug --host=x86_64-w64-mingw32)
-#	make -C libinsane-gobject
-
-build_c: build_linux_c
+build_c: build_linux_c build_windows_c
 
 version:
 
@@ -41,7 +38,7 @@ doxygen:
 	mkdir -p doc/build
 	doxygen doc/doxygen.conf
 
-gtkdoc:
+gtkdoc: cmake_linux
 	# Does not work yet
 
 doc: doxygen gtkdoc
@@ -80,24 +77,33 @@ clean:
 	if [ -e libinsane/Makefile ]; then make -C libinsane clean ; fi
 	if [ -e libinsane-gobject/Makefile ]; then make -C libinsane-gobject clean ; fi
 	rm -rf doc/build
-	rm -f libinsane/configure libinsane-gobject/configure
-	rm -rf libinsane/build libinsane-gobject/build
-	rm -rf libinsane/out libinsane-gobject/out
+	rm -rf build_linux
+	rm -rf build_windows
 
 install_py:
 
 
-install_c: build_linux_c
-	make -C libinsane install
-	make -C libinsane-gobject install
+install_windows_c: build_windows_c
+	(cd build_windows ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
 
-install: install_c
+
+install_linux_c: build_linux_c
+	(cd build_linux ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
+
+
+ifeq ($(OS),Windows_NT)
+
+install_c: install_windows_c
+
+else
+
+install_c: install_linux_c
+
+endif
 
 uninstall_py:
 
 uninstall_c:
-	make -C libinsane-gobject uninstall
-	make -C libinsane uninstall
 
 help:
 	@echo "make build || make build_c || make build_py"
@@ -112,8 +118,11 @@ help:
 .PHONY: \
 	build \
 	build_c \
+	build_linux_c \
+	build_windows_c \
 	build_py \
 	check \
+	cmake_linux \
 	doc \
 	doxygen \
 	gtkdoc \
@@ -122,6 +131,7 @@ help:
 	help \
 	install \
 	install_c \
+	install_linux_c \
 	install_py \
 	release \
 	test \
