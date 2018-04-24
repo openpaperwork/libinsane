@@ -2,9 +2,6 @@ PYTHON ?= python3
 VERBOSE ?=
 DESTDIR ?=
 
-# See MXE project
-WIN_CMAKE ?= /usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static-cmake
-
 SRCS = $(wildcard src/libinsane/*.c)
 HEADERS = $(wildcard include/libinsane/*.h)
 
@@ -14,23 +11,16 @@ install: install_py install_c
 
 uninstall: uninstall_py uninstall_c
 
-cmake_linux:
-	mkdir -p build_linux
-	(cd build_linux ; OS=linux cmake ..)
-
-cmake_windows:
-	mkdir -p build_windows
-	(cd build_windows ; OS=mingw ${WIN_CMAKE} ..)
+makefile_libinsane:
+	mkdir -p libinsane/build
+	(cd libinsane/build ; cmake ..)
 
 build_py:
 
-build_linux_c: cmake_linux
-	(cd build_linux ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR})
+build_libinsane: makefile_libinsane
+	make -C libinsane/build VERBOSE=${VERBOSE} DESTDIR=${DESTDIR}
 
-build_windows_c: cmake_windows
-	(cd build_windows ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR})
-
-build_c: build_linux_c build_windows_c
+build_c: build_libinsane
 
 version:
 
@@ -38,7 +28,7 @@ doxygen:
 	mkdir -p doc/build
 	doxygen doc/doxygen.conf
 
-gtkdoc: cmake_linux
+gtkdoc: makefile_libinsane
 	# Does not work yet
 
 doc: doxygen gtkdoc
@@ -74,36 +64,21 @@ else
 endif
 
 clean:
-	if [ -e libinsane/Makefile ]; then make -C libinsane clean ; fi
-	if [ -e libinsane-gobject/Makefile ]; then make -C libinsane-gobject clean ; fi
 	rm -rf doc/build
-	rm -rf build_linux
-	rm -rf build_windows
+	rm -rf build
 
 install_py:
 
 
-install_windows_c: build_windows_c
-	(cd build_windows ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
+install_c: build_c
+	(cd libinsane/build ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
 
-
-install_linux_c: build_linux_c
-	(cd build_linux ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
-
-
-ifeq ($(OS),Windows_NT)
-
-install_c: install_windows_c
-
-else
-
-install_c: install_linux_c
-
-endif
 
 uninstall_py:
 
+
 uninstall_c:
+
 
 help:
 	@echo "make build || make build_c || make build_py"
@@ -118,11 +93,9 @@ help:
 .PHONY: \
 	build \
 	build_c \
-	build_linux_c \
-	build_windows_c \
 	build_py \
 	check \
-	cmake_linux \
+	makefile_libinsane \
 	doc \
 	doxygen \
 	gtkdoc \
@@ -131,7 +104,6 @@ help:
 	help \
 	install \
 	install_c \
-	install_linux_c \
 	install_py \
 	release \
 	test \
