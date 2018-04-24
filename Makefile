@@ -1,6 +1,6 @@
 PYTHON ?= python3
 VERBOSE ?=
-DESTDIR ?=
+DESTDIR ?= /usr/local
 
 SRCS = $(wildcard src/libinsane/*.c)
 HEADERS = $(wildcard include/libinsane/*.h)
@@ -11,16 +11,19 @@ install: install_py install_c
 
 uninstall: uninstall_py uninstall_c
 
-makefile_libinsane:
-	mkdir -p libinsane/build
-	(cd libinsane/build ; cmake ..)
-
 build_py:
 
-build_libinsane: makefile_libinsane
+build_libinsane:
+	mkdir -p libinsane/build
+	(cd libinsane/build ; cmake .. -DCMAKE_INSTALL_PREFIX=${DESTDIR})
 	make -C libinsane/build VERBOSE=${VERBOSE} DESTDIR=${DESTDIR}
 
-build_c: build_libinsane
+build_libinsane_gobject: build_libinsane
+	mkdir -p libinsane-gobject/build
+	(cd libinsane-gobject/build ; cmake .. -DCMAKE_INSTALL_PREFIX=${DESTDIR})
+	make -C libinsane-gobject/build VERBOSE=${VERBOSE} PREFIX=${DESTDIR}
+
+build_c: build_libinsane build_libinsane_gobject
 
 version:
 
@@ -28,7 +31,7 @@ doxygen:
 	mkdir -p doc/build
 	doxygen doc/doxygen.conf
 
-gtkdoc: makefile_libinsane
+gtkdoc: build_libinsane_gobject
 	# Does not work yet
 
 doc: doxygen gtkdoc
@@ -65,13 +68,15 @@ endif
 
 clean:
 	rm -rf doc/build
-	rm -rf build
+	rm -rf libinsane/build
+	rm -rf libinsane-gobject/build
 
 install_py:
 
 
 install_c: build_c
 	(cd libinsane/build ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
+	(cd libinsane-gobject/build ; make VERBOSE=${VERBOSE} DESTDIR=${DESTDIR} install)
 
 
 uninstall_py:

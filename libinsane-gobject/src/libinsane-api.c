@@ -26,4 +26,4 @@ LibinsaneApi *libinsane_api_new_from_string(const char *desc)
 }
 
 
-G_DEFINE_TYPE(LibinsaneApi, libinsane_api, G_TYPE_OBJECT);
+G_DEFINE_TYPE(LibinsaneApi, libinsane_api, G_TYPE_OBJECT)
