@@ -45,7 +45,7 @@ macro(_list_prefix _outvar _listvar _prefix)
   endforeach()
 endmacro(_list_prefix)
 
-set(INTROSPECTION_SCANNER_ARGS "--add-include-path=${CMAKE_CURRENT_SOURCE_DIR} --warn-all")
+set(INTROSPECTION_SCANNER_ARGS "--add-include-path=${CMAKE_CURRENT_SOURCE_DIR} --warn-all --warn-error")
 set(INTROSPECTION_COMPILER_ARGS "--includedir=${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(introspection_files ${INSANE_GOBJECT_SRCS} ${INSANE_GOBJECT_HEADERS})
