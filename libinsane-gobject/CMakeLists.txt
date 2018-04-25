@@ -21,26 +21,22 @@ include_directories(
 
 add_definitions(${GLIB2_CFLAGS_OTHER})
 
-set(LIBINSANE_GOBJECT_SRCS
+set(INSANE_GOBJECT_SRCS
     src/libinsane-api.c
 )
-set(LIBINSANE_GOBJECT_HEADERS
+set(INSANE_GOBJECT_HEADERS
     include/libinsane-gobject/libinsane-api.h
 )
 
-add_library(libinsane_gobject ${LIBINSANE_GOBJECT_SRCS})
-target_link_libraries(libinsane_gobject ${GLIB2_LIBRARIES})
-target_include_directories(libinsane_gobject PUBLIC include)
+add_library(insane_gobject SHARED ${INSANE_GOBJECT_SRCS})
+target_link_libraries(insane_gobject ${GLIB2_LIBRARIES})
+target_include_directories(insane_gobject PUBLIC include)
 
-install(TARGETS libinsane_gobject
+install(TARGETS insane_gobject
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 )
-
-install(FILES
-    ${LIBINSANE_GOBJECT_HEADERS}
-    DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/libinsane-gobject)
 
 macro(_list_prefix _outvar _listvar _prefix)
   set(${_outvar})
@@ -52,16 +48,18 @@ endmacro(_list_prefix)
 set(INTROSPECTION_SCANNER_ARGS "--add-include-path=${CMAKE_CURRENT_SOURCE_DIR} --warn-all")
 set(INTROSPECTION_COMPILER_ARGS "--includedir=${CMAKE_CURRENT_SOURCE_DIR}")
 
-set(introspection_files ${LIBINSANE_GOBJECT_SRCS} ${LIBINSANE_GOBJECT_HEADERS})
+set(introspection_files ${INSANE_GOBJECT_SRCS} ${INSANE_GOBJECT_HEADERS})
 set(Libinsane_0_1_gir "libinsane-gobject")
-set(Libinsane_0_1_gir_INCLUDES GObject-2.0 Gio-2.0 cairo-1.0)
+set(Libinsane_0_1_gir_INCLUDES GObject-2.0)
 get_directory_property(_tmp_includes INCLUDE_DIRECTORIES)
 _list_prefix(_includes _tmp_includes "-I")
 set(Libinsane_0_1_gir_CFLAGS ${_includes} -L${CMAKE_BINARY_DIR})
-set(Libinsane_0_1_gir_LIBS libinsane_gobject)
+set(Libinsane_0_1_gir_LIBS insane_gobject)
 _list_prefix(_abs_introspection_files introspection_files "${CMAKE_CURRENT_SOURCE_DIR}/")
 set(Libinsane_0_1_gir_FILES ${_abs_introspection_files})
-set(Libinsane_0_1_gir_SCANNERFLAGS --c-include poppler.h)
-set(Libinsane_0_1_gir_EXPORT_PACKAGES poppler-glib)
+set(Libinsane_0_1_gir_SCANNERFLAGS)
+set(Libinsane_0_1_gir_EXPORT_PACKAGES libinsane-gobject)
 
-gir_add_introspections(Libinsane-0.1.gir)
+set(INTROSPECTION_GIRS)
+list(APPEND INTROSPECTION_GIRS Libinsane-0.1.gir)
+gir_add_introspections(INTROSPECTION_GIRS)
