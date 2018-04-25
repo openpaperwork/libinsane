@@ -34,8 +34,8 @@ target_include_directories(insane_gobject PUBLIC include)
 
 install(TARGETS insane_gobject
     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 macro(_list_prefix _outvar _listvar _prefix)
