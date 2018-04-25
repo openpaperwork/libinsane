@@ -16,12 +16,12 @@ build_py:
 build_libinsane:
 	mkdir -p libinsane/build
 	(cd libinsane/build ; cmake .. -DCMAKE_INSTALL_PREFIX=${DESTDIR})
-	make -C libinsane/build VERBOSE=${VERBOSE}
+	make -j4 -C libinsane/build VERBOSE=${VERBOSE}
 
 build_libinsane_gobject: build_libinsane
 	mkdir -p libinsane-gobject/build
 	(cd libinsane-gobject/build ; cmake .. -DCMAKE_INSTALL_PREFIX=${DESTDIR})
-	make -C libinsane-gobject/build VERBOSE=${VERBOSE}
+	make -j4 -C libinsane-gobject/build VERBOSE=${VERBOSE}
 
 build_c: build_libinsane build_libinsane_gobject
 
