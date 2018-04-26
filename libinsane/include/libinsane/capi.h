@@ -271,7 +271,12 @@ struct lis_item {
 	} type;
 
 	/*!
-	 * \brief Get item's children.
+	 * \brief open access to the device (root only ; useless on child items)
+	 */
+	enum lis_error (*open)(struct lis_item *item);
+
+	/*!
+	 * \brief Get item's children (usually scan sources).
 	 *
 	 * Without workarounds or normalizers:
 	 * - Sane: will return an empty list.
@@ -369,7 +374,7 @@ struct lis_api {
 	 *		See \ref LIS_IS_ERROR.
 	 * \retval LIS_ERR_ACCESS_DENIED Permission denied. See \ref LIS_IS_ERROR.
 	 */
-	enum lis_error (*dev_open)(struct lis_api *impl, const char *dev_id, struct lis_item **item);
+	enum lis_error (*dev_get)(struct lis_api *impl, const char *dev_id, struct lis_item **item);
 };
 
 #ifdef __cplusplus

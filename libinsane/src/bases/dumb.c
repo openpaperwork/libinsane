@@ -8,7 +8,7 @@ static void dumb_cleanup(struct lis_api *impl);
 static enum lis_error dumb_get_devices(
 	struct lis_api *impl, struct lis_device_description ***dev_infos
 );
-static enum lis_error dumb_dev_open(
+static enum lis_error dumb_dev_get(
 	struct lis_api *impl, const char *dev_id, struct lis_item **item
 );
 
@@ -21,7 +21,7 @@ static struct lis_device_description *g_dev_infos[] = {
 static struct lis_api g_dumb_api = {
 	.cleanup = dumb_cleanup,
 	.get_devices = dumb_get_devices,
-	.dev_open = dumb_dev_open,
+	.dev_get = dumb_dev_get,
 };
 
 
@@ -40,7 +40,7 @@ static enum lis_error dumb_get_devices(
 }
 
 
-static enum lis_error dumb_dev_open(
+static enum lis_error dumb_dev_get(
 	struct lis_api *impl, const char *dev_id, struct lis_item **item
 ) {
 	LIS_UNUSED(impl);
