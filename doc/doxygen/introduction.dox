@@ -36,10 +36,10 @@ other weird thingies that could acquire or generate images.
 
 Let the insanity begin !
 
-![Design of LibInsane](design.png)
-
-Most of the components in LibInsane provides an implementation of a normalized
+Most of the components in LibInsane provide an implementation of a normalized
 C API. This API provides a generic way to access scanners and their options.
+
+![Design of LibInsane](design.png)
 
 * Component for WIA support implements the normalized API.
 * Component for Twain support implements the normalized API.
@@ -53,7 +53,7 @@ C API. This API provides a generic way to access scanners and their options.
   implem.. well you get the idea ?
 * The GObject Introspection support wraps the normalized API.
 
-While this may sound like a lot of wrapping and layers, this approach allows
+While it may sound like a lot of wrapping and layers, this approach allows
 modularity. Any workaround or behavior normalization component can be enabled
 or disabled easily and clear [separation of concerns](https://en.wikipedia.org/wiki/Separation_of_concerns)
 is ensured.

@@ -147,8 +147,6 @@ WIA2 provide also features that LibInsane doesn't support:
 - Access to file storages on devices
 - Windows Dialogs (why in hell are there dialogs in a scan API in a first place !?)
 
-.. _Windows Image Acquisition: https://msdn.microsoft.com/en-us/library/windows/desktop/ms630368(v=vs.85).aspx
-
 
 # ImageKit
 

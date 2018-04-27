@@ -4,19 +4,21 @@
 
 # Description
 
-LibInsane has one C API. It is implemented by a variety of components:
+LibInsane has one C API. It is designed so it can wrap the Sane API, the WIA API,
+or the TWAIN API without losing too many features.
+
+This API is implemented by a variety of components:
 - \ref sane.h "Wrapper for libsane API"
 - \ref wia_ll.h "Wrapper for WIA2 low-level API"
 - \ref wia_automation.h "Wrapper for WIA2 automation layer"
 - \ref twain.h "Wrapper for TWAIN API"
 - \ref workarounds.h "Various wrappers that allow working transparently around bugs"
-- \ref normalizers.h "Various wrappers that normalize the behaviors of scanners and drivers
-  from an application standpoint"
+- \ref normalizers.h "Various wrappers that normalize the behaviors of scanners and drivers from an application standpoint"
 
-The function \ref lis_safebet "lis_safebet()" stacks all the required implementations.
+The function \ref lis_safebet "lis_safebet()" stacks all the recommended implementations.
 It is your recommended entry point to LibInsane.
-Since all the components implements the same API, you can use the one provided by
-\ref lis_safebet "lis_safebet()" without ever worrying about which components are used.
+Since all the components implement the same API, you can simply use the one provided by
+\ref lis_safebet "lis_safebet()" without ever worrying about which components are actually used.
 
 
 # Expected use of LibInsane

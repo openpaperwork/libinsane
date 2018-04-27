@@ -11,9 +11,9 @@
 
 \ref safebet
 
-\ref api_multiplexer
-
 \ref gobject_introspection_api
+
+\ref api_multiplexer
 
 \ref workarounds
 
