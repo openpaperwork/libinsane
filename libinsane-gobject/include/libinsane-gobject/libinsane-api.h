@@ -54,16 +54,16 @@ LibinsaneApi *libinsane_api_new_safebet(GError **error);
 LibinsaneApi *libinsane_api_new_from_string(const char *desc, GError **error);
 
 
-void libinsane_api_cleanup(LibinsaneApi *impl); /* TODO */
+void libinsane_api_cleanup(LibinsaneApi *self); /* TODO */
 
 
 /**
  * Returns: (transfer full): list of available devices (LibinsaneItem objects)
  */
-GValueArray *libinsane_api_get_devices(LibinsaneApi *impl, GError **error); /* TODO */
+GValueArray *libinsane_api_get_devices(LibinsaneApi *self, GError **error); /* TODO */
 
 
-LibinsaneItem *libinsane_api_dev_get(LibinsaneApi *impl, const char *dev_id); /* TODO */
+LibinsaneItem *libinsane_api_dev_get(LibinsaneApi *self, const char *dev_id); /* TODO */
 
 
 G_END_DECLS
