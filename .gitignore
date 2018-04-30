@@ -3,6 +3,7 @@
 build_windows/
 build_linux/
 build/
+generated/
 venv/
 *.gir
 *.typelib
