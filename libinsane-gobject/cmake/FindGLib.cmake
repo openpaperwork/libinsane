@@ -15,6 +15,6 @@ include(FindPackageHandleStandardArgs)
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(GLIB2 "glib-2.0" "gobject-2.0")
+pkg_check_modules(GLIB2 "glib-2.0" "gobject-2.0" "gio-2.0")
 
 find_package_handle_standard_args(GLib DEFAULT_MSG GLIB2_LIBRARIES GLIB2_CFLAGS)

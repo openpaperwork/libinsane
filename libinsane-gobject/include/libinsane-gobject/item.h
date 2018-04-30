@@ -4,6 +4,7 @@
 #include <glib-object.h>
 
 #include "scan_parameters.h"
+#include "scan_session.h"
 
 G_BEGIN_DECLS
 
@@ -58,6 +59,10 @@ GValueArray libinsane_item_get_options(LibinsaneItem *self, GError **error); /* 
  */
 LibinsaneScanParameters *libinsane_item_get_scan_parameters(LibinsaneItem *self, GError **error);
 
-/* xxx libinsane_item_scan_start(LibinsaneItem *self, GError **error); */ /* TODO */
+/**
+ * libinsane_item_scan_start:
+ * Returns: (transfer full): item scan parameters.
+ */
+LibinsaneScanSession libinsane_item_scan_start(LibinsaneItem *self, GError **error); /* TODO */
 
 #endif

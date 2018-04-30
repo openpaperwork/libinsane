@@ -25,11 +25,13 @@ set(INSANE_GOBJECT_SRCS
     src/item.c
     src/libinsane-api.c
     src/scan_parameters.c
+    src/scan_session.c
 )
 set(INSANE_GOBJECT_HEADERS
     include/libinsane-gobject/item.h
     include/libinsane-gobject/libinsane-api.h
     include/libinsane-gobject/scan_parameters.h
+    include/libinsane-gobject/scan_session.h
 )
 
 add_library(insane_gobject SHARED ${INSANE_GOBJECT_SRCS})
