@@ -49,7 +49,7 @@ macro(_list_prefix _outvar _listvar _prefix)
   endforeach()
 endmacro(_list_prefix)
 
-set(INTROSPECTION_SCANNER_ARGS "--add-include-path=${CMAKE_CURRENT_SOURCE_DIR} --warn-all --warn-error")
+set(INTROSPECTION_SCANNER_ARGS "--add-include-path=${CMAKE_CURRENT_SOURCE_DIR}")
 set(INTROSPECTION_COMPILER_ARGS "--includedir=${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(introspection_files ${INSANE_GOBJECT_SRCS} ${INSANE_GOBJECT_HEADERS})
@@ -61,7 +61,7 @@ set(Libinsane_0_1_gir_CFLAGS ${_includes} -L${CMAKE_BINARY_DIR})
 set(Libinsane_0_1_gir_LIBS insane_gobject)
 _list_prefix(_abs_introspection_files introspection_files "${CMAKE_CURRENT_SOURCE_DIR}/")
 set(Libinsane_0_1_gir_FILES ${_abs_introspection_files})
-set(Libinsane_0_1_gir_SCANNERFLAGS)
+set(Libinsane_0_1_gir_SCANNERFLAGS "--warn-all" "--warn-error")
 set(Libinsane_0_1_gir_EXPORT_PACKAGES libinsane-gobject)
 
 set(INTROSPECTION_GIRS)

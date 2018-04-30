@@ -40,17 +40,20 @@ void libinsane_item_open(LibinsaneItem *self, GError **error); /* TODO */
 void libinsane_item_close(LibinsaneItem *self, GError **error); /* TODO */
 
 /**
+ * libinsane_item_get_children:
  * Returns: (transfer full): list of children items (usually scan sources)
  */
 GValueArray libinsane_item_get_children(LibinsaneItem *self, GError **error); /* TODO */
 
 
 /**
+ * libinsane_item_get_options:
  * Returns: (transfer full): item scan options.
  */
 GValueArray libinsane_item_get_options(LibinsaneItem *self, GError **error); /* TODO */
 
 /**
+ * libinsane_item_get_scan_parameters:
  * Returns: (transfer full): item scan parameters.
  */
 LibinsaneScanParameters *libinsane_item_get_scan_parameters(LibinsaneItem *self, GError **error);

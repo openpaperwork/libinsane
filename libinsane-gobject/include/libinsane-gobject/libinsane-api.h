@@ -58,11 +58,16 @@ void libinsane_api_cleanup(LibinsaneApi *self); /* TODO */
 
 
 /**
+ * libinsane_api_get_devices:
  * Returns: (transfer full): list of available devices (LibinsaneItem objects)
  */
 GValueArray *libinsane_api_get_devices(LibinsaneApi *self, GError **error); /* TODO */
 
 
+/**
+ * libinsane_api_dev_get:
+ * Returns: (transfer none): list of available devices (LibinsaneItem objects)
+ */
 LibinsaneItem *libinsane_api_dev_get(LibinsaneApi *self, const char *dev_id); /* TODO */
 
 
