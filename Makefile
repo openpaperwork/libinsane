@@ -70,6 +70,9 @@ clean:
 	rm -rf doc/build
 	rm -rf libinsane/build
 	rm -rf libinsane-gobject/build
+	rm -rf libinsane-gobject/generated
+	mkdir -p libinsane-gobject/generated
+	touch libinsane-gobject/generated/.notempty
 
 install_py:
 
