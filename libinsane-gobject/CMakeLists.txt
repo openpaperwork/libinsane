@@ -22,8 +22,6 @@ include_directories(
 
 add_definitions(${GLIB2_CFLAGS_OTHER})
 
-MESSAGE(STATUS "POUET: ${CMAKE_CURRENT_BINARY_DIR}/enums.c")
-
 set(INSANE_GOBJECT_SRCS
     src/item.c
     src/libinsane-api.c
@@ -38,7 +36,7 @@ set(INSANE_GOBJECT_HEADERS
     include/libinsane-gobject/scan_session.h
 )
 
-MESSAGE(STATUS "POUET: ${CMAKE_CURRENT_BINARY_DIR}")
+## Generate enums.h / enums.c
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/generated/enums.h
@@ -63,6 +61,8 @@ add_custom_command(
           ${CMAKE_CURRENT_SOURCE_DIR}/src/enums.c.template
 )
 
+## Build libinsane_gobject itself
+
 add_library(insane_gobject SHARED ${INSANE_GOBJECT_SRCS})
 target_link_libraries(insane_gobject ${GLIB2_LIBRARIES})
 target_include_directories(insane_gobject PUBLIC include)
@@ -74,8 +74,10 @@ install(TARGETS insane_gobject
 )
 install(FILES
   ${INSANE_GOBJECT_HEADERS}
-  ${CMAKE_CURRENT_BINARY_DIR}/enums.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/generated/enums.h
   DESTINATION include/libinsane-gobject)
+
+## Introspection scanner --> .gir / .typelib
 
 macro(_list_prefix _outvar _listvar _prefix)
   set(${_outvar})
@@ -102,3 +104,19 @@ set(Libinsane_0_1_gir_EXPORT_PACKAGES libinsane-gobject)
 set(INTROSPECTION_GIRS)
 list(APPEND INTROSPECTION_GIRS Libinsane-0.1.gir)
 gir_add_introspections(INTROSPECTION_GIRS)
+
+## Doc
+
+# WORKAROUND(JFlesch):
+# https://bugzilla.gnome.org/show_bug.cgi?id=792148
+set(exec_prefix /usr)
+
+find_package(GtkDoc 1.25 REQUIRED)
+gtk_doc_add_module(
+  libinsane_gobject
+  XML ${CMAKE_SOURCE_DIR}/doc/libinsane_gobject-gtkdoc.xml
+  SOURCE ${CMAKE_SOURCE_DIR}
+  LIBRARIES insane_gobject
+)
+
+add_custom_target(doc DEPENDS doc-libinsane_gobject)

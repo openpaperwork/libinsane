@@ -32,7 +32,8 @@ doxygen:
 	doxygen doc/doxygen.conf
 
 gtkdoc: build_libinsane_gobject
-	# Does not work yet
+	make -C libinsane-gobject/build doc
+	mv libinsane-gobject/build/libinsane_gobject/html doc/build/gtkdoc
 
 doc: doxygen gtkdoc
 	cp doc/index.html doc/build/index.html
