@@ -9,6 +9,8 @@ Makefiles in all [OpenPaper.work](https://openpaper.work) projects present simil
 
 ```
 sudo apt install \
+        cmake \
+        gtk-doc-tools \
         build-essential \
         libsane-dev \
         libtool \
