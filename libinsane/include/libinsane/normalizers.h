@@ -246,7 +246,7 @@ extern enum lis_error lis_api_normalizer_maximize_scan_area(
  * \param[out] impl Implementation of the API including the workaround.
  */
 extern enum lis_error lis_api_normalizer_default_mode_to_color(
-	struct lis_api *to_wrap, struct lis_api **iml
+	struct lis_api *to_wrap, struct lis_api **impl
 );
 
 

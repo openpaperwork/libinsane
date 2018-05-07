@@ -282,7 +282,7 @@ struct lis_item {
 	 * - Sane: will return an empty list.
 	 * - WIA: will return device sources (Flatbed, Automatic Document Feeder, etc).
 	 *
-	 * \param[in] parent Usually a scanner (see \ref lis_api.dev_open()).
+	 * \param[in] parent Usually a scanner (see \ref lis_api.dev_get()).
 	 * \param[out] children Usually scanner sources. List will be NULL terminated.
 	 * \retval LIS_OK children has been set to a valid array of items. See \ref LIS_IS_OK.
 	 */
@@ -351,7 +351,7 @@ struct lis_api {
 	 * \brief Look for scanners.
 	 *
 	 * If you already know the device identifier of the scanner you want to use, you do not need
-	 * to call this function. You can call directly \ref dev_open.
+	 * to call this function. You can call directly \ref dev_get.
 	 *
 	 * \warning This operation may take many seconds.
 	 * \param[out] dev_infos will point to a list of device descriptions, NULL terminated.
