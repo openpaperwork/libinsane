@@ -13,7 +13,6 @@ sudo apt install \
         gtk-doc-tools \
         build-essential \
         libsane-dev \
-        libtool \
         libgirepository1.0-dev gobject-introspection
 make
 ```
