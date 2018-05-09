@@ -58,7 +58,7 @@ void lets_scan(void)
 {
     enum lis_error err;
     struct lis_api *impl = NULL;
-    struct lis_device_description **dev_infos;
+    struct lis_device_descriptor **dev_infos;
     struct lis_item *device = NULL;
     struct lis_item **sources;
     struct lis_scan_parameters parameters;

@@ -12,7 +12,7 @@ extern "C" {
 /*!
  * \brief Basic informations regarding a scanner.
  */
-struct lis_device_description {
+struct lis_device_descriptor {
 	const char *api_name; /*!< "Sane", "WIA", "TWAIN", etc */
 
 	/*!
@@ -358,7 +358,7 @@ struct lis_api {
 	 * \retval LIS_OK dev_infos has been set to a list of devices. See \ref LIS_IS_OK.
 	 */
 	enum lis_error (*get_devices)(
-		struct lis_api *impl, struct lis_device_description ***dev_infos
+		struct lis_api *impl, struct lis_device_descriptor ***dev_infos
 	);
 
 	/*!
