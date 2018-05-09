@@ -4,7 +4,7 @@
 #include <libinsane/util.h>
 
 
-enum lis_error lis_api_safebet(struct lis_api **api)
+enum lis_error lis_safebet(struct lis_api **api)
 {
 	LIS_UNUSED(api);
 	return LIS_ERR_UNSUPPORTED;
