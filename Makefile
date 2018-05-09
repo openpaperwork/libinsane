@@ -61,6 +61,8 @@ else
 	@echo "Will release: ${RELEASE}"
 	@echo "Checking release is in ChangeLog ..."
 	grep ${RELEASE} ChangeLog
+	@echo "Checking release is in libinsane-gobject/CMakeLists.txt ..."
+	grep ${RELEASE} libinsane-gobject/CMakeLists.txt
 	@echo "Releasing ..."
 	git tag -a ${RELEASE} -m ${RELEASE}
 	git push origin ${RELEASE}
