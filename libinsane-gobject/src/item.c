@@ -30,6 +30,13 @@ const char *libinsane_item_get_name(LibinsaneItem *self)
 	return NULL; /* TODO */
 }
 
+
+LibinsaneItemType libinsane_item_get_item_type(LibinsaneItem *self)
+{
+	return 0; /* TODO */
+}
+
+
 void libinsane_item_open(LibinsaneItem *self, GError **error)
 {
 	/* TODO */
