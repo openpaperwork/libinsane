@@ -91,7 +91,7 @@ struct lis_option_description {
 #define LIS_CAP_SW_SELECT (1<<3) /*!< read/write ; can be set by software */
 	/* TODO(Jflesch): Sane provides SANE_CAP_SOFT_DETECT ? oO */
 /*!
- * \brief /requires another option to be set to a specific value to become active
+ * \brief requires another option to be set to a specific value to become active
  */
 #define LIS_CAP_INACTIVE (1<<4)
 
