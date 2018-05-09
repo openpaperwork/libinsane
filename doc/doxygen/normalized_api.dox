@@ -29,16 +29,16 @@ Expected order of calling when most of the normalizers are enabled:
 - \ref lis_api.get_devices "impl->get_devices()"
 - \ref lis_item "dev" = \ref lis_api.dev_get "impl->dev_get()"
   - \ref lis_item "sources" = \ref lis_item.get_children "dev->get_children()"
-    - \ref lis_option_description "options" = \ref lis_item.get_options "sources[a]->get_options()"
-      - \ref lis_option_description.get_value "options[x]->fn.get_value()".
-      - \ref lis_option_description.set_value "options[x]->fn.set_value()".<br>
+    - \ref lis_option_descriptor "options" = \ref lis_item.get_options "sources[a]->get_options()"
+      - \ref lis_option_descriptor.get_value "options[x]->fn.get_value()".
+      - \ref lis_option_descriptor.set_value "options[x]->fn.set_value()".<br>
         Options that should always be set:
         - \ref lis_api_normalizer_resolution_constraint_format "scan resolution (option \"resolution\")"
         - \ref lis_maximize_scan_area "scan area"
-      - \ref lis_option_description.get_value "options[y]->fn.get_value()".
-      - \ref lis_option_description.set_value "options[y]->fn.set_value()".
-      - \ref lis_option_description.get_value "options[z]->fn.get_value()".
-      - \ref lis_option_description.set_value "options[z]->fn.set_value()".
+      - \ref lis_option_descriptor.get_value "options[y]->fn.get_value()".
+      - \ref lis_option_descriptor.set_value "options[y]->fn.set_value()".
+      - \ref lis_option_descriptor.get_value "options[z]->fn.get_value()".
+      - \ref lis_option_descriptor.set_value "options[z]->fn.set_value()".
     - \ref lis_item.get_scan_parameters "sources[a]->get_scan_parameters()"
     - \ref lis_scan_session "scan_session" = \ref lis_item.scan_start "sources[a]->scan_start()"<br>
       From this point and until \ref LIS_END_OF_FEED, \ref lis_scan_session.scan_cancel "scan_session->scan_cancel()"

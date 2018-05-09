@@ -19,6 +19,17 @@ static void libinsane_item_init(LibinsaneItem *self)
 
 }
 
+/**
+ * libinsane_item_get_name:
+ * @self: current item
+ *
+ * Returns: (transfer none): Item's name
+ */
+const char *libinsane_item_get_name(LibinsaneItem *self)
+{
+	return NULL; /* TODO */
+}
+
 void libinsane_item_open(LibinsaneItem *self, GError **error)
 {
 	/* TODO */

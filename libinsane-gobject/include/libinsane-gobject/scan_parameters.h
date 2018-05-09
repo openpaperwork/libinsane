@@ -40,4 +40,6 @@ int libinsane_scan_parameters_get_width(LibinsaneScanParameters *self);
 int libinsane_scan_parameters_get_height(LibinsaneScanParameters *self);
 int libinsane_scan_parameters_get_image_size(LibinsaneScanParameters *self);
 
+G_END_DECLS
+
 #endif

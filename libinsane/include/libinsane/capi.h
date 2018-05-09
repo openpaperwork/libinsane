@@ -80,7 +80,7 @@ union lis_value {
 /*!
  * \brief Describes a scanner or source option and provides callback to read or change its value.
  */
-struct lis_option_description {
+struct lis_option_descriptor {
 	const char *name; /*!< option name / identifier (ex: "source", "resolution", etc). */
 	const char *title; /*!< Human readable title (usually in English). */
 	const char *desc; /*!< Human readable description (usually in English). */
@@ -135,12 +135,12 @@ struct lis_option_description {
 		} type; /*!< Type of constaint */
 
 		/*!
-		 * Content undefined if \ref lis_option_description.type ==
+		 * Content undefined if \ref lis_option_descriptor.type ==
 		 * \ref LIS_CONSTRAINT_NONE.
 		 */
 		union {
 			/*!
-			 * If \ref lis_option_description.type == \ref LIS_CONSTRAINT_RANGE.
+			 * If \ref lis_option_descriptor.type == \ref LIS_CONSTRAINT_RANGE.
 			 */
 			struct {
 				int min;
@@ -148,7 +148,7 @@ struct lis_option_description {
 				int interval;
 			} range;
 			/*!
-			 * If \ref lis_option_description.type == \ref LIS_CONSTRAINT_LIST.
+			 * If \ref lis_option_descriptor.type == \ref LIS_CONSTRAINT_LIST.
 			 */
 			struct {
 				enum lis_value_type type;
@@ -169,20 +169,20 @@ struct lis_option_description {
 		 *
 		 * \param[in] opt option for which we want the value.
 		 * \param[out] value option value. Type is defined by
-		 *		\ref lis_option_description.type .
+		 *		\ref lis_option_descriptor.type .
 		 * \retval LIS_OK value successful read. See \ref LIS_IS_OK.
 		 * \retval LIS_ACCESS_DENIED value cannot be read because the option is inactive.
 		 *		\ref value may or may not be set. See \ref LIS_IS_ERROR.
 		 * \retval LIS_IO_ERROR things are going the wrong way. \ref value may or may not be set.
 		 *		See \ref LIS_IS_ERROR.
 		 */
-		enum lis_error (*get_value)(struct lis_option_description *opt, union lis_value **value);
+		enum lis_error (*get_value)(struct lis_option_descriptor *opt, union lis_value **value);
 
 		/*!
 		 * \brief set the option value.
 		 *
 		 * \param[in] opt option for which we want the value.
-		 * \param[out] value option value. Type is defined by \ref lis_option_description.type.
+		 * \param[out] value option value. Type is defined by \ref lis_option_descriptor.type.
 		 * \retval LIS_OK value has been successfully set. See \ref LIS_IS_OK.
 		 * \retval LIS_APPROXIMATE_VALUE value has been successfully set, but value has been
 		 *		approximated. See \ref LIS_IS_OK.
@@ -190,7 +190,7 @@ struct lis_option_description {
 		 * \retval LIS_INVALID_VALUE value doesn't match in type or doesn't fit in expected
 		 *		constraints. See \ref LIS_IS_ERROR.
 		 */
-		enum lis_error (*set_value)(struct lis_option_description *opt, const union lis_value *value);
+		enum lis_error (*set_value)(struct lis_option_descriptor *opt, const union lis_value *value);
 	} fn; /*!< Functions to read and set the option value */
 };
 
@@ -271,7 +271,7 @@ struct lis_item {
 	} type;
 
 	/*!
-	 * \brief open access to the device (root only ; useless on child items)
+	 * \brief open access to the device (root item only ; useless on child items)
 	 */
 	enum lis_error (*open)(struct lis_item *item);
 
@@ -295,7 +295,7 @@ struct lis_item {
 	 * \retval LIS_OK descs has been set.
 	 */
 	enum lis_error (*get_options)(
-		struct lis_item *item, struct lis_option_description ***descs
+		struct lis_item *item, struct lis_option_descriptor ***descs
 	);
 
 	/*!

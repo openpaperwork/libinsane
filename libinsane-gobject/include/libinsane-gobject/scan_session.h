@@ -33,5 +33,6 @@ GType libinsane_scan_session_get_type(void) G_GNUC_CONST;
 
 /* no public constructor */
 
+G_END_DECLS
 
 #endif
