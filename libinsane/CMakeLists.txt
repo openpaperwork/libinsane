@@ -13,6 +13,7 @@ set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 
 set(LIBINSANE_SRCS
     src/bases/dumb.c
+    src/error.c
     src/log.c
     src/normalizers/all_opts_on_all_sources.c
     src/normalizers/end_of_feed.c
@@ -27,7 +28,6 @@ set(LIBINSANE_SRCS
     src/normalizers/source_types.c
     src/normalizers/sources_order.c
     src/normalizers/strip_non_scanners.c
-    src/safebet.c
     src/safebet.c
     src/str2impls.c
     src/workarounds/clean_dev_model_char.c
