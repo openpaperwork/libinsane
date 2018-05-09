@@ -26,6 +26,7 @@ set(INSANE_GOBJECT_SRCS
     generated/enums.c
     src/constraint.c
     src/device_descriptor.c
+    src/error.c
     src/item.c
     src/libinsane-api.c
     src/option_descriptor.c
@@ -36,6 +37,7 @@ set(INSANE_GOBJECT_HEADERS
     include/libinsane-gobject/capability.h
     include/libinsane-gobject/constraint.h
     include/libinsane-gobject/device_descriptor.h
+    include/libinsane-gobject/error.h
     include/libinsane-gobject/img_format.h
     include/libinsane-gobject/item.h
     include/libinsane-gobject/item_type.h
