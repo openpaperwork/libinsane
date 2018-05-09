@@ -113,11 +113,13 @@ set(exec_prefix /usr)
 
 find_package(GtkDoc 1.25 REQUIRED)
 
-file(COPY ${CMAKE_SOURCE_DIR}/doc/gtkdocentities.ent DESTINATION build/xml)
+file(COPY ${CMAKE_SOURCE_DIR}/doc/gtkdocentities.ent DESTINATION ${CMAKE_BINARY_DIR}/libinsane_gobject/xml)
+
 gtk_doc_add_module(
   libinsane_gobject
   XML ${CMAKE_SOURCE_DIR}/doc/libinsane_gobject-gtkdoc.xml
   SOURCE ${CMAKE_SOURCE_DIR}
+  SUFFIXES "h" "c"
   LIBRARIES insane_gobject
 )
 
