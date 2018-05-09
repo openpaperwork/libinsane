@@ -3,6 +3,8 @@
 
 #include <glib-object.h>
 
+#include "img_format.h"
+
 G_BEGIN_DECLS
 
 #define LIBINSANE_SCAN_PARAMETERS_TYPE \
@@ -32,8 +34,7 @@ GType libinsane_scan_parameters_get_type(void) G_GNUC_CONST;
 
 /* no public constructor */
 
-/* TODO: enum */
-int libinsane_scan_parameters_get_format(LibinsaneScanParameters *self);
+LibinsaneImgFormat libinsane_scan_parameters_get_format(LibinsaneScanParameters *self);
 
 int libinsane_scan_parameters_get_width(LibinsaneScanParameters *self);
 int libinsane_scan_parameters_get_height(LibinsaneScanParameters *self);

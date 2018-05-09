@@ -19,9 +19,9 @@ static void libinsane_scan_parameters_init(LibinsaneScanParameters *self)
 
 }
 
-int libinsane_scan_parameters_get_format(LibinsaneScanParameters *self)
+LibinsaneImgFormat libinsane_scan_parameters_get_format(LibinsaneScanParameters *self)
 {
-	return 0; /* TODO */
+	return LIBINSANE_IMG_FORMAT_RAW_RGB_24; /* TODO */
 }
 
 int libinsane_scan_parameters_get_width(LibinsaneScanParameters *self)

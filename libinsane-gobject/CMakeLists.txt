@@ -30,6 +30,7 @@ set(INSANE_GOBJECT_SRCS
     generated/enums.c
 )
 set(INSANE_GOBJECT_HEADERS
+    include/libinsane-gobject/img_format.h
     include/libinsane-gobject/item.h
     include/libinsane-gobject/libinsane-api.h
     include/libinsane-gobject/scan_parameters.h
