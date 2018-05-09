@@ -30,11 +30,16 @@ set(INSANE_GOBJECT_SRCS
     generated/enums.c
 )
 set(INSANE_GOBJECT_HEADERS
+    include/libinsane-gobject/capability.h
+    include/libinsane-gobject/constraint_type.h
     include/libinsane-gobject/img_format.h
     include/libinsane-gobject/item.h
+    include/libinsane-gobject/item_type.h
     include/libinsane-gobject/libinsane-api.h
     include/libinsane-gobject/scan_parameters.h
     include/libinsane-gobject/scan_session.h
+    include/libinsane-gobject/unit.h
+    include/libinsane-gobject/value_type.h
 )
 
 ## Generate enums.h / enums.c
