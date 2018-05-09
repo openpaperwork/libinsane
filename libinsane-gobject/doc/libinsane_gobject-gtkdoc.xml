@@ -19,8 +19,16 @@
 
   <chapter>
     <title>Libinsane GObject Bindings Documentation</title>
-        <xi:include href="xml/item.xml"/>
     <xi:include href="xml/libinsane-api.xml"/>
+
+    <xi:include href="xml/capability.xml"/>
+    <xi:include href="xml/constraint.xml"/>
+    <xi:include href="xml/device_descriptor.xml"/>
+    <xi:include href="xml/error.xml"/>
+    <xi:include href="xml/img_format.xml"/>
+    <xi:include href="xml/item.xml"/>
+    <xi:include href="xml/item_type.xml"/>
+    <xi:include href="xml/option_descriptor.xml"/>
     <xi:include href="xml/scan_parameters.xml"/>
     <xi:include href="xml/scan_session.xml"/>
 
