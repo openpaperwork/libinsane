@@ -10,7 +10,7 @@ GQuark libinsane_error_quark(void);
 #define LIBINSANE_ERROR libinsane_error_quark()
 
 typedef enum {
-	LIBINSANE_ERROR_OK,
+	LIBINSANE_ERROR_OK = 0,
 	LIBINSANE_ERROR_CANCELLED,
 	LIBINSANE_ERROR_DEVICE_BUSY,
 	LIBINSANE_ERROR_UNSUPPORTED,

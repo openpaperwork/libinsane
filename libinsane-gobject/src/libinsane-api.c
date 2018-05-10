@@ -1,6 +1,7 @@
 #include <libinsane/safebet.h>
 
 #include <libinsane-gobject/error.h>
+#include <libinsane-gobject/error_private.h>
 #include <libinsane-gobject/libinsane-api.h>
 
 typedef struct _LibinsaneApiPrivate
@@ -49,7 +50,7 @@ LibinsaneApi *libinsane_api_new_safebet(GError **error)
 
 	enum lis_error err = lis_safebet(&priv->impl);
 	if (LIS_IS_ERROR(err)) {
-		g_set_error(error, LIBINSANE_ERROR, err,
+		SET_LIBINSANE_GOBJECT_ERROR(error, err,
 			"Libinsane init error: %d, %s",
 			err, lis_strerror(err));
 		return NULL;
