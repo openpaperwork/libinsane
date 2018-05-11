@@ -59,7 +59,10 @@ static void log_error_stderr(const char *msg)
 }
 
 
-void lis_log(enum lis_log_level lvl, const char *file, int line, const char *msg, ...)
+void lis_log(
+		enum lis_log_level lvl, const char *file, int line, const char *func,
+		const char *msg, ...
+	)
 {
 	static char g_buffer[2048];
 	int r;
@@ -68,7 +71,11 @@ void lis_log(enum lis_log_level lvl, const char *file, int line, const char *msg
 	assert(lvl >= LIS_LOG_LVL_MIN);
 	assert(lvl <= LIS_LOG_LVL_MAX);
 
-	r = snprintf(g_buffer, sizeof(g_buffer), "%s:L%d: ", file, line);
+	if (g_current_callbacks->callbacks[lvl] == NULL) {
+		return;
+	}
+
+	r = snprintf(g_buffer, sizeof(g_buffer), "%s:L%d(%s): ", file, line, func);
 
 	va_start(ap, msg);
 	r = vsnprintf(g_buffer + r, sizeof(g_buffer) - r, msg, ap);

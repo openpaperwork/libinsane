@@ -1,3 +1,4 @@
+#include <libinsane/log.h>
 #include <libinsane/safebet.h>
 
 #include <libinsane-gobject/error.h>
@@ -15,6 +16,7 @@ typedef struct _LibinsaneApiPrivate
 
 static void libinsane_api_finalize(GObject *self)
 {
+	lis_log_debug("[gobject] Finalizing");
 	libinsane_api_cleanup(LIBINSANE_API(self));
 }
 
@@ -31,7 +33,7 @@ static void libinsane_api_class_init(LibinsaneApiClass *cls)
 
 static void libinsane_api_init(LibinsaneApi *self)
 {
-
+	lis_log_debug("[gobject] Initializing");
 }
 
 
@@ -48,13 +50,19 @@ LibinsaneApi *libinsane_api_new_safebet(GError **error)
 	LibinsaneApi *api = g_object_new(LIBINSANE_API_TYPE, NULL);
 	LibinsaneApiPrivate *priv = LIBINSANE_API_GET_PRIVATE(api);
 
-	enum lis_error err = lis_safebet(&priv->impl);
+	enum lis_error err;
+
+	lis_log_debug("[gobject] enter");
+
+	err = lis_safebet(&priv->impl);
 	if (LIS_IS_ERROR(err)) {
 		SET_LIBINSANE_GOBJECT_ERROR(error, err,
 			"Libinsane init error: %d, %s",
 			err, lis_strerror(err));
+		lis_log_debug("[gobject] error");
 		return NULL;
 	}
+	lis_log_debug("[gobject] leave");
 
 	return api;
 }
@@ -71,18 +79,29 @@ LibinsaneApi *libinsane_api_new_safebet(GError **error)
  */
 LibinsaneApi *libinsane_api_new_from_string(const char *desc, GError **error)
 {
-	return g_object_new(LIBINSANE_API_TYPE, NULL);
+	LibinsaneApi *impl;
+	lis_log_debug("[gobject] enter");
+	impl = g_object_new(LIBINSANE_API_TYPE, NULL);
+	lis_log_debug("[gobject] leave");
+	return impl;
 }
 
 
 
 void libinsane_api_cleanup(LibinsaneApi *self)
 {
-	LibinsaneApiPrivate *priv = LIBINSANE_API_GET_PRIVATE(self);
+	LibinsaneApiPrivate *priv;
+
+	lis_log_debug("[gobject] enter");
+
+	priv = LIBINSANE_API_GET_PRIVATE(self);
 	if (priv->impl != NULL) {
+		lis_log_debug("[gobject] cleanup");
 		priv->impl->cleanup(priv->impl);
 		priv->impl = NULL;
 	}
+
+	lis_log_debug("[gobject] leave");
 }
 
 

@@ -34,17 +34,13 @@ struct lis_log_callbacks {
 extern void lis_set_log_callbacks(const struct lis_log_callbacks *callbacks);
 
 
-#ifdef LIS_PRIVATE
-
 /* functions inside libinsane to log */
 
-extern void lis_log(enum lis_log_level lvl, const char *file, int line, const char *fmt, ...);
+extern void lis_log(enum lis_log_level lvl, const char *file, int line, const char *func, const char *fmt, ...);
 
-#define lis_debug(...) lis_log(LIS_LOG_LVL_DEBUG, __FILE__, __LINE__, __VA_ARGS__);
-#define lis_info(...) lis_log(LIS_LOG_LVL_DEBUG, __FILE__, __LINE__, __VA_ARGS__);
-#define lis_warning(...) lis_log(LIS_LOG_LVL_DEBUG, __FILE__, __LINE__, __VA_ARGS__);
-#define lis_error(...) lis_log(LIS_LOG_LVL_DEBUG, __FILE__, __LINE__, __VA_ARGS__);
-
-#endif
+#define lis_log_debug(...) lis_log(LIS_LOG_LVL_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__);
+#define lis_log_info(...) lis_log(LIS_LOG_LVL_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__);
+#define lis_log_warning(...) lis_log(LIS_LOG_LVL_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__);
+#define lis_log_error(...) lis_log(LIS_LOG_LVL_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__);
 
 #endif
