@@ -344,6 +344,8 @@ struct lis_api {
 	 *
 	 * Exact meaning depends on the implementation (call to `sane_cleanup()`, stopping a thread,
 	 * etc).
+	 *
+	 * \warning Do not use the impl pointer anymore after calling this function. It will probably be freed.
 	 */
 	void (*cleanup)(struct lis_api *impl);
 

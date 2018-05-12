@@ -39,6 +39,8 @@ const char *lis_strerror(enum lis_error err)
 			return "LibInsane internal error: Image format not supported (please report !)";
 		case LIS_ERR_INTERNAL_NOT_IMPLEMENTED:
 			return "LibInsane internal error: Operation not implemented (please report !)";
+		case LIS_ERR_INTERNAL_UNKNOWN_ERROR:
+			return "LibInsane internal error: Unknown error reported by backend (please report !)";
 	}
 	return NULL;
 }

@@ -8,13 +8,14 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 include(GNUInstallDirs)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
-set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic -g -ggdb")
+set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic -g -ggdb")
 
 set(LIBINSANE_SRCS
     src/bases/dumb.c
     src/error.c
     src/log.c
+    src/multiplexer.c
     src/normalizers/all_opts_on_all_sources.c
     src/normalizers/end_of_feed.c
     src/normalizers/flatbed_and_feeder_behavior.c
@@ -70,6 +71,9 @@ if(WIN32)
         include/libinsane/wia_automation.h
     )
 
+    set(LIBINSANE_INCLUDES)
+    set(LIBINSANE_LIBS)
+
 else()
 
     MESSAGE(STATUS "Target OS: Unix-like")
@@ -82,6 +86,8 @@ else()
         include/libinsane/sane.h
     )
     include(Sane)
+    set(LIBINSANE_INCLUDES ${SANE_INCLUDE_DIR})
+    set(LIBINSANE_LIBS ${SANE_LIBRARY})
 
 endif()
 
@@ -91,7 +97,8 @@ install(FILES
 
 # libinsane: dynamic
 add_library(libinsane_dynamic SHARED ${LIBINSANE_SRCS})
-target_include_directories(libinsane_dynamic PUBLIC include)
+target_include_directories(libinsane_dynamic PUBLIC include ${LIBINSANE_INCLUDES})
+target_link_libraries(libinsane_dynamic ${LIBINSANE_LIBS})
 set_target_properties(libinsane_dynamic PROPERTIES OUTPUT_NAME insane)
 INSTALL(TARGETS libinsane_dynamic
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -106,7 +113,8 @@ endif()
 
 # libinsane: static
 add_library(libinsane_static STATIC ${LIBINSANE_SRCS})
-target_include_directories(libinsane_static PUBLIC include)
+target_include_directories(libinsane_static PUBLIC include ${LIBINSANE_INCLUDES})
+target_link_libraries(libinsane_static ${LIBINSANE_LIBS})
 set_target_properties(libinsane_static PROPERTIES OUTPUT_NAME insane)
 INSTALL(TARGETS libinsane_static
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

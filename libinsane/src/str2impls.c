@@ -125,12 +125,13 @@ enum lis_error lis_str2impls(const char *list_of_impls, struct lis_api **impls)
 		*impls = next;
 	}
 
+	free(input_str);
 	lis_log_debug("leave");
 	return LIS_OK;
 
 error:
 	lis_log_debug("error");
-	if (*impls) {
+	if (*impls != NULL) {
 		(*impls)->cleanup(*impls);
 	}
 	free(input_str);

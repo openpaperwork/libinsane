@@ -57,7 +57,7 @@ LibinsaneApi *libinsane_api_new_safebet(GError **error)
 	err = lis_safebet(&priv->impl);
 	if (LIS_IS_ERROR(err)) {
 		SET_LIBINSANE_GOBJECT_ERROR(error, err,
-			"Libinsane init error: %d, %s",
+			"Libinsane init error: 0x%X, %s",
 			err, lis_strerror(err));
 		lis_log_debug("[gobject] error");
 		return NULL;

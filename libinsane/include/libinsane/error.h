@@ -32,6 +32,7 @@ enum lis_error {
 	 */
 	LIS_ERR_INTERNAL_IMG_FORMAT_NOT_SUPPORTED = LIS_ERR_BIT | LIS_ERR_INTERNAL_BIT,
 	LIS_ERR_INTERNAL_NOT_IMPLEMENTED,
+	LIS_ERR_INTERNAL_UNKNOWN_ERROR, /*!< Backend returned an unknown error code */
 };
 
 #define LIS_IS_OK(err) (!((err) & LIS_ERR_BIT))
