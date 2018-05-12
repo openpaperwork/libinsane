@@ -64,15 +64,17 @@ See \ref quickstart.
 
 ## Stacking API implementations
 
-If you don't want to use \ref lis_safebet, you can stack the API implementation
+If you don't want to use \ref lis_safebet, you can stack the API implementations
 yourself.
 
 Please note that you should use \ref lis_safebet in most applications. There shouldn't
 be any reason not to use it. Don't hesitate to report a bug if \ref lis_safebet
-makes you troubles.
+doesn't work for you.
 
 Once you have wrapped an implementation with another, you don't have to worry about the
 first implementation. The wrapping one will take care of the wrapped one.
+
+Quick and lazy example:
 
 ```
 #include <libinsane/capi.h>
