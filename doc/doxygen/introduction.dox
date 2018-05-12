@@ -36,10 +36,22 @@ other weird thingies that could acquire or generate images.
 
 Let the insanity begin !
 
-Most of the components in LibInsane provide an implementation of a normalized
-C API. This API provides a generic way to access scanners and their options.
+The end goal of LibInsane is to have a consistent behavior across
+all scan APIs, all scanners, and all drivers. All the workarounds
+and weird quirks should be implemented in LibInsane and not the
+applications using it.
 
-![Design of LibInsane](design.png)
+For that purpose, LibInsane provides a bunch of components, each
+solving a specific problem (working around a bug, normalizing
+the behavior of drivers, etc).
+
+These components all implement \ref normalized_api "a normalized C API"
+(think object-oriented interface). This API provides a generic way to
+access scanners and their options and a generic way to scan. In other
+words, there is a single API implemented by all components. Many of the
+components actually just wrap other implementations with their own,
+changing slightly the behavior of the wrapped component. They usually change
+them to work around a bug or normalize the behavior of something.
 
 * Component for WIA support implements the normalized API.
 * Component for Twain support implements the normalized API.
@@ -53,9 +65,15 @@ C API. This API provides a generic way to access scanners and their options.
   implem.. well you get the idea ?
 * The GObject Introspection support wraps the normalized API.
 
+Since most of the components wrap other components, they can be stacked easily
+each on top of another and can be enabled or disabled easily.
+
+![Design of LibInsane](design.png)
+
 While it may sound like a lot of wrapping and layers, this approach allows
 modularity. Any workaround or behavior normalization component can be enabled
-or disabled easily and clear [separation of concerns](https://en.wikipedia.org/wiki/Separation_of_concerns)
+or disabled easily for debugging and clear
+[separation of concerns](https://en.wikipedia.org/wiki/Separation_of_concerns)
 is ensured.
 
 */
