@@ -63,7 +63,7 @@ enum lis_error lis_safebet(struct lis_api **out_impls)
 	if (LIS_IS_ERROR(err)) {
 		goto error;
 	}
-	*impls = next;
+	*out_impls = next;
 
 	return err;
 

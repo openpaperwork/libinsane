@@ -1,3 +1,7 @@
+#define _GNU_SOURCE
+
+#include <assert.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <libinsane/capi.h>
@@ -6,18 +10,30 @@
 #include <libinsane/multiplexer.h>
 
 
+#define MAX_APIS 8
+
+
 struct lis_multi
 {
 	struct lis_api parent;
 
 	struct lis_api **impls;
 	int nb_impls;
+
+	/* list actually reported to the caller.
+	 * IMPORTANT: device ids are prefixed with "<api_name>:"
+	 * So:
+	 * - struct lis_device_descriptor are *not* the same than those reported by each child implementation
+	 * - (struct lis_device_descriptor)->dev_id are *not* the same than those reported by each child implementation
+	 * - all other pointers are those reported by the child implementation (--> no need to free them here)
+	 */
+	struct lis_device_descriptor **merged_devs;
 };
 #define LIS_MULTI_PRIVATE(impl) ((struct lis_multi *)(impl))
 
 
 static void lis_multi_cleanup(struct lis_api *impl);
-static enum lis_error lis_multi_get_devices(struct lis_api *impl, struct lis_device_descriptor ***dev_infos);
+static enum lis_error lis_multi_get_devices(struct lis_api *impl, int local_only, struct lis_device_descriptor ***dev_descs);
 static enum lis_error lis_multi_dev_get(struct lis_api *impl, const char *dev_id, struct lis_item **item);
 
 
@@ -33,42 +49,138 @@ enum lis_error lis_api_multiplexer(
 		struct lis_api **output_implementation
 	)
 {
-	struct lis_multi *multi;
+	struct lis_multi *private;
 
-	multi = calloc(1, sizeof(struct lis_multi));
-	if (multi == NULL) {
+	if (nb_input_implementations > MAX_APIS || nb_input_implementations == 0) {
+		lis_log_error("Too many implementations to manage ! (%d > %d)",
+			nb_input_implementations, MAX_APIS);
+		return LIS_ERR_INVALID_VALUE;
+	}
+
+	private = calloc(1, sizeof(struct lis_multi));
+	if (private == NULL) {
 		lis_log_error("Out of memory");
 		return LIS_ERR_NO_MEM;
 	}
-	multi->impls = calloc(nb_input_implementations, sizeof(struct lis_api *));
-	if (multi->impls == NULL) {
-		free(multi);
+	private->impls = calloc(nb_input_implementations, sizeof(struct lis_api *));
+	if (private->impls == NULL) {
+		free(private);
 		lis_log_error("Out of memory");
 		return LIS_ERR_NO_MEM;
 	}
 
-	memcpy(&multi->parent, &g_multi_impl_template, sizeof(multi->parent));
-	memcpy(&multi->impls, input_implementations, nb_input_implementations * sizeof(struct lis_api*));
-	multi->nb_impls = nb_input_implementations;
-	*output_implementation = &multi->parent;
+	memcpy(&private->parent, &g_multi_impl_template, sizeof(private->parent));
+	memcpy(private->impls, input_implementations, nb_input_implementations * sizeof(struct lis_api*));
+	private->nb_impls = nb_input_implementations;
+	*output_implementation = &private->parent;
 	return LIS_OK;
 }
 
-static void lis_multi_cleanup(struct lis_api *impl)
-{
-	struct lis_multi *multi = LIS_MULTI_PRIVATE(impl);
-	int i;
 
-	for (i = 0 ; i < multi->nb_impls ; i++) {
-		multi->impls[i]->cleanup(multi->impls[i]);
+static void lis_multi_cleanup_dev_descs(struct lis_device_descriptor **dev_descs) {
+	int i;
+	if (dev_descs == NULL) {
+		return;
 	}
-	free(multi);
+	for (i = 0 ; dev_descs[i] != NULL ; i++) {
+		free(dev_descs[i]->dev_id);
+		free(dev_descs[i]);
+	}
+	free(dev_descs[i]);
 }
 
-static enum lis_error lis_multi_get_devices(struct lis_api *impl, struct lis_device_descriptor ***dev_infos)
+
+static void lis_multi_cleanup(struct lis_api *impl)
 {
-	/* TODO */
-	return LIS_ERR_INTERNAL_NOT_IMPLEMENTED;
+	struct lis_multi *private = LIS_MULTI_PRIVATE(impl);
+	int i;
+
+	for (i = 0 ; i < private->nb_impls ; i++) {
+		private->impls[i]->cleanup(private->impls[i]);
+	}
+	lis_multi_cleanup_dev_descs(private->merged_devs);
+	free(private);
+}
+
+
+static enum lis_error lis_multi_get_devices(struct lis_api *impl, int local_only,
+		struct lis_device_descriptor ***out_dev_descs)
+{
+	struct lis_multi *private = LIS_MULTI_PRIVATE(impl);
+	enum lis_error err, last_err = LIS_OK;
+	int has_success = 0, i, j, nb_devs;
+	struct lis_device_descriptor **devs[MAX_APIS];
+
+	assert(private->nb_impls > 0);
+	assert(private->nb_impls <= MAX_APIS);
+
+	*out_dev_descs = NULL;
+
+	/* get all the devices */
+	memset(&devs, 0, sizeof(devs));
+	for (i = 0 ; i < private->nb_impls ; i++) {
+		lis_log_debug("Getting devices from API %d", i);
+		err = private->impls[i]->get_devices(private->impls[i], local_only, &devs[i]);
+		if (LIS_IS_ERROR(err)) {
+			last_err = err;
+			continue;
+		}
+		has_success = 1;
+		for (j = 0 ; devs[i][j] != NULL ; j++) {
+			nb_devs++;
+		}
+	}
+
+	/* if all implementations have failed
+	 * or if at least one failed and no device has been found by any other */
+	if (!has_success || (nb_devs == 0 && LIS_IS_ERROR(last_err))) {
+		lis_log_debug("get_devices() has failed:"
+			" had success ? %d ;"
+			" number of devices found: %d ;"
+			" last error: 0x%X, %s",
+			has_success, nb_devs, last_err, lis_strerror(last_err));
+		return last_err;
+	}
+
+	/* merge the device lists */
+	*out_dev_descs = calloc(nb_devs + 1, sizeof(struct lis_device_descriptor *));
+	if (*out_dev_descs == NULL) {
+		lis_log_error("out of memory");
+		err = LIS_ERR_NO_MEM;
+		goto error;
+	}
+	nb_devs = 0;
+	for (i = 0 ; i < private->nb_impls ; i++) {
+		if (devs[i] == NULL) {
+			continue;
+		}
+		for (j = 0 ; devs[i][j] != NULL ; j++) {
+			*out_dev_descs[nb_devs] = calloc(1, sizeof(struct lis_device_descriptor));
+			if (*out_dev_descs[nb_devs] == NULL) {
+				lis_log_error("out of memory");
+				err = LIS_ERR_NO_MEM;
+				goto error;
+			}
+			memcpy((*out_dev_descs)[nb_devs], devs[i][j], sizeof(struct lis_device_descriptor));
+			if (asprintf(&(*out_dev_descs[nb_devs])->dev_id, "%s:%s",
+					(*out_dev_descs[nb_devs])->api,
+					(*out_dev_descs[nb_devs])->dev_id) < 0) {
+				(*out_dev_descs[nb_devs])->dev_id = NULL;
+				lis_log_error("out of memory");
+				err = LIS_ERR_NO_MEM;
+				goto error;
+			}
+			nb_devs++;
+		}
+	}
+
+	lis_multi_cleanup_dev_descs(private->merged_devs);
+	private->merged_devs = *out_dev_descs;
+	return LIS_OK;
+
+error:
+	lis_multi_cleanup_dev_descs(*out_dev_descs);
+	return err;
 }
 
 static enum lis_error lis_multi_dev_get(struct lis_api *impl, const char *dev_id, struct lis_item **item)

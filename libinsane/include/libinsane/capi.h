@@ -13,18 +13,18 @@ extern "C" {
  * \brief Basic informations regarding a scanner.
  */
 struct lis_device_descriptor {
-	const char *api_name; /*!< "Sane", "WIA", "TWAIN", etc */
+	const char *api; /*!< "Sane", "WIA", "TWAIN", etc */
 
 	/*!
 	 * \brief Device id to use to identify and access the scanner.
 	 *
 	 * There is strictly no guarantee regarding the content of this string.
 	 */
-	const char *dev_id;
+	char *dev_id;
 
-	const char *vendor; /*!< Device manufacturer name (ex: "Hewlett-Packard") */
-	const char *model; /*!< Device model name */
-	const char *type; /*!< ex: "flatbed scanner", "sheetfed scanner" */
+	char *vendor; /*!< Device manufacturer name (ex: "Hewlett-Packard") */
+	char *model; /*!< Device model name */
+	char *type; /*!< ex: "flatbed scanner", "sheetfed scanner" */
 };
 
 /*!
@@ -356,11 +356,13 @@ struct lis_api {
 	 * to call this function. You can call directly \ref dev_get.
 	 *
 	 * \warning This operation may take many seconds.
-	 * \param[out] dev_infos will point to a list of device descriptions, NULL terminated.
+	 * \param[in] local_only 1 if only local devices must be reported, 0 if remote devices must also be reported
+	 * \param[out] dev_infos will point to a list of device descriptions, NULL terminated. Will be
+	 *   invalidated/freed at the next call of \ref get_devices() or \ref cleanup.
 	 * \retval LIS_OK dev_infos has been set to a list of devices. See \ref LIS_IS_OK.
 	 */
 	enum lis_error (*get_devices)(
-		struct lis_api *impl, struct lis_device_descriptor ***dev_infos
+		struct lis_api *impl, int local_only, struct lis_device_descriptor ***dev_infos
 	);
 
 	/*!

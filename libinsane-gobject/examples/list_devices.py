@@ -13,9 +13,9 @@ from gi.repository import Libinsane  # noqa: E402
 
 def main():
     api = Libinsane.Api.new_safebet()
-    devs = api.get_devices()
+    devs = api.get_devices(False)  # !local_only
     for dev in devs:
-        print(dev)
+        print(dev.to_string())
 
 
 if __name__ == "__main__":

@@ -32,11 +32,12 @@ GType libinsane_device_descriptor_get_type(void) G_GNUC_CONST;
 
 /* no public constructor */
 
-const char *libinsane_device_descriptor_get_api_name(LibinsaneDeviceDescriptor *self);
+const char *libinsane_device_descriptor_get_api(LibinsaneDeviceDescriptor *self);
 const char *libinsane_device_descriptor_get_dev_id(LibinsaneDeviceDescriptor *self);
 const char *libinsane_device_descriptor_get_dev_vendor(LibinsaneDeviceDescriptor *self);
 const char *libinsane_device_descriptor_get_dev_model(LibinsaneDeviceDescriptor *self);
 const char *libinsane_device_descriptor_get_dev_type(LibinsaneDeviceDescriptor *self);
+const char *libinsane_device_descriptor_to_string(LibinsaneDeviceDescriptor *self);
 
 G_END_DECLS
 

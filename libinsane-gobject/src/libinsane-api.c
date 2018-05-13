@@ -1,14 +1,19 @@
+#include <assert.h>
+#include <stdlib.h>
+
 #include <libinsane/log.h>
 #include <libinsane/safebet.h>
 
+#include <libinsane-gobject/device_descriptor.h>
+#include <libinsane-gobject/device_descriptor_private.h>
 #include <libinsane-gobject/error.h>
 #include <libinsane-gobject/error_private.h>
 #include <libinsane-gobject/libinsane-api.h>
 
-typedef struct _LibinsaneApiPrivate
+struct _LibinsaneApiPrivate
 {
 	struct lis_api *impl;
-} LibinsaneApiPrivate;
+};
 
 #define LIBINSANE_API_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE ((obj), LIBINSANE_API_TYPE, LibinsaneApiPrivate))
@@ -62,6 +67,7 @@ LibinsaneApi *libinsane_api_new_safebet(GError **error)
 		lis_log_debug("[gobject] error");
 		return NULL;
 	}
+	assert(priv->impl != NULL);
 	lis_log_debug("[gobject] leave");
 
 	return api;
@@ -108,10 +114,36 @@ void libinsane_api_cleanup(LibinsaneApi *self)
 /**
  * libinsane_api_get_devices:
  *
- * Returns: (transfer full): list of available devices (LibinsaneItem objects)
+ * Returns: (element-type Libinsane.DeviceDescriptor) (transfer full):
+ *   list of available devices (LibinsaneItem objects)
  */
-GValueArray *libinsane_api_get_devices(LibinsaneApi *self, GError **error) {
-	return NULL; /* TODO */
+GList *libinsane_api_get_devices(LibinsaneApi *self, gboolean local_only, GError **error) {
+	LibinsaneApiPrivate *priv;
+	enum lis_error err;
+	struct lis_device_descriptor **dev_infos;
+	LibinsaneDeviceDescriptor *dev_info;
+	GList *out;
+	int i;
+
+	lis_log_debug("[gobject] enter");
+
+	priv = LIBINSANE_API_GET_PRIVATE(self);
+	err = priv->impl->get_devices(priv->impl, local_only, &dev_infos);
+	if (LIS_IS_ERROR(err)) {
+		SET_LIBINSANE_GOBJECT_ERROR(error, err,
+			"Libinsane get devices error: 0x%X, %s",
+			err, lis_strerror(err));
+		lis_log_debug("[gobject] error");
+		return NULL;
+	}
+
+	for (i = 0 ; dev_infos[i] != NULL ; i++) {
+		dev_info = libinsane_device_descriptor_new_from_libinsane(dev_infos[i]);
+		out = g_list_prepend(out, dev_info);
+	}
+
+	lis_log_debug("[gobject] leave");
+	return g_list_reverse(out);
 }
 
 
