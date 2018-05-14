@@ -1,0 +1,18 @@
+/*!
+
+\page logging Libinsane logs
+
+# Libinsane
+
+By default, all logs from libinsane go to stderr. This may not be what you want
+(debug logs are *very* verbose).
+
+This can be changed by defining a callback to handle logs using functions from \ref log.h.
+
+
+# Libinsane-gobject
+
+You have to create an object implementing the interface Libinsane.LoggerInterface
+and pass it to libinsane_logger_log().
+
+*/

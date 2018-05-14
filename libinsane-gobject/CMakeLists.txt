@@ -31,6 +31,7 @@ set(INSANE_GOBJECT_SRCS
     src/error.c
     src/item.c
     src/libinsane-api.c
+    src/log.c
     src/option_descriptor.c
     src/scan_parameters.c
     src/scan_session.c
@@ -44,6 +45,7 @@ set(INSANE_GOBJECT_HEADERS
     include/libinsane-gobject/item.h
     include/libinsane-gobject/item_type.h
     include/libinsane-gobject/libinsane-api.h
+    include/libinsane-gobject/log.h
     include/libinsane-gobject/option_descriptor.h
     include/libinsane-gobject/scan_parameters.h
     include/libinsane-gobject/scan_session.h

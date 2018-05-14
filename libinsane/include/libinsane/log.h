@@ -27,9 +27,9 @@ struct lis_log_callbacks {
  * \brief register callbacks that will be used to get back messages.
  * Only one set of callback can be registered at one time.
  * Calling this function will unset previously set callbacks.
+ * By default, all log messages go to stderr.
  * \param[in] callbacks callback to use. Pointer must remain valid until lis_set_log_callbacks is
  *		called again. NULL will reset callbacks to their default (stderr).
- *
  */
 extern void lis_set_log_callbacks(const struct lis_log_callbacks *callbacks);
 
