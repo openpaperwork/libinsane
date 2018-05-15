@@ -122,7 +122,7 @@ GList *libinsane_api_get_devices(LibinsaneApi *self, gboolean local_only, GError
 	enum lis_error err;
 	struct lis_device_descriptor **dev_infos;
 	LibinsaneDeviceDescriptor *dev_info;
-	GList *out;
+	GList *out = NULL;
 	int i;
 
 	lis_log_debug("[gobject] enter");
