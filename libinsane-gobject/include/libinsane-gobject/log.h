@@ -12,7 +12,7 @@ typedef enum {
 	LIBINSANE_LOG_LEVEL_ERROR,
 } LibinsaneLogLevel;
 
-#define LIBINSANE_LOGGER_TYPE libinsane_logger_get_type()
+#define LIBINSANE_TYPE_LOGGER libinsane_logger_get_type()
 G_DECLARE_INTERFACE(LibinsaneLogger, libinsane_logger, LIBINSANE, LOGGER, GObject)
 
 struct _LibinsaneLoggerInterface

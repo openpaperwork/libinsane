@@ -16,8 +16,8 @@ class ExampleLogger(GObject.Object, Libinsane.Logger):
     def __init__(self):
         super().__init__()
 
-    def log(self, *args, **kwargs):
-        print("%s: %s" % (str(args), str(kwargs)))
+    def log(self, lvl, msg):
+        print("%s: %s" % (str(lvl), str(msg)))
 
 
 GObject.type_register(ExampleLogger)
