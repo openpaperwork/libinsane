@@ -42,8 +42,8 @@ static void log_callback(enum lis_log_level lis_lvl, const char *msg)
 	LibinsaneLogLevel lvl = LIBINSANE_LOG_LEVEL_ERROR;
 
 	if (g_logger_iface == NULL || g_logger_iface->log == NULL) {
-		fprintf(stderr, "Warning: no log callback defined (callback ? %d). Defaulting to stderr\n",
-				(g_logger_iface->log != NULL));
+		fprintf(stderr, "Warning: no log callback defined (iface ? %d). Defaulting to stderr\n",
+				(g_logger_iface != NULL));
 		fprintf(stderr, "%d: %s\n", lis_lvl, msg);
 		return;
 	}
