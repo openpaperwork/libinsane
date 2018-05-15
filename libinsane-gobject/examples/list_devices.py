@@ -24,6 +24,7 @@ def main():
 #! [Logger]
     api = Libinsane.Api.new_safebet()
     devs = api.get_devices(False)  # !local_only
+    print("Found {} devices".format(len(devs)))
     for dev in devs:
         print(dev.to_string())
 
