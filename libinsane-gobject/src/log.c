@@ -7,9 +7,9 @@ G_DEFINE_INTERFACE(LibinsaneLogger, libinsane_logger, G_TYPE_OBJECT)
 
 
 static LibinsaneLogger *g_logger = NULL;
-static LibinsaneLoggerInterface *g_logger_iface = NULL;
 
 static lis_log_callback log_callback;
+static void libinsane_logger_real_log(LibinsaneLogger *self, LibinsaneLogLevel lvl, const char *msg);
 
 static struct lis_log_callbacks g_callbacks = {
 	.callbacks = {
@@ -23,9 +23,13 @@ static struct lis_log_callbacks g_callbacks = {
 
 static void libinsane_logger_default_init(LibinsaneLoggerInterface *iface)
 {
-
+	iface->log = libinsane_logger_real_log;
 }
 
+static void libinsane_logger_real_log(LibinsaneLogger *self, LibinsaneLogLevel lvl, const char *msg)
+{
+	fprintf(stderr, "[missing log callback] %d: %s\n", lvl, msg);
+}
 
 void libinsane_logger_log(LibinsaneLogger *self, LibinsaneLogLevel lvl, const char *msg)
 {
@@ -41,10 +45,9 @@ static void log_callback(enum lis_log_level lis_lvl, const char *msg)
 {
 	LibinsaneLogLevel lvl = LIBINSANE_LOG_LEVEL_ERROR;
 
-	if (g_logger_iface == NULL || g_logger_iface->log == NULL) {
-		fprintf(stderr, "Warning: no log callback defined (iface ? %d). Defaulting to stderr\n",
-				(g_logger_iface != NULL));
-		fprintf(stderr, "%d: %s\n", lis_lvl, msg);
+	if (g_logger == NULL) {
+		fprintf(stderr, "Warning: no log callback defined. Defaulting to stderr\n");
+		fprintf(stderr, "[missing logger object] %d: %s\n", lis_lvl, msg);
 		return;
 	}
 
@@ -64,7 +67,7 @@ static void log_callback(enum lis_log_level lis_lvl, const char *msg)
 			break;
 	}
 
-	g_logger_iface->log(g_logger, lvl, msg);
+	libinsane_logger_log(g_logger, lvl, msg);
 }
 
 void libinsane_register_logger(LibinsaneLogger *logger)
@@ -73,19 +76,9 @@ void libinsane_register_logger(LibinsaneLogger *logger)
 		g_object_ref(logger);
 
 		g_logger = logger;
-		g_logger_iface = LIBINSANE_LOGGER_GET_IFACE(logger);
-
-		if (g_logger_iface == NULL) {
-			fprintf(stderr, "[WARNING] Expected Logger object !\n");
-		} else {
-			lis_set_log_callbacks(&g_callbacks);
-		}
+		lis_set_log_callbacks(&g_callbacks);
 	} else {
-		if (g_logger != NULL) {
-			libinsane_unregister_logger();
-		}
-		g_logger = NULL;
-		g_logger_iface = NULL;
+		libinsane_unregister_logger();
 	}
 }
 
@@ -96,5 +89,4 @@ void libinsane_unregister_logger()
 		g_object_unref(g_logger);
 	}
 	g_logger = NULL;
-	g_logger_iface = NULL;
 }

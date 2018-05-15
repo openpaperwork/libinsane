@@ -12,15 +12,9 @@ from gi.repository import GObject  # noqa: E402
 from gi.repository import Libinsane  # noqa: E402
 
 
-class ExampleLogger(GObject.Object, Libinsane.Logger):
-    def __init__(self):
-        super().__init__()
-
-    def log(self, lvl, msg):
-        print("%s: %s" % (str(lvl), str(msg)))
-
-
-GObject.type_register(ExampleLogger)
+class ExampleLogger(GObject.GObject, Libinsane.Logger):
+    def do_log(self, lvl, msg):
+        print("{}: {}".format(lvl.value_nick, msg))
 
 
 def main():
