@@ -13,7 +13,7 @@ Makefiles in all [OpenPaper.work](https://openpaper.work) projects present simil
 ```
 sudo apt install \
         cmake \
-        gtk-doc-tools \
+        gtk-doc-tools doxygen \
         build-essential \
         libsane-dev \
         libgirepository1.0-dev gobject-introspection
