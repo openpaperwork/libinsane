@@ -12,7 +12,9 @@ This can be changed by defining a callback to handle logs using functions from \
 
 # Libinsane-gobject
 
-You have to create an object implementing the interface Libinsane.LoggerInterface
-and pass it to libinsane_logger_log().
+You have to create an object implementing the interface Libinsane.Logger
+and pass it to libinsane_register_loggger().
+
+\snippet libinsane-gobject/examples/list_devices.py Logger
 
 */

@@ -9,6 +9,8 @@
 import gi
 gi.require_version('Libinsane', '0.1')
 from gi.repository import GObject  # noqa: E402
+
+#! [Logger]
 from gi.repository import Libinsane  # noqa: E402
 
 
@@ -19,6 +21,7 @@ class ExampleLogger(GObject.GObject, Libinsane.Logger):
 
 def main():
     Libinsane.register_logger(ExampleLogger())
+#! [Logger]
     api = Libinsane.Api.new_safebet()
     devs = api.get_devices(False)  # !local_only
     for dev in devs:
