@@ -15,7 +15,7 @@ enum lis_log_level {
  * \brief log callback
  * \param[in] msg does no include "\n".
  */
-typedef void (lis_log_callback)(const char *msg);
+typedef void (lis_log_callback)(enum lis_log_level lvl, const char *msg);
 
 
 struct lis_log_callbacks {

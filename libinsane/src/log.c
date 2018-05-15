@@ -7,18 +7,15 @@
 #include <libinsane/log.h>
 
 
-static lis_log_callback log_debug_stderr;
-static lis_log_callback log_info_stderr;
-static lis_log_callback log_warning_stderr;
-static lis_log_callback log_error_stderr;
+static lis_log_callback log_stderr;
 
 
 const struct lis_log_callbacks g_default_callbacks = {
 	.callbacks = {
-		[LIS_LOG_LVL_DEBUG] = log_debug_stderr,
-		[LIS_LOG_LVL_INFO] = log_info_stderr,
-		[LIS_LOG_LVL_WARNING] = log_warning_stderr,
-		[LIS_LOG_LVL_ERROR] = log_error_stderr,
+		[LIS_LOG_LVL_DEBUG] = log_stderr,
+		[LIS_LOG_LVL_INFO] = log_stderr,
+		[LIS_LOG_LVL_WARNING] = log_stderr,
+		[LIS_LOG_LVL_ERROR] = log_stderr,
 	}
 };
 
@@ -35,27 +32,27 @@ void lis_set_log_callbacks(const struct lis_log_callbacks *callbacks)
 }
 
 
-static void log_debug_stderr(const char *msg)
+static void log_stderr(enum lis_log_level lis_lvl, const char *msg)
 {
-	fprintf(stderr, "[LibInsane:DEBUG] %s\n", msg);
-}
+	const char *lvl = "UNKNOWN";
 
+	switch(lis_lvl)
+	{
+		case LIS_LOG_LVL_DEBUG:
+			lvl = "DEBUG";
+			break;
+		case LIS_LOG_LVL_INFO:
+			lvl = "INFO";
+			break;
+		case LIS_LOG_LVL_WARNING:
+			lvl = "WARNING";
+			break;
+		case LIS_LOG_LVL_ERROR:
+			lvl = "ERROR";
+			break;
+	}
 
-static void log_info_stderr(const char *msg)
-{
-	fprintf(stderr, "[LibInsane:INFO] %s\n", msg);
-}
-
-
-static void log_warning_stderr(const char *msg)
-{
-	fprintf(stderr, "[LibInsane:WARNING] %s\n", msg);
-}
-
-
-static void log_error_stderr(const char *msg)
-{
-	fprintf(stderr, "[LibInsane:ERROR] %s\n", msg);
+	fprintf(stderr, "[LibInsane:%s] %s\n", lvl, msg);
 }
 
 
@@ -86,5 +83,5 @@ void lis_log(
 		return;
 	}
 
-	g_current_callbacks->callbacks[lvl](g_buffer);
+	g_current_callbacks->callbacks[lvl](lvl, g_buffer);
 }
