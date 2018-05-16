@@ -44,16 +44,16 @@ enum lis_value_type {
  * Used to defined the type of content that will be returned by \ref lis_scan_session.scan_read() .
  */
 enum lis_img_format {
-	 /*!
-	  * \brief Raw image, 24bits per pixel.
-	  *
-	  * For each pixel:
-	  * - 8bits for red,
-	  * - 8bits for green,
-	  * - 8bits for blue.
-	  *
-	  * No header, just pixels.
-	  */
+	/*!
+	 * \brief Raw image, 24bits per pixel.
+	 *
+	 * For each pixel:
+	 * - 8bits for red,
+	 * - 8bits for green,
+	 * - 8bits for blue.
+	 *
+	 * No header, just pixels.
+	 */
 	LIS_IMG_FORMAT_RAW_RGB_24,
 
 	LIS_IMG_FORMAT_GRAYSCALE_8,
