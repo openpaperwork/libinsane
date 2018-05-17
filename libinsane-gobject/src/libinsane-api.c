@@ -8,7 +8,10 @@
 #include <libinsane-gobject/device_descriptor_private.h>
 #include <libinsane-gobject/error.h>
 #include <libinsane-gobject/error_private.h>
+#include <libinsane-gobject/item.h>
+#include <libinsane-gobject/item_private.h>
 #include <libinsane-gobject/libinsane-api.h>
+
 
 struct _LibinsaneApiPrivate
 {
@@ -21,7 +24,7 @@ struct _LibinsaneApiPrivate
 
 static void libinsane_api_finalize(GObject *self)
 {
-	lis_log_debug("[gobject] Finalizing");
+	lis_log_debug("Finalizing");
 	libinsane_api_cleanup(LIBINSANE_API(self));
 }
 
@@ -38,7 +41,7 @@ static void libinsane_api_class_init(LibinsaneApiClass *cls)
 
 static void libinsane_api_init(LibinsaneApi *self)
 {
-	lis_log_debug("[gobject] Initializing");
+	lis_log_debug("Initializing");
 }
 
 
@@ -57,18 +60,18 @@ LibinsaneApi *libinsane_api_new_safebet(GError **error)
 
 	enum lis_error err;
 
-	lis_log_debug("[gobject] enter");
+	lis_log_debug("enter");
 
 	err = lis_safebet(&priv->impl);
 	if (LIS_IS_ERROR(err)) {
 		SET_LIBINSANE_GOBJECT_ERROR(error, err,
 			"Libinsane init error: 0x%X, %s",
 			err, lis_strerror(err));
-		lis_log_debug("[gobject] error");
+		lis_log_debug("error");
 		return NULL;
 	}
 	assert(priv->impl != NULL);
-	lis_log_debug("[gobject] leave");
+	lis_log_debug("leave");
 
 	return api;
 }
@@ -86,9 +89,9 @@ LibinsaneApi *libinsane_api_new_safebet(GError **error)
 LibinsaneApi *libinsane_api_new_from_string(const char *desc, GError **error)
 {
 	LibinsaneApi *impl;
-	lis_log_debug("[gobject] enter");
+	lis_log_debug("enter");
 	impl = g_object_new(LIBINSANE_API_TYPE, NULL);
-	lis_log_debug("[gobject] leave");
+	lis_log_debug("leave");
 	return impl;
 }
 
@@ -98,26 +101,26 @@ void libinsane_api_cleanup(LibinsaneApi *self)
 {
 	LibinsaneApiPrivate *priv;
 
-	lis_log_debug("[gobject] enter");
+	lis_log_debug("enter");
 
 	priv = LIBINSANE_API_GET_PRIVATE(self);
 	if (priv->impl != NULL) {
-		lis_log_debug("[gobject] cleanup");
+		lis_log_debug("cleanup");
 		priv->impl->cleanup(priv->impl);
 		priv->impl = NULL;
 	}
 
-	lis_log_debug("[gobject] leave");
+	lis_log_debug("leave");
 }
 
 
 /**
- * libinsane_api_get_devices:
+ * libinsane_api_list_devices:
  *
  * Returns: (element-type Libinsane.DeviceDescriptor) (transfer full):
  *   list of available devices (LibinsaneItem objects)
  */
-GList *libinsane_api_get_devices(LibinsaneApi *self, gboolean local_only, GError **error) {
+GList *libinsane_api_list_devices(LibinsaneApi *self, gboolean local_only, GError **error) {
 	LibinsaneApiPrivate *priv;
 	enum lis_error err;
 	struct lis_device_descriptor **dev_infos;
@@ -125,15 +128,15 @@ GList *libinsane_api_get_devices(LibinsaneApi *self, gboolean local_only, GError
 	GList *out = NULL;
 	int i;
 
-	lis_log_debug("[gobject] enter");
+	lis_log_debug("enter");
 
 	priv = LIBINSANE_API_GET_PRIVATE(self);
-	err = priv->impl->get_devices(priv->impl, local_only, &dev_infos);
+	err = priv->impl->list_devices(priv->impl, local_only, &dev_infos);
 	if (LIS_IS_ERROR(err)) {
 		SET_LIBINSANE_GOBJECT_ERROR(error, err,
 			"Libinsane get devices error: 0x%X, %s",
 			err, lis_strerror(err));
-		lis_log_debug("[gobject] error");
+		lis_log_debug("error");
 		return NULL;
 	}
 
@@ -142,18 +145,38 @@ GList *libinsane_api_get_devices(LibinsaneApi *self, gboolean local_only, GError
 		out = g_list_prepend(out, dev_info);
 	}
 
-	lis_log_debug("[gobject] leave");
+	lis_log_debug("leave");
 	return g_list_reverse(out);
 }
 
 
 /**
- * libinsane_api_dev_get:
+ * libinsane_api_get_device:
  *
  * Returns: (transfer none): list of available devices (LibinsaneItem objects)
  */
-LibinsaneItem *libinsane_api_dev_get(LibinsaneApi *self, const char *dev_id) {
-	return NULL; /* TODO */
+LibinsaneItem *libinsane_api_get_device(LibinsaneApi *self, const char *dev_id, GError **error) {
+	LibinsaneApiPrivate *priv;
+	struct lis_item *lis_item;
+	LibinsaneItem *item;
+	enum lis_error lis_err;
+
+	lis_log_debug("enter");
+
+	priv = LIBINSANE_API_GET_PRIVATE(self);
+
+	lis_err = priv->impl->get_device(priv->impl, dev_id, &lis_item);
+	if (LIS_IS_ERROR(lis_err)) {
+		SET_LIBINSANE_GOBJECT_ERROR(error, lis_err,
+			"Libinsane get devices error: 0x%X, %s",
+			lis_err, lis_strerror(lis_err));
+		lis_log_debug("error");
+		return NULL;
+	}
+
+	item = libinsane_item_new_from_libinsane(lis_item);
+	lis_log_debug("leave");
+	return item;
 }
 
 G_DEFINE_TYPE(LibinsaneApi, libinsane_api, G_TYPE_OBJECT)

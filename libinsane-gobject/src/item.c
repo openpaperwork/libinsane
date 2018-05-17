@@ -1,22 +1,51 @@
+#include <libinsane/capi.h>
+#include <libinsane/log.h>
+
 #include <libinsane-gobject/item.h>
+
+
+struct _LibinsaneItemPrivate
+{
+	struct lis_item *item;
+};
+
+#define LIBINSANE_ITEM_GET_PRIVATE(obj) \
+	(G_TYPE_INSTANCE_GET_PRIVATE ((obj), LIBINSANE_ITEM_TYPE, LibinsaneItemPrivate))
 
 
 static void libinsane_item_finalize(GObject *object)
 {
-
+	lis_log_debug("[gobject] Finalizing");
 }
 
 
 static void libinsane_item_class_init(LibinsaneItemClass *cls)
 {
-	GObjectClass *go_cls = G_OBJECT_CLASS(cls);
+	GObjectClass *go_cls;
+	g_type_class_add_private(cls, sizeof(LibinsaneItemPrivate));
+	go_cls = G_OBJECT_CLASS(cls);
 	go_cls->finalize = libinsane_item_finalize;
 }
 
 
 static void libinsane_item_init(LibinsaneItem *self)
 {
+	lis_log_debug("[gobject] Initializing");
+}
 
+
+LibinsaneItem *libinsane_item_new_from_libinsane(struct lis_item *lis_item)
+{
+	LibinsaneItem *item;
+	LibinsaneItemPrivate *private;
+
+	lis_log_debug("[gobject] enter");
+	item = g_object_new(LIBINSANE_ITEM_TYPE, NULL);
+	private = LIBINSANE_ITEM_GET_PRIVATE(item);
+	private->item = lis_item;
+	lis_log_debug("[gobject] leave");
+
+	return item;
 }
 
 /**
@@ -27,19 +56,16 @@ static void libinsane_item_init(LibinsaneItem *self)
  */
 const char *libinsane_item_get_name(LibinsaneItem *self)
 {
-	return NULL; /* TODO */
+	LibinsaneItemPrivate *private;
+
+	private = LIBINSANE_ITEM_GET_PRIVATE(self);
+	return private->item->name;
 }
 
 
 LibinsaneItemType libinsane_item_get_item_type(LibinsaneItem *self)
 {
 	return 0; /* TODO */
-}
-
-
-void libinsane_item_open(LibinsaneItem *self, GError **error)
-{
-	/* TODO */
 }
 
 

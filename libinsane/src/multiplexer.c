@@ -33,14 +33,14 @@ struct lis_multi
 
 
 static void lis_multi_cleanup(struct lis_api *impl);
-static enum lis_error lis_multi_get_devices(struct lis_api *impl, int local_only, struct lis_device_descriptor ***dev_descs);
-static enum lis_error lis_multi_dev_get(struct lis_api *impl, const char *dev_id, struct lis_item **item);
+static enum lis_error lis_multi_list_devices(struct lis_api *impl, int local_only, struct lis_device_descriptor ***dev_descs);
+static enum lis_error lis_multi_get_device(struct lis_api *impl, const char *dev_id, struct lis_item **item);
 
 
 static struct lis_api g_multi_impl_template = {
 	.cleanup = lis_multi_cleanup,
-	.get_devices = lis_multi_get_devices,
-	.dev_get = lis_multi_dev_get,
+	.list_devices = lis_multi_list_devices,
+	.get_device = lis_multi_get_device,
 };
 
 
@@ -103,7 +103,7 @@ static void lis_multi_cleanup(struct lis_api *impl)
 }
 
 
-static enum lis_error lis_multi_get_devices(struct lis_api *impl, int local_only,
+static enum lis_error lis_multi_list_devices(struct lis_api *impl, int local_only,
 		struct lis_device_descriptor ***out_dev_descs)
 {
 	struct lis_multi *private = LIS_MULTI_PRIVATE(impl);
@@ -120,7 +120,7 @@ static enum lis_error lis_multi_get_devices(struct lis_api *impl, int local_only
 	memset(&devs, 0, sizeof(devs));
 	for (i = 0 ; i < private->nb_impls ; i++) {
 		lis_log_debug("Getting devices from API %d", i);
-		err = private->impls[i]->get_devices(private->impls[i], local_only, &devs[i]);
+		err = private->impls[i]->list_devices(private->impls[i], local_only, &devs[i]);
 		if (LIS_IS_ERROR(err)) {
 			last_err = err;
 			continue;
@@ -134,7 +134,7 @@ static enum lis_error lis_multi_get_devices(struct lis_api *impl, int local_only
 	/* if all implementations have failed
 	 * or if at least one failed and no device has been found by any other */
 	if (!has_success || (nb_devs == 0 && LIS_IS_ERROR(last_err))) {
-		lis_log_debug("get_devices() has failed:"
+		lis_log_debug("list_devices() has failed:"
 			" had success ? %d ;"
 			" number of devices found: %d ;"
 			" last error: 0x%X, %s",
@@ -163,7 +163,7 @@ static enum lis_error lis_multi_get_devices(struct lis_api *impl, int local_only
 			}
 			memcpy((*out_dev_descs)[nb_devs], devs[i][j], sizeof(struct lis_device_descriptor));
 			if (asprintf(&(*out_dev_descs[nb_devs])->dev_id, "%s:%s",
-					(*out_dev_descs[nb_devs])->api,
+					(*out_dev_descs[nb_devs])->impl->base_name,
 					(*out_dev_descs[nb_devs])->dev_id) < 0) {
 				(*out_dev_descs[nb_devs])->dev_id = NULL;
 				lis_log_error("out of memory");
@@ -183,8 +183,32 @@ error:
 	return err;
 }
 
-static enum lis_error lis_multi_dev_get(struct lis_api *impl, const char *dev_id, struct lis_item **item)
+static enum lis_error lis_multi_get_device(struct lis_api *impl, const char *dev_id, struct lis_item **item)
 {
-	/* TODO */
-	return LIS_ERR_INTERNAL_NOT_IMPLEMENTED;
+	struct lis_multi *private = LIS_MULTI_PRIVATE(impl);
+	char *api_name;
+	char *sep;
+	int i;
+
+	sep = strchr(dev_id, ':');
+	if (sep == NULL) {
+		lis_log_error("Invalid device id: %s (missing separator ':')", dev_id);
+		return LIS_ERR_INVALID_VALUE;
+	}
+
+	api_name = strndup(dev_id, sep - dev_id);
+	impl = NULL;
+	for (i = 0 ; i < private->nb_impls ; i++) {
+		if (strcmp(api_name, private->impls[i]->base_name) == 0) {
+			impl = private->impls[i];
+		}
+	}
+	if (impl == NULL) {
+		lis_log_error("Unknown API: %s", api_name);
+		free(api_name);
+		return LIS_ERR_INVALID_VALUE;
+	}
+	free(api_name);
+
+	return impl->get_device(impl, sep + 1, item);
 }

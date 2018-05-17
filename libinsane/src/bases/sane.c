@@ -19,23 +19,42 @@ struct lis_sane
 };
 #define LIS_SANE_PRIVATE(impl) ((struct lis_sane *)(impl))
 
+struct lis_sane_item
+{
+	struct lis_item item;
+	SANE_Handle handle;
+};
+#define LIS_SANE_ITEM_PRIVATE(impl) ((struct lis_sane_item *)(impl))
+
 
 static void lis_sane_cleanup(struct lis_api *impl);
-static enum lis_error lis_sane_get_devices(struct lis_api *impl, int local_only,
+static enum lis_error lis_sane_list_devices(struct lis_api *impl, int local_only,
 		struct lis_device_descriptor ***out_dev_descs);
-static enum lis_error lis_sane_dev_get(struct lis_api *impl, const char *dev_id,
+static enum lis_error lis_sane_get_device(struct lis_api *impl, const char *dev_id,
 		struct lis_item **item);
+
+static struct lis_api g_sane_impl_template = {
+	.base_name = "sane",
+	.cleanup = lis_sane_cleanup,
+	.list_devices = lis_sane_list_devices,
+	.get_device = lis_sane_get_device,
+};
+
+
+static void lis_sane_item_close(struct lis_item *dev);
+
+static struct lis_item g_sane_item_template = {
+	.type = LIS_ITEM_UNIDENTIFIED,
+	.get_children = NULL, /* TODO */
+	.get_options = NULL, /* TODO */
+	.get_scan_parameters = NULL, /* TODO */
+	.scan_start = NULL, /* TODO */
+	.close = lis_sane_item_close,
+};
 
 
 /* ref counter */
 static int g_sane_initialized = 0;
-
-
-static struct lis_api g_sane_impl_template = {
-	.cleanup = lis_sane_cleanup,
-	.get_devices = lis_sane_get_devices,
-	.dev_get = lis_sane_dev_get,
-};
 
 
 static void auth_callback(
@@ -49,6 +68,7 @@ static void auth_callback(
 	username[0] = '\0';
 	password[0] = '\0';
 }
+
 
 static enum lis_error sane_status_to_lis_error(SANE_Status status)
 {
@@ -82,6 +102,7 @@ static enum lis_error sane_status_to_lis_error(SANE_Status status)
 	return LIS_ERR_INTERNAL_UNKNOWN_ERROR;
 }
 
+
 enum lis_error lis_api_sane(struct lis_api **out_impl)
 {
 	enum lis_error err;
@@ -111,6 +132,7 @@ enum lis_error lis_api_sane(struct lis_api **out_impl)
 	return LIS_OK;
 }
 
+
 static void lis_sane_cleanup_dev_descriptors(struct lis_device_descriptor **dev_descs)
 {
 	int i;
@@ -127,6 +149,7 @@ static void lis_sane_cleanup_dev_descriptors(struct lis_device_descriptor **dev_
 	free(dev_descs);
 }
 
+
 static void lis_sane_cleanup(struct lis_api *impl)
 {
 	struct lis_sane *private = LIS_SANE_PRIVATE(impl);
@@ -141,7 +164,8 @@ static void lis_sane_cleanup(struct lis_api *impl)
 	}
 }
 
-static enum lis_error lis_sane_get_devices(
+
+static enum lis_error lis_sane_list_devices(
 		struct lis_api *impl, int local_only, struct lis_device_descriptor ***out_dev_descs
 	)
 {
@@ -174,7 +198,7 @@ static enum lis_error lis_sane_get_devices(
 			err = LIS_ERR_NO_MEM;
 			goto error;
 		}
-		(*out_dev_descs)[i]->api = API_NAME;
+		(*out_dev_descs)[i]->impl = impl;
 		(*out_dev_descs)[i]->dev_id = strdup(dev_list[i]->name);
 		(*out_dev_descs)[i]->vendor = strdup(dev_list[i]->vendor);
 		(*out_dev_descs)[i]->model = strdup(dev_list[i]->model);
@@ -189,7 +213,7 @@ static enum lis_error lis_sane_get_devices(
 		}
 	}
 
-	/* we must keep track of them so we can free them when get_devices() or cleanup()
+	/* we must keep track of them so we can free them when list_devices() or cleanup()
 	 * are called */
 	lis_sane_cleanup_dev_descriptors(private->dev_descs);
 	private->dev_descs = *out_dev_descs;
@@ -201,8 +225,38 @@ error:
 	return err;
 }
 
-static enum lis_error lis_sane_dev_get(struct lis_api *impl, const char *dev_id, struct lis_item **item)
+
+static enum lis_error lis_sane_get_device(struct lis_api *impl, const char *dev_id, struct lis_item **item)
 {
-	/* TODO */
-	return LIS_ERR_INTERNAL_NOT_IMPLEMENTED;
+	struct lis_sane_item *private;
+	enum lis_error err;
+
+	private = calloc(1, sizeof(struct lis_sane_item));
+	if (private == NULL) {
+		lis_log_debug("out of memory");
+		return LIS_ERR_NO_MEM;
+	}
+	memcpy(&private->item, &g_sane_item_template, sizeof(private->item));
+	private->item.name = strdup(dev_id);
+
+	lis_log_debug("sane_open() ...")
+	err = sane_status_to_lis_error(sane_open(dev_id, &private->handle));
+	lis_log_debug("sane_open(): 0x%X, %s", err, lis_strerror(err));
+	if (LIS_IS_ERROR(err)) {
+		free(private);
+		return err;
+	}
+
+	*item = &private->item;
+	return LIS_OK;
 }
+
+
+static void lis_sane_item_close(struct lis_item *device)
+{
+	struct lis_sane_item *private = LIS_SANE_ITEM_PRIVATE(device);
+	lis_log_debug("sane_close()");
+	free((void *)private->item.name);
+	sane_close(private->handle);
+}
+

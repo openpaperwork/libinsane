@@ -34,8 +34,8 @@ GType libinsane_api_get_type(void) G_GNUC_CONST;
 
 LibinsaneApi *libinsane_api_new_safebet(GError **error);
 LibinsaneApi *libinsane_api_new_from_string(const char *desc, GError **error);
-GList *libinsane_api_get_devices(LibinsaneApi *self, gboolean local_only, GError **error);
-LibinsaneItem *libinsane_api_dev_get(LibinsaneApi *self, const char *dev_id);
+GList *libinsane_api_list_devices(LibinsaneApi *self, gboolean local_only, GError **error);
+LibinsaneItem *libinsane_api_get_device(LibinsaneApi *self, const char *dev_id, GError **error);
 void libinsane_api_cleanup(LibinsaneApi *self);
 
 G_END_DECLS

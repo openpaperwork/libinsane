@@ -13,7 +13,7 @@ extern "C" {
  * \brief Basic informations regarding a scanner.
  */
 struct lis_device_descriptor {
-	const char *api; /*!< "Sane", "WIA", "TWAIN", etc */
+	struct lis_api *impl;
 
 	/*!
 	 * \brief Device id to use to identify and access the scanner.
@@ -271,11 +271,6 @@ struct lis_item {
 	} type;
 
 	/*!
-	 * \brief open access to the device (root item only ; useless on child items)
-	 */
-	enum lis_error (*open)(struct lis_item *item);
-
-	/*!
 	 * \brief Get item's children (usually scan sources).
 	 *
 	 * Without workarounds or normalizers:
@@ -324,6 +319,7 @@ struct lis_item {
 
 	/*!
 	 * \brief Close the access to a scanner.
+	 * Will also be done automatically if you call \ref lis_api.cleanup().
 	 */
 	void (*close)(struct lis_item *dev);
 };
@@ -335,6 +331,7 @@ struct lis_item {
  * Initialized as soon as you get it.
  */
 struct lis_api {
+	const char *base_name; /*!< "Sane", "WIA", "TWAIN", etc */
 
 	/*!
 	 * \brief cleanup the implementation.
@@ -350,7 +347,7 @@ struct lis_api {
 	void (*cleanup)(struct lis_api *impl);
 
 	/*!
-	 * \brief Look for scanners.
+	 * \brief Look for paper eaters.
 	 *
 	 * If you already know the device identifier of the scanner you want to use, you do not need
 	 * to call this function. You can call directly \ref dev_get.
@@ -361,7 +358,7 @@ struct lis_api {
 	 *   invalidated/freed at the next call of \ref get_devices() or \ref cleanup.
 	 * \retval LIS_OK dev_infos has been set to a list of devices. See \ref LIS_IS_OK.
 	 */
-	enum lis_error (*get_devices)(
+	enum lis_error (*list_devices)(
 		struct lis_api *impl, int local_only, struct lis_device_descriptor ***dev_infos
 	);
 
@@ -378,7 +375,7 @@ struct lis_api {
 	 *		See \ref LIS_IS_ERROR.
 	 * \retval LIS_ERR_ACCESS_DENIED Permission denied. See \ref LIS_IS_ERROR.
 	 */
-	enum lis_error (*dev_get)(struct lis_api *impl, const char *dev_id, struct lis_item **item);
+	enum lis_error (*get_device)(struct lis_api *impl, const char *dev_id, struct lis_item **item);
 };
 
 #ifdef __cplusplus

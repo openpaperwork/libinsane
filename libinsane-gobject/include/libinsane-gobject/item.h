@@ -38,7 +38,6 @@ GType libinsane_item_get_type(void) G_GNUC_CONST;
 
 const char *libinsane_item_get_name(LibinsaneItem *self);
 LibinsaneItemType libinsane_item_get_item_type(LibinsaneItem *self);
-void libinsane_item_open(LibinsaneItem *self, GError **error);
 void libinsane_item_close(LibinsaneItem *self, GError **error);
 GValueArray *libinsane_item_get_children(LibinsaneItem *self, GError **error);
 GValueArray *libinsane_item_get_options(LibinsaneItem *self, GError **error); /* TODO */

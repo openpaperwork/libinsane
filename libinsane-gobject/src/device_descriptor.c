@@ -52,11 +52,13 @@ LibinsaneDeviceDescriptor *libinsane_device_descriptor_new_from_libinsane(
 		const struct lis_device_descriptor *lis_desc
 	)
 {
-	LibinsaneDeviceDescriptor *desc = g_object_new(LIBINSANE_DEVICE_DESCRIPTOR_TYPE, NULL);
-	LibinsaneDeviceDescriptorPrivate *private = LIBINSANE_DEVICE_DESCRIPTOR_GET_PRIVATE(desc);
+	LibinsaneDeviceDescriptor *desc;
+	LibinsaneDeviceDescriptorPrivate *private;
 
 	lis_log_debug("[gobject] enter");
-	private->api = g_strdup(lis_desc->api);
+	desc = g_object_new(LIBINSANE_DEVICE_DESCRIPTOR_TYPE, NULL);
+	private = LIBINSANE_DEVICE_DESCRIPTOR_GET_PRIVATE(desc);
+	private->api = g_strdup(lis_desc->impl->base_name);
 	private->dev_id = g_strdup(lis_desc->dev_id);
 	private->vendor = g_strdup(lis_desc->vendor);
 	private->model = g_strdup(lis_desc->model);
