@@ -55,6 +55,10 @@ set(LIBINSANE_HEADERS
     include/libinsane/workarounds.h
 )
 
+set(LIBINSANE_TESTS
+    tests/tests_multiplexer.c
+)
+
 if(WIN32)
 
     MESSAGE(STATUS "Target OS: Microsoft Windows (Mingw)")
@@ -125,3 +129,13 @@ if (DEFINED(SANE_INCLUDED_DIR))
     target_include_directories(libinsane_static SYSTEM PUBLIC ${SANE_INCLUDE_DIR})
     target_link_libraries(libinsane_static ${SANE_LIBRARY})
 endif()
+
+
+# libinsane tests
+enable_testing()
+foreach(test ${LIBINSANE_TESTS})
+    add_executable(libinsane_tests ${LIBINSANE_SRCS} ${test})
+    target_include_directories(libinsane_tests PUBLIC include ${LIBINSANE_INCLUDES})
+    target_link_libraries(libinsane_tests ${LIBINSANE_LIBS} -lcunit)
+    add_test(libinsane_tests ${EXECUTABLE_OUTPUT_PATH}/libinsane_tests)
+endforeach(test)

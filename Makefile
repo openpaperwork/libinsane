@@ -48,7 +48,8 @@ check: \
 	$(patsubst %.h,%.h_check,${HEADERS}) \
 	$(patsubst %.c,%.c_check,${SRCS})
 
-test:
+test: build_libinsane
+	(cd libinsane/build ; make test)
 
 linux_exe:
 

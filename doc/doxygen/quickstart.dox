@@ -16,7 +16,8 @@ sudo apt install \
         gtk-doc-tools doxygen plantuml graphviz \
         build-essential \
         libsane-dev \
-        libgirepository1.0-dev gobject-introspection
+        libgirepository1.0-dev gobject-introspection \
+        libcunit1-ncurses-dev
 make
 ```
 
