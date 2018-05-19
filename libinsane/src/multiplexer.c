@@ -118,6 +118,7 @@ static enum lis_error lis_multi_list_devices(struct lis_api *impl, int local_onl
 
 	/* get all the devices */
 	memset(&devs, 0, sizeof(devs));
+	nb_devs = 0;
 	for (i = 0 ; i < private->nb_impls ; i++) {
 		lis_log_debug("Getting devices from API %d", i);
 		err = private->impls[i]->list_devices(private->impls[i], local_only, &devs[i]);
@@ -129,6 +130,7 @@ static enum lis_error lis_multi_list_devices(struct lis_api *impl, int local_onl
 		for (j = 0 ; devs[i][j] != NULL ; j++) {
 			nb_devs++;
 		}
+		lis_log_debug("Got %d devices from API %d", j, i);
 	}
 
 	/* if all implementations have failed
@@ -155,17 +157,17 @@ static enum lis_error lis_multi_list_devices(struct lis_api *impl, int local_onl
 			continue;
 		}
 		for (j = 0 ; devs[i][j] != NULL ; j++) {
-			*out_dev_descs[nb_devs] = calloc(1, sizeof(struct lis_device_descriptor));
-			if (*out_dev_descs[nb_devs] == NULL) {
+			(*out_dev_descs)[nb_devs] = calloc(1, sizeof(struct lis_device_descriptor));
+			if ((*out_dev_descs)[nb_devs] == NULL) {
 				lis_log_error("out of memory");
 				err = LIS_ERR_NO_MEM;
 				goto error;
 			}
 			memcpy((*out_dev_descs)[nb_devs], devs[i][j], sizeof(struct lis_device_descriptor));
-			if (asprintf(&(*out_dev_descs[nb_devs])->dev_id, "%s:%s",
-					(*out_dev_descs[nb_devs])->impl->base_name,
-					(*out_dev_descs[nb_devs])->dev_id) < 0) {
-				(*out_dev_descs[nb_devs])->dev_id = NULL;
+			if (asprintf(&((*out_dev_descs)[nb_devs])->dev_id, "%s:%s",
+					((*out_dev_descs)[nb_devs])->impl->base_name,
+					((*out_dev_descs)[nb_devs])->dev_id) < 0) {
+				((*out_dev_descs)[nb_devs])->dev_id = NULL;
 				lis_log_error("out of memory");
 				err = LIS_ERR_NO_MEM;
 				goto error;
