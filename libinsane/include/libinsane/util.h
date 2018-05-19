@@ -10,6 +10,7 @@ extern "C" {
 #endif
 
 #define LIS_UNUSED(x) (void)(x)
+#define LIS_COUNT_OF(x) (sizeof(x) / sizeof((x)[0]))
 
 /*!
  * \brief Copy a value.

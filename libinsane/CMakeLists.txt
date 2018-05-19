@@ -8,8 +8,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 include(GNUInstallDirs)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic -g -ggdb")
-set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic -g -ggdb")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic -g -ggdb -O2")
+set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic -g -ggdb -O2")
 
 set(LIBINSANE_SRCS
     src/bases/dumb.c
@@ -56,7 +56,7 @@ set(LIBINSANE_HEADERS
 )
 
 set(LIBINSANE_TESTS
-    tests/tests_multiplexer.c
+    multiplexer
 )
 
 if(WIN32)
@@ -134,8 +134,8 @@ endif()
 # libinsane tests
 enable_testing()
 foreach(test ${LIBINSANE_TESTS})
-    add_executable(libinsane_tests ${LIBINSANE_SRCS} ${test})
-    target_include_directories(libinsane_tests PUBLIC include ${LIBINSANE_INCLUDES})
-    target_link_libraries(libinsane_tests ${LIBINSANE_LIBS} -lcunit)
-    add_test(libinsane_tests ${EXECUTABLE_OUTPUT_PATH}/libinsane_tests)
+    add_executable(tests_${test} ${LIBINSANE_SRCS} tests/main.c tests/tests_${test}.c)
+    target_include_directories(tests_${test} PUBLIC include ${LIBINSANE_INCLUDES})
+    target_link_libraries(tests_${test} ${LIBINSANE_LIBS} -lcunit)
+    add_test(tests_${test} tests_${test})
 endforeach(test)
