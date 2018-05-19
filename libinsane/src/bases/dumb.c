@@ -6,6 +6,7 @@
 #include <libinsane/capi.h>
 #include <libinsane/dumb.h>
 #include <libinsane/error.h>
+#include <libinsane/log.h>
 #include <libinsane/util.h>
 
 
@@ -42,10 +43,19 @@ static struct lis_api g_dumb_api_template = {
 	.get_device = dumb_get_device,
 };
 
+static struct lis_device_descriptor *g_dumb_default_devices[] = { NULL };
 
 static void dumb_cleanup(struct lis_api *self)
 {
+	struct lis_dumb_private *private = LIS_DUMB_PRIVATE(self);
 	free((void*)self->base_name);
+
+	if (private->descs != g_dumb_default_devices) {
+
+	}
+
+	if (private->devices != NULL) {
+	}
 }
 
 
@@ -59,10 +69,17 @@ static enum lis_error dumb_list_devices(
 }
 
 static enum lis_error dumb_get_device(
-			struct lis_api *self, const char *dev_id, struct lis_item **item
-		) {
+		struct lis_api *self, const char *dev_id, struct lis_item **item
+	)
+{
 	struct lis_dumb_private *private = LIS_DUMB_PRIVATE(self);
 	int i;
+
+	if (private->devices == NULL) {
+		lis_log_error("[dumb] get_device() called when no device has been set"
+				"; shouldn't happen");
+		return LIS_ERR_INTERNAL_NOT_IMPLEMENTED;
+	}
 
 	for (i = 0 ; private->devices[i] != NULL ; i++) {
 		if (strcmp(dev_id, private->devices[i]->dev_id) == 0) {
@@ -75,21 +92,25 @@ static enum lis_error dumb_get_device(
 }
 
 
-enum lis_error lis_api_dumb(struct lis_api **impl) {
-	return lis_api_dumb_named_devices(impl, "dumb", 0);
-}
-
-
-enum lis_error lis_api_dumb_named_devices(
-		struct lis_api **out_impl, const char *name, int nb_devices
-) {
-	int i;
+enum lis_error lis_api_dumb(struct lis_api **out_impl, const char *name)
+{
 	struct lis_dumb_private *private;
-	struct lis_dumb_item *item;
 
 	private = calloc(1, sizeof(struct lis_dumb_private));
 	memcpy(&private->base, &g_dumb_api_template, sizeof(private->base));
 	private->base.base_name = strdup(name);
+	private->descs = g_dumb_default_devices;
+
+	*out_impl = &private->base;
+	return LIS_OK;
+}
+
+
+void lis_dumb_set_nb_devices(struct lis_api *self, int nb_devices)
+{
+	struct lis_dumb_private *private = LIS_DUMB_PRIVATE(self);
+	int i;
+	struct lis_dumb_item *item;
 
 	private->descs = calloc(nb_devices + 1, sizeof(struct lis_device_descriptor *));
 	for (i = 0 ; i < nb_devices ; i++) {
@@ -108,7 +129,4 @@ enum lis_error lis_api_dumb_named_devices(
 		item->dev_id = private->descs[i]->dev_id;
 		private->devices[i] = item;
 	}
-
-	*out_impl = &private->base;
-	return LIS_OK;
 }

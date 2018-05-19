@@ -15,10 +15,14 @@ static void test_list_devices_prefix(void)
 	struct lis_device_descriptor **descs;
 	enum lis_error err;
 
-	err = lis_api_dumb_named_devices(&dumbs[0], "dummy0", 1);
+	err = lis_api_dumb(&dumbs[0], "dummy0");
 	CU_ASSERT_TRUE(LIS_IS_OK(err));
-	err = lis_api_dumb_named_devices(&dumbs[1], "dummy1", 2);
+	lis_dumb_set_nb_devices(dumbs[0], 1);
+
+	err = lis_api_dumb(&dumbs[1], "dummy1");
 	CU_ASSERT_TRUE(LIS_IS_OK(err));
+	lis_dumb_set_nb_devices(dumbs[1], 2);
+
 	err = lis_api_multiplexer(dumbs, LIS_COUNT_OF(dumbs), &multiplexer);
 	CU_ASSERT_TRUE(LIS_IS_OK(err));
 

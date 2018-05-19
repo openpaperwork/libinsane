@@ -52,7 +52,7 @@ enum lis_error lis_safebet(struct lis_api **out_impls)
 	}
 #endif
 	if (lis_getenv("LIBINSANE_DUMB", nb_impls == 0)) {
-		err = lis_api_dumb(&impls[nb_impls]);
+		err = lis_api_dumb(&impls[nb_impls], "dumb");
 		if (LIS_IS_ERROR(err)) {
 			goto error;
 		}

@@ -45,7 +45,7 @@ enum lis_error lis_str2impls(const char *list_of_impls, struct lis_api **impls)
 
 			// look for a base API
 			if (strcmp(tok, "dumb") == 0) {
-				err = lis_api_dumb(&next);
+				err = lis_api_dumb(&next, "dumb");
 #ifdef OS_LINUX
 			} else if (strcmp(tok, "sane") == 0) {
 				err = lis_api_sane(&next);
