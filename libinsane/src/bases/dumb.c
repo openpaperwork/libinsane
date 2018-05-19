@@ -45,17 +45,44 @@ static struct lis_api g_dumb_api_template = {
 
 static struct lis_device_descriptor *g_dumb_default_devices[] = { NULL };
 
+static void dumb_cleanup_descs(struct lis_device_descriptor **descs)
+{
+	int i;
+
+	if (descs == g_dumb_default_devices) {
+		return;
+	}
+
+	for (i = 0 ; descs[i] != NULL ; i++) {
+		free(descs[i]->dev_id);
+		free(descs[i]);
+	}
+
+	free(descs);
+}
+
+static void dumb_cleanup_devices(struct lis_dumb_item **devs)
+{
+	int i;
+	if (devs == NULL) {
+		return;
+	}
+
+	for (i = 0 ; devs[i] != NULL ; i++) {
+		free(devs[i]);
+	}
+
+	free(devs);
+}
+
 static void dumb_cleanup(struct lis_api *self)
 {
 	struct lis_dumb_private *private = LIS_DUMB_PRIVATE(self);
 	free((void*)self->base_name);
 
-	if (private->descs != g_dumb_default_devices) {
-
-	}
-
-	if (private->devices != NULL) {
-	}
+	dumb_cleanup_descs(private->descs);
+	dumb_cleanup_devices(private->devices);
+	free(private);
 }
 
 

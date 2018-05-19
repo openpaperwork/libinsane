@@ -87,6 +87,7 @@ static void lis_multi_cleanup_dev_descs(struct lis_device_descriptor **dev_descs
 		free(dev_descs[i]);
 	}
 	free(dev_descs[i]);
+	free(dev_descs);
 }
 
 
@@ -95,10 +96,11 @@ static void lis_multi_cleanup(struct lis_api *impl)
 	struct lis_multi *private = LIS_MULTI_PRIVATE(impl);
 	int i;
 
+	lis_multi_cleanup_dev_descs(private->merged_devs);
 	for (i = 0 ; i < private->nb_impls ; i++) {
 		private->impls[i]->cleanup(private->impls[i]);
 	}
-	lis_multi_cleanup_dev_descs(private->merged_devs);
+	free(private->impls);
 	free(private);
 }
 

@@ -49,7 +49,7 @@ check: \
 	$(patsubst %.c,%.c_check,${SRCS})
 
 test: build_libinsane
-	(cd libinsane/build ; make test)
+	(cd libinsane/build ; CTEST_OUTPUT_ON_FAILURE=1 make test)
 
 linux_exe:
 
