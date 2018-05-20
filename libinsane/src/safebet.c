@@ -68,12 +68,8 @@ enum lis_error lis_safebet(struct lis_api **out_impls)
 	return err;
 
 error:
-	if (*impls != NULL) {
-		(*impls)->cleanup(*impls);
-	} else {
-		for (nb_impls-- ; nb_impls >= 0 ; nb_impls--) {
-			impls[nb_impls]->cleanup(impls[nb_impls]);
-		}
+	for (nb_impls-- ; nb_impls >= 0 ; nb_impls--) {
+		impls[nb_impls]->cleanup(impls[nb_impls]);
 	}
 	return err;
 }

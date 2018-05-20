@@ -5,6 +5,8 @@ DESTDIR ?= /usr/local
 SRCS = $(wildcard src/libinsane/*.c)
 HEADERS = $(wildcard include/libinsane/*.h)
 
+all: build check test
+
 build: build_c build_py
 
 install: install_py install_c
@@ -38,17 +40,17 @@ gtkdoc: build_libinsane_gobject
 doc: doxygen gtkdoc
 	cp doc/index.html doc/build/index.html
 
-%.c_check:
-	splint -f splint.rc $(patsubst %_check,%,$@)
-
-%.h_check:
-	splint -f splint.rc $(patsubst %_check,%,$@)
-
-check: \
-	$(patsubst %.h,%.h_check,${HEADERS}) \
-	$(patsubst %.c,%.c_check,${SRCS})
+check: build_c
+	@echo
+	@echo "### CHECK libinsane ###"
+	(cd libinsane/build ; ! /usr/lib/llvm-4.0/share/clang/run-clang-tidy.py | grep warning 2>&1)
+	@echo
+	@echo "### CHECK libinsane-gobject ###"
+	(cd libinsane-gobject/build ; ! /usr/lib/llvm-4.0/share/clang/run-clang-tidy.py | grep warning 2>&1)
 
 test: build_libinsane
+	@echo
+	@echo "### TEST libinsane ###"
 	(cd libinsane/build ; CTEST_OUTPUT_ON_FAILURE=1 make test)
 
 linux_exe:
