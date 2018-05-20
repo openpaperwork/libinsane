@@ -26,8 +26,8 @@ Since all the components implement the same API, you can simply use the one prov
 Expected order of calling when most of the normalizers are enabled:
 
 - \ref lis_safebet "impl = lis_safebet()"
-- \ref lis_api.get_devices "impl->get_devices()"
-- \ref lis_item "dev" = \ref lis_api.dev_get "impl->dev_get()"
+- \ref lis_api.list_devices "impl->list_devices()"
+- \ref lis_item "dev" = \ref lis_api.get_device "impl->get_device()"
   - \ref lis_item "sources" = \ref lis_item.get_children "dev->get_children()"
     - \ref lis_option_descriptor "options" = \ref lis_item.get_options "sources[a]->get_options()"
       - \ref lis_option_descriptor.get_value "options[x]->fn.get_value()".

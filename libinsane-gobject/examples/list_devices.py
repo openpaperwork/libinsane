@@ -16,12 +16,14 @@ from gi.repository import Libinsane  # noqa: E402
 
 class ExampleLogger(GObject.GObject, Libinsane.Logger):
     def do_log(self, lvl, msg):
+        if lvl <= Libinsane.LogLevel.DEBUG:
+            return
         print("{}: {}".format(lvl.value_nick, msg))
 
 
 def main():
     Libinsane.register_logger(ExampleLogger())
-#! [Logger]
+    #! [Logger]
     api = Libinsane.Api.new_safebet()
     devs = api.list_devices(Libinsane.DeviceLocations.ANY)
     print("Found {} devices".format(len(devs)))

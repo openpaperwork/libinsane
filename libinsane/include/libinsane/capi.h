@@ -277,7 +277,7 @@ struct lis_item {
 	 * - Sane: will return an empty list.
 	 * - WIA: will return device sources (Flatbed, Automatic Document Feeder, etc).
 	 *
-	 * \param[in] parent Usually a scanner (see \ref lis_api.dev_get()).
+	 * \param[in] parent Usually a scanner (see \ref lis_api.get_device()).
 	 * \param[out] children Usually scanner sources. List will be NULL terminated.
 	 * \retval LIS_OK children has been set to a valid array of items. See \ref LIS_IS_OK.
 	 */
@@ -354,12 +354,12 @@ struct lis_api {
 	 * \brief Look for paper eaters.
 	 *
 	 * If you already know the device identifier of the scanner you want to use, you do not need
-	 * to call this function. You can call directly \ref dev_get.
+	 * to call this function. You can call directly \ref get_device.
 	 *
 	 * \warning This operation may take many seconds.
 	 * \param[in] local_only 1 if only local devices must be reported, 0 if remote devices must also be reported
 	 * \param[out] dev_infos will point to a list of device descriptions, NULL terminated. Will be
-	 *   invalidated/freed at the next call of \ref get_devices() or \ref cleanup.
+	 *   invalidated/freed at the next call of \ref list_devices() or \ref cleanup.
 	 * \retval LIS_OK dev_infos has been set to a list of devices. See \ref LIS_IS_OK.
 	 */
 	enum lis_error (*list_devices)(
@@ -368,7 +368,7 @@ struct lis_api {
 
 	/*!
 	 * \brief Open the access to a scanner.
-	 * \param[in] dev_id Device identifier. See \ref get_devices().
+	 * \param[in] dev_id Device identifier. See \ref list_devices().
 	 * \param[out] item Item representing the scanner.
 	 * \warning This operation may take many seconds.
 	 * \retval LIS_OK item has been set to ta valid list of items. List is NULL terminated.
