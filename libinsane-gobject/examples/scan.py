@@ -40,7 +40,7 @@ def main():
         source = sys.argv[3]
 
     if dev_id is None:
-        devs = api.list_devices(False)  # !local_only
+        devs = api.list_devices(Libinsane.DeviceLocations.ANY)
         print("Found {} devices".format(len(devs)))
         for dev in devs:
             print("[{}] : [{}]".format(dev.get_dev_id(), dev.to_string()))

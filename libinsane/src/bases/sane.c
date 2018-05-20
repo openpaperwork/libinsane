@@ -28,7 +28,8 @@ struct lis_sane_item
 
 
 static void lis_sane_cleanup(struct lis_api *impl);
-static enum lis_error lis_sane_list_devices(struct lis_api *impl, int local_only,
+static enum lis_error lis_sane_list_devices(struct lis_api *impl,
+		enum lis_device_locations locations,
 		struct lis_device_descriptor ***out_dev_descs);
 static enum lis_error lis_sane_get_device(struct lis_api *impl, const char *dev_id,
 		struct lis_item **item);
@@ -166,13 +167,24 @@ static void lis_sane_cleanup(struct lis_api *impl)
 
 
 static enum lis_error lis_sane_list_devices(
-		struct lis_api *impl, int local_only, struct lis_device_descriptor ***out_dev_descs
+		struct lis_api *impl, enum lis_device_locations locations,
+		struct lis_device_descriptor ***out_dev_descs
 	)
 {
 	struct lis_sane *private = LIS_SANE_PRIVATE(impl);
 	enum lis_error err;
 	const SANE_Device **dev_list = NULL;
 	int nb_devs, i;
+	int local_only = 0;
+
+	switch(locations) {
+		case LIS_DEVICE_LOCATIONS_ANY:
+			local_only = 0;
+			break;
+		case LIS_DEVICE_LOCATIONS_LOCAL_ONLY:
+			local_only = 1;
+			break;
+	}
 
 	lis_log_debug("sane_get_devices() ...");
 	err = sane_status_to_lis_error(sane_get_devices(&dev_list, local_only));

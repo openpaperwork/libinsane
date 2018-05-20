@@ -7,26 +7,47 @@
 #include <libinsane/multiplexer.h>
 #include <libinsane/util.h>
 
+struct lis_api *g_dumbs[2];
+struct lis_api *g_multiplexer;
+
+static int tests_multiplexer_init(void)
+{
+	enum lis_error err;
+	int ret;
+
+	err = lis_api_dumb(&g_dumbs[0], "dummy0");
+	ret = LIS_IS_OK(err);
+	if (!ret)
+		goto end;
+	lis_dumb_set_nb_devices(g_dumbs[0], 1);
+
+	err = lis_api_dumb(&g_dumbs[1], "dummy1");
+	ret = LIS_IS_OK(err);
+	if (!ret)
+		goto end;
+	lis_dumb_set_nb_devices(g_dumbs[1], 2);
+
+	err = lis_api_multiplexer(g_dumbs, LIS_COUNT_OF(g_dumbs), &g_multiplexer);
+	ret = LIS_IS_OK(err);
+
+end:
+	return ret;
+}
+
+static int tests_multiplexer_clean(void)
+{
+	g_multiplexer->cleanup(g_multiplexer);
+	return 1;
+}
 
 static void test_list_devices_prefix(void)
 {
-	struct lis_api *dumbs[2];
-	struct lis_api *multiplexer;
 	struct lis_device_descriptor **descs;
 	enum lis_error err;
 
-	err = lis_api_dumb(&dumbs[0], "dummy0");
-	CU_ASSERT_TRUE(LIS_IS_OK(err));
-	lis_dumb_set_nb_devices(dumbs[0], 1);
-
-	err = lis_api_dumb(&dumbs[1], "dummy1");
-	CU_ASSERT_TRUE(LIS_IS_OK(err));
-	lis_dumb_set_nb_devices(dumbs[1], 2);
-
-	err = lis_api_multiplexer(dumbs, LIS_COUNT_OF(dumbs), &multiplexer);
-	CU_ASSERT_TRUE(LIS_IS_OK(err));
-
-	err = multiplexer->list_devices(multiplexer, 0 /* !local_only */, &descs);
+	err = g_multiplexer->list_devices(
+		g_multiplexer, LIS_DEVICE_LOCATIONS_ANY, &descs
+	);
 	CU_ASSERT_TRUE(LIS_IS_OK(err));
 
 	CU_ASSERT_EQUAL(strncmp(descs[0]->dev_id, "dummy0:", 7), 0);
@@ -44,12 +65,34 @@ static void test_list_devices_prefix(void)
 	CU_ASSERT_NOT_EQUAL(descs[2]->vendor, NULL);
 	CU_ASSERT_NOT_EQUAL(descs[2]->model, NULL);
 
-	multiplexer->cleanup(multiplexer);
+	CU_ASSERT_EQUAL(descs[3], NULL);
 }
 
 static void test_list_devices_ko(void)
 {
+	struct lis_device_descriptor **descs;
+	enum lis_error err;
 
+	/* if one of the base APIs still works, multiplexer should still work */
+	lis_dumb_set_list_devices_return(g_dumbs[1], LIS_ERR_IO_ERROR);
+	err = g_multiplexer->list_devices(
+		g_multiplexer, LIS_DEVICE_LOCATIONS_ANY, &descs
+	);
+	CU_ASSERT_TRUE(LIS_IS_OK(err));
+
+	CU_ASSERT_EQUAL(strncmp(descs[0]->dev_id, "dummy0:", 7), 0);
+	CU_ASSERT_NOT_EQUAL(descs[0]->impl, NULL);
+	CU_ASSERT_NOT_EQUAL(descs[0]->vendor, NULL);
+	CU_ASSERT_NOT_EQUAL(descs[0]->model, NULL);
+
+	CU_ASSERT_EQUAL(descs[1], NULL);
+
+	/* if none work, then multiplexer shouln't work */
+	lis_dumb_set_list_devices_return(g_dumbs[0], LIS_ERR_JAMMED);
+	err = g_multiplexer->list_devices(
+		g_multiplexer, LIS_DEVICE_LOCATIONS_ANY, &descs
+	);
+	CU_ASSERT_TRUE(LIS_IS_ERROR(err));
 }
 
 static void test_get_device_ok(void)
@@ -71,7 +114,7 @@ int register_tests(void)
 {
 	CU_pSuite suite = NULL;
 
-	suite = CU_add_suite("Multiplexer", NULL, NULL);
+	suite = CU_add_suite("Multiplexer", tests_multiplexer_init, tests_multiplexer_clean);
 	if (suite == NULL) {
 		fprintf(stderr, "CU_add_suite() failed\n");
 		return 0;

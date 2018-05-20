@@ -12,7 +12,7 @@
 
 static void dumb_cleanup(struct lis_api *impl);
 static enum lis_error dumb_list_devices(
-	struct lis_api *impl, int local_only, struct lis_device_descriptor ***dev_infos
+	struct lis_api *impl, enum lis_device_locations, struct lis_device_descriptor ***dev_infos
 );
 static enum lis_error dumb_get_device(
 	struct lis_api *impl, const char *dev_id, struct lis_item **item
@@ -27,6 +27,7 @@ struct lis_dumb_item {
 struct lis_dumb_private {
 	struct lis_api base;
 
+	enum lis_error list_devices_ret;
 	struct lis_device_descriptor **descs;
 	struct lis_dumb_item **devices;
 };
@@ -87,12 +88,19 @@ static void dumb_cleanup(struct lis_api *self)
 
 
 static enum lis_error dumb_list_devices(
-		struct lis_api *self, int local_only, struct lis_device_descriptor ***dev_infos
+		struct lis_api *self, enum lis_device_locations locations,
+		struct lis_device_descriptor ***dev_infos
 	)
 {
+	LIS_UNUSED(locations);
+
 	struct lis_dumb_private *private = LIS_DUMB_PRIVATE(self);
-	*dev_infos = private->descs;
-	return LIS_OK;
+	if (LIS_IS_OK(private->list_devices_ret)) {
+		*dev_infos = private->descs;
+	} else {
+		*dev_infos = NULL;
+	}
+	return private->list_devices_ret;
 }
 
 static enum lis_error dumb_get_device(
@@ -127,6 +135,7 @@ enum lis_error lis_api_dumb(struct lis_api **out_impl, const char *name)
 	memcpy(&private->base, &g_dumb_api_template, sizeof(private->base));
 	private->base.base_name = strdup(name);
 	private->descs = g_dumb_default_devices;
+	private->list_devices_ret = LIS_OK;
 
 	*out_impl = &private->base;
 	return LIS_OK;
@@ -156,4 +165,10 @@ void lis_dumb_set_nb_devices(struct lis_api *self, int nb_devices)
 		item->dev_id = private->descs[i]->dev_id;
 		private->devices[i] = item;
 	}
+}
+
+void lis_dumb_set_list_devices_return(struct lis_api *self, enum lis_error ret)
+{
+	struct lis_dumb_private *private = LIS_DUMB_PRIVATE(self);
+	private->list_devices_ret = ret;
 }

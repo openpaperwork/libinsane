@@ -120,18 +120,31 @@ void libinsane_api_cleanup(LibinsaneApi *self)
  * Returns: (element-type Libinsane.DeviceDescriptor) (transfer full):
  *   list of available devices (LibinsaneItem objects)
  */
-GList *libinsane_api_list_devices(LibinsaneApi *self, gboolean local_only, GError **error) {
+GList *libinsane_api_list_devices(
+	LibinsaneApi *self, LibinsaneDeviceLocations locations, GError **error
+)
+{
 	LibinsaneApiPrivate *priv;
 	enum lis_error err;
 	struct lis_device_descriptor **dev_infos;
 	LibinsaneDeviceDescriptor *dev_info;
 	GList *out = NULL;
 	int i;
+	enum lis_device_locations lis_locations = LIS_DEVICE_LOCATIONS_ANY;
 
 	lis_log_debug("enter");
 
+	switch(locations) {
+		case LIBINSANE_DEVICE_LOCATIONS_ANY:
+			lis_locations = LIS_DEVICE_LOCATIONS_ANY;
+			break;
+		case LIBINSANE_DEVICE_LOCATIONS_LOCAL_ONLY:
+			lis_locations = LIS_DEVICE_LOCATIONS_LOCAL_ONLY;
+			break;
+	}
+
 	priv = LIBINSANE_API_GET_PRIVATE(self);
-	err = priv->impl->list_devices(priv->impl, local_only, &dev_infos);
+	err = priv->impl->list_devices(priv->impl, lis_locations, &dev_infos);
 	if (LIS_IS_ERROR(err)) {
 		SET_LIBINSANE_GOBJECT_ERROR(error, err,
 			"Libinsane get devices error: 0x%X, %s",

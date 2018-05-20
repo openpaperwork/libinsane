@@ -324,6 +324,10 @@ struct lis_item {
 	void (*close)(struct lis_item *dev);
 };
 
+enum lis_device_locations {
+	LIS_DEVICE_LOCATIONS_ANY = 0, /*!< local and remote */
+	LIS_DEVICE_LOCATIONS_LOCAL_ONLY,
+};
 
 /*!
  * \brief LibInsane C API.
@@ -359,7 +363,7 @@ struct lis_api {
 	 * \retval LIS_OK dev_infos has been set to a list of devices. See \ref LIS_IS_OK.
 	 */
 	enum lis_error (*list_devices)(
-		struct lis_api *impl, int local_only, struct lis_device_descriptor ***dev_infos
+		struct lis_api *impl, enum lis_device_locations, struct lis_device_descriptor ***dev_infos
 	);
 
 	/*!

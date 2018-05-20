@@ -33,7 +33,10 @@ struct lis_multi
 
 
 static void lis_multi_cleanup(struct lis_api *impl);
-static enum lis_error lis_multi_list_devices(struct lis_api *impl, int local_only, struct lis_device_descriptor ***dev_descs);
+static enum lis_error lis_multi_list_devices(
+	struct lis_api *impl, enum lis_device_locations locations,
+	struct lis_device_descriptor ***dev_descs
+);
 static enum lis_error lis_multi_get_device(struct lis_api *impl, const char *dev_id, struct lis_item **item);
 
 
@@ -105,7 +108,8 @@ static void lis_multi_cleanup(struct lis_api *impl)
 }
 
 
-static enum lis_error lis_multi_list_devices(struct lis_api *impl, int local_only,
+static enum lis_error lis_multi_list_devices(
+		struct lis_api *impl, enum lis_device_locations locations,
 		struct lis_device_descriptor ***out_dev_descs)
 {
 	struct lis_multi *private = LIS_MULTI_PRIVATE(impl);
@@ -123,7 +127,7 @@ static enum lis_error lis_multi_list_devices(struct lis_api *impl, int local_onl
 	nb_devs = 0;
 	for (i = 0 ; i < private->nb_impls ; i++) {
 		lis_log_debug("Getting devices from API %d", i);
-		err = private->impls[i]->list_devices(private->impls[i], local_only, &devs[i]);
+		err = private->impls[i]->list_devices(private->impls[i], locations, &devs[i]);
 		if (LIS_IS_ERROR(err)) {
 			last_err = err;
 			continue;

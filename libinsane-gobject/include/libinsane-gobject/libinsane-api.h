@@ -7,6 +7,11 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+	LIBINSANE_DEVICE_LOCATIONS_ANY = 0,
+	LIBINSANE_DEVICE_LOCATIONS_LOCAL_ONLY,
+} LibinsaneDeviceLocations;
+
 #define LIBINSANE_API_TYPE \
      (libinsane_api_get_type())
 #define LIBINSANE_API(obj) \
@@ -34,7 +39,9 @@ GType libinsane_api_get_type(void) G_GNUC_CONST;
 
 LibinsaneApi *libinsane_api_new_safebet(GError **error);
 LibinsaneApi *libinsane_api_new_from_string(const char *desc, GError **error);
-GList *libinsane_api_list_devices(LibinsaneApi *self, gboolean local_only, GError **error);
+GList *libinsane_api_list_devices(
+	LibinsaneApi *self, LibinsaneDeviceLocations locations, GError **error
+);
 LibinsaneItem *libinsane_api_get_device(LibinsaneApi *self, const char *dev_id, GError **error);
 void libinsane_api_cleanup(LibinsaneApi *self);
 
