@@ -71,6 +71,7 @@ def main():
     if source is None:
         print("Failed to find scan source \"{}\"".format(source_name))
         sys.exit(2)
+    print("Will use scan source {}".format(source.get_name()))
 
     # set the options
     # TODO
