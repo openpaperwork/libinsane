@@ -277,20 +277,20 @@ struct lis_item {
 	 * - Sane: will return an empty list.
 	 * - WIA: will return device sources (Flatbed, Automatic Document Feeder, etc).
 	 *
-	 * \param[in] parent Usually a scanner (see \ref lis_api.get_device()).
+	 * \param[in] self Usually a scanner (see \ref lis_api.get_device()).
 	 * \param[out] children Usually scanner sources. List will be NULL terminated.
 	 * \retval LIS_OK children has been set to a valid array of items. See \ref LIS_IS_OK.
 	 */
-	enum lis_error (*get_children)(struct lis_item *parent, struct lis_item ***children);
+	enum lis_error (*get_children)(struct lis_item *self, struct lis_item ***children);
 
 	/*!
 	 * \brief Get item's options.
-	 * \param[in] item Item from which we want the option list.
+	 * \param[in] self Item from which we want the option list.
 	 * \param[out] descs Option list. NULL terminated.
 	 * \retval LIS_OK descs has been set.
 	 */
 	enum lis_error (*get_options)(
-		struct lis_item *item, struct lis_option_descriptor ***descs
+		struct lis_item *self, struct lis_option_descriptor ***descs
 	);
 
 	/*!
@@ -300,28 +300,28 @@ struct lis_item {
 	 * the height may actually vary. Application must handle the case where something different
 	 * will be scanned (longer or shorter image).
 	 *
-	 * \param[in] item Item from which the scan will be done.
+	 * \param[in] self Item from which the scan will be done.
 	 * \param[out] parameters Estimation of what will be scanned.
 	 * \retval LIS_OK parameters has been set.
 	 */
 	enum lis_error (*get_scan_parameters)(
-		struct lis_item *item, struct lis_scan_parameters *parameters
+		struct lis_item *self, struct lis_scan_parameters *parameters
 	);
 
 	/*!
 	 * \brief Starts a scan session.
 	 * \warning This operation may take many seconds.
-	 * \param[in] item Item from which to scan.
+	 * \param[in] self Item from which to scan.
 	 * \param[out] session Scan session.
 	 * \retval LIS_OK Scan of the first page has started.
 	 */
-	enum lis_error (*scan_start)(struct lis_item *item, struct lis_scan_session **session);
+	enum lis_error (*scan_start)(struct lis_item *self, struct lis_scan_session **session);
 
 	/*!
 	 * \brief Close the access to a scanner.
 	 * Will also be done automatically if you call \ref lis_api.cleanup().
 	 */
-	void (*close)(struct lis_item *dev);
+	void (*close)(struct lis_item *self);
 };
 
 enum lis_device_locations {

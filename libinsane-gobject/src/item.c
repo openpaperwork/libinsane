@@ -1,6 +1,8 @@
 #include <libinsane/capi.h>
 #include <libinsane/log.h>
 
+#include <libinsane-gobject/error.h>
+#include <libinsane-gobject/error_private.h>
 #include <libinsane-gobject/item.h>
 
 
@@ -56,9 +58,7 @@ LibinsaneItem *libinsane_item_new_from_libinsane(struct lis_item *lis_item)
  */
 const char *libinsane_item_get_name(LibinsaneItem *self)
 {
-	LibinsaneItemPrivate *private;
-
-	private = LIBINSANE_ITEM_GET_PRIVATE(self);
+	LibinsaneItemPrivate *private = LIBINSANE_ITEM_GET_PRIVATE(self);
 	return private->item->name;
 }
 
@@ -83,11 +83,35 @@ void libinsane_item_close(LibinsaneItem *self, GError **error)
  *
  * See [C-API](../doxygen/html/structlis__item.html#ae4039acefa6acf85a110dec491340411)
  *
- * Returns: (transfer full): list of children items (usually scan sources)
+ * Returns: (element-type Libinsane.Item) (transfer full):
+ *   list of children items (usually scan sources)
  */
-GValueArray *libinsane_item_get_children(LibinsaneItem *self, GError **error)
+GList *libinsane_item_get_children(LibinsaneItem *self, GError **error)
 {
-	return NULL; /* TODO */
+	LibinsaneItemPrivate *private = LIBINSANE_ITEM_GET_PRIVATE(self);
+	struct lis_item **children;
+	GList *out = NULL;
+	enum lis_error err;
+	LibinsaneItem *item;
+	int i;
+
+	lis_log_debug("enter");
+	err = private->item->get_children(private->item, &children);
+	if (LIS_IS_ERROR(err)) {
+		SET_LIBINSANE_GOBJECT_ERROR(error, err,
+			"Libinsane item_get_children() error: 0x%X, %s",
+			err, lis_strerror(err));
+		lis_log_debug("error");
+		return NULL;
+	}
+
+	for (i = 0 ; children[i] != NULL ; i++) {
+		item = libinsane_item_new_from_libinsane(children[i]);
+		out = g_list_prepend(out, item);
+	}
+
+	lis_log_debug("leave");
+	return g_list_reverse(out);
 }
 
 

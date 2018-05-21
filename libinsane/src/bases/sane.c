@@ -26,13 +26,17 @@ struct lis_sane_item
 };
 #define LIS_SANE_ITEM_PRIVATE(impl) ((struct lis_sane_item *)(impl))
 
-
+/* root functions */
 static void lis_sane_cleanup(struct lis_api *impl);
 static enum lis_error lis_sane_list_devices(struct lis_api *impl,
 		enum lis_device_locations locations,
 		struct lis_device_descriptor ***out_dev_descs);
 static enum lis_error lis_sane_get_device(struct lis_api *impl, const char *dev_id,
 		struct lis_item **item);
+
+/* item functions */
+enum lis_error lis_sane_item_get_children(struct lis_item *self, struct lis_item ***children);
+
 
 static struct lis_api g_sane_impl_template = {
 	.base_name = "sane",
@@ -46,13 +50,15 @@ static void lis_sane_item_close(struct lis_item *dev);
 
 static struct lis_item g_sane_item_template = {
 	.type = LIS_ITEM_UNIDENTIFIED,
-	.get_children = NULL, /* TODO */
+	.get_children = lis_sane_item_get_children,
 	.get_options = NULL, /* TODO */
 	.get_scan_parameters = NULL, /* TODO */
 	.scan_start = NULL, /* TODO */
 	.close = lis_sane_item_close,
 };
 
+/* sane implementation: root has no children */
+static struct lis_item *g_children[] = { NULL };
 
 /* ref counter */
 static int g_sane_initialized = 0;
@@ -272,3 +278,10 @@ static void lis_sane_item_close(struct lis_item *device)
 	sane_close(private->handle);
 }
 
+
+enum lis_error lis_sane_item_get_children(struct lis_item *self, struct lis_item ***children)
+{
+	LIS_UNUSED(self);
+	*children = g_children;
+	return LIS_OK;
+}
