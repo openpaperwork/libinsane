@@ -34,7 +34,7 @@ struct lis_dumb_private {
 #define LIS_DUMB_PRIVATE(impl) ((struct lis_dumb_private *)(impl))
 
 static struct lis_item g_dumb_item_template = {
-	0
+	.name = "dumb-o-jet",
 };
 
 static struct lis_api g_dumb_api_template = {
@@ -152,7 +152,7 @@ void lis_dumb_set_nb_devices(struct lis_api *self, int nb_devices)
 	for (i = 0 ; i < nb_devices ; i++) {
 		private->descs[i] = calloc(1, sizeof(struct lis_device_descriptor));
 		private->descs[i]->impl = &private->base;
-		asprintf(&private->descs[i]->dev_id, "dumb_:#$@;dev%d", i);
+		asprintf(&private->descs[i]->dev_id, "dumb dev%d", i);
 		private->descs[i]->vendor = "Microsoft";
 		private->descs[i]->model = "Bugware";
 		private->descs[i]->type = NULL;

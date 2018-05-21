@@ -97,6 +97,20 @@ static void test_list_devices_ko(void)
 
 static void test_get_device_ok(void)
 {
+	struct lis_item *dev = NULL;
+	enum lis_error err;
+
+	err = g_multiplexer->get_device(g_multiplexer, "dummy0:dumb dev0", &dev);
+	CU_ASSERT_TRUE(LIS_IS_OK(err));
+	CU_ASSERT_NOT_EQUAL(dev, NULL);
+
+	err = g_multiplexer->get_device(g_multiplexer, "dummy1:dumb dev0", &dev);
+	CU_ASSERT_TRUE(LIS_IS_OK(err));
+	CU_ASSERT_NOT_EQUAL(dev, NULL);
+
+	err = g_multiplexer->get_device(g_multiplexer, "dummy1:dumb dev1", &dev);
+	CU_ASSERT_TRUE(LIS_IS_OK(err));
+	CU_ASSERT_NOT_EQUAL(dev, NULL);
 
 }
 
