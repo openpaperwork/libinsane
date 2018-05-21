@@ -15,6 +15,10 @@ include(FindGLib)
 include(FindGObjectIntrospection)
 include(GObjectIntrospectionMacros)
 
+message(STATUS "INTROSPECTION_FOUND: ${INTROSPECTION_FOUND}")
+message(STATUS "INTROSPECTION_COMPILER: ${INTROSPECTION_COMPILER}")
+message(STATUS "INTROSPECTION_SCANNER: ${INTROSPECTION_SCANNER}")
+
 include_directories(
   SYSTEM
   ${GLIB2_INCLUDE_DIRS}
