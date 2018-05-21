@@ -29,6 +29,8 @@ struct lis_dumb_private {
 
 	enum lis_error list_devices_ret;
 	struct lis_device_descriptor **descs;
+
+	enum lis_error get_device_ret;
 	struct lis_dumb_item **devices;
 };
 #define LIS_DUMB_PRIVATE(impl) ((struct lis_dumb_private *)(impl))
@@ -116,14 +118,17 @@ static enum lis_error dumb_get_device(
 		return LIS_ERR_INTERNAL_NOT_IMPLEMENTED;
 	}
 
-	for (i = 0 ; private->devices[i] != NULL ; i++) {
-		if (strcmp(dev_id, private->devices[i]->dev_id) == 0) {
-			*item = &private->devices[i]->base;
-			return LIS_OK;
+	if (LIS_IS_OK(private->get_device_ret)) {
+		for (i = 0 ; private->devices[i] != NULL ; i++) {
+			if (strcmp(dev_id, private->devices[i]->dev_id) == 0) {
+				*item = &private->devices[i]->base;
+				return LIS_OK;
+			}
 		}
+		return LIS_ERR_INVALID_VALUE;
+	} else {
+		return private->get_device_ret;
 	}
-
-	return LIS_ERR_INVALID_VALUE;
 }
 
 
@@ -134,8 +139,10 @@ enum lis_error lis_api_dumb(struct lis_api **out_impl, const char *name)
 	private = calloc(1, sizeof(struct lis_dumb_private));
 	memcpy(&private->base, &g_dumb_api_template, sizeof(private->base));
 	private->base.base_name = strdup(name);
-	private->descs = g_dumb_default_devices;
+
 	private->list_devices_ret = LIS_OK;
+	private->descs = g_dumb_default_devices;
+	private->get_device_ret = LIS_OK;
 
 	*out_impl = &private->base;
 	return LIS_OK;
@@ -171,4 +178,10 @@ void lis_dumb_set_list_devices_return(struct lis_api *self, enum lis_error ret)
 {
 	struct lis_dumb_private *private = LIS_DUMB_PRIVATE(self);
 	private->list_devices_ret = ret;
+}
+
+void lis_dumb_set_get_device_return(struct lis_api *self, enum lis_error ret)
+{
+	struct lis_dumb_private *private = LIS_DUMB_PRIVATE(self);
+	private->get_device_ret = ret;
 }

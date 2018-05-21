@@ -116,12 +116,32 @@ static void test_get_device_ok(void)
 
 static void test_get_device_not_found(void)
 {
+	struct lis_item *dev = NULL;
+	enum lis_error err;
 
+	err = g_multiplexer->get_device(g_multiplexer, "dummy0:doesnotexists", &dev);
+	CU_ASSERT_TRUE(LIS_IS_ERROR(err));
+	CU_ASSERT_EQUAL(dev, NULL);
+
+	err = g_multiplexer->get_device(g_multiplexer, "doesnotexists:dumb dev0", &dev);
+	CU_ASSERT_TRUE(LIS_IS_ERROR(err));
+	CU_ASSERT_EQUAL(dev, NULL);
 }
 
 static void test_get_device_ko(void)
 {
+	struct lis_item *dev = NULL;
+	enum lis_error err;
 
+	lis_dumb_set_get_device_return(g_dumbs[0], LIS_ERR_JAMMED);
+
+	err = g_multiplexer->get_device(g_multiplexer, "dummy0:dumb dev0", &dev);
+	CU_ASSERT_EQUAL(err, LIS_ERR_JAMMED);
+	CU_ASSERT_EQUAL(dev, NULL);
+
+	err = g_multiplexer->get_device(g_multiplexer, "dummy1:dumb dev0", &dev);
+	CU_ASSERT_TRUE(LIS_IS_OK(err));
+	CU_ASSERT_NOT_EQUAL(dev, NULL);
 }
 
 int register_tests(void)
