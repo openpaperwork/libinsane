@@ -11,7 +11,8 @@
 
 
 static struct lis_api *g_sane;
-// static struct lis_item g_test_device;
+static struct lis_item *g_test_device;
+
 
 static int tests_sane_init(void)
 {
@@ -19,18 +20,25 @@ static int tests_sane_init(void)
 
 	err = lis_api_sane(&g_sane);
 	if (LIS_IS_ERROR(err)) {
-		fprintf(stderr, "Failed to init Sane: 0x%X, %s\n", err, lis_strerror(err));
+		fprintf(stderr, "Tests init: Failed to init Sane: 0x%X, %s\n", err, lis_strerror(err));
+		return -1;
+	}
+	err = g_sane->get_device(g_sane, TEST_DEV_ID, &g_test_device);
+	if (LIS_IS_ERROR(err)) {
+		fprintf(stderr, "Tests init: Failed to get test device: 0x%X, %s\n", err, lis_strerror(err));
 		return -1;
 	}
 
 	return 0;
 }
 
+
 static int tests_sane_clean(void)
 {
 	g_sane->cleanup(g_sane);
 	return 0;
 }
+
 
 static void tests_sane_list_devices(void)
 {
@@ -53,6 +61,7 @@ static void tests_sane_list_devices(void)
 	}
 	CU_ASSERT_TRUE(has_test0);
 }
+
 
 int register_tests(void)
 {
