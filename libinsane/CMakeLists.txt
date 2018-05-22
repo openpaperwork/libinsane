@@ -55,7 +55,13 @@ set(LIBINSANE_HEADERS
     include/libinsane/workarounds.h
 )
 
+# Some tests can safely go through valgrinf
+# Some other will never pass (libsane and its drivers have leaks for instance)
+
 set(LIBINSANE_TESTS
+    sane
+)
+set(LIBINSANE_VALGRIND_TESTS
     multiplexer
 )
 
@@ -140,6 +146,15 @@ set(ENV{CTEST_OUTPUT_ON_FAILURE} "1")
 MESSAGE(STATUS "Valgrind: ${MEMORYCHECK_COMMAND} ${MEMORYCHECK_COMMAND_OPTIONS}")
 
 foreach(test ${LIBINSANE_TESTS})
+    add_executable(tests_${test} ${LIBINSANE_SRCS} tests/main.c tests/tests_${test}.c)
+    target_include_directories(tests_${test} PUBLIC include ${LIBINSANE_INCLUDES})
+    target_link_libraries(tests_${test} ${LIBINSANE_LIBS} -lcunit)
+    add_test(
+        NAME tests_${test}
+        COMMAND ${CMAKE_BINARY_DIR}/tests_${test}
+    )
+endforeach(test)
+foreach(test ${LIBINSANE_VALGRIND_TESTS})
     add_executable(tests_${test} ${LIBINSANE_SRCS} tests/main.c tests/tests_${test}.c)
     target_include_directories(tests_${test} PUBLIC include ${LIBINSANE_INCLUDES})
     target_link_libraries(tests_${test} ${LIBINSANE_LIBS} -lcunit)
