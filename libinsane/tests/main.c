@@ -25,6 +25,9 @@ int main(int argc, char **argv)
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
 	has_failed = CU_get_number_of_failures();
+	if (!has_failed && CU_get_number_of_tests_run() == 0) {
+		has_failed = 1;
+	}
 	CU_cleanup_registry();
 	err = CU_get_error();
 	if (err != 0)

@@ -7,8 +7,8 @@
 #include <libinsane/multiplexer.h>
 #include <libinsane/util.h>
 
-struct lis_api *g_dumbs[2];
-struct lis_api *g_multiplexer;
+static struct lis_api *g_dumbs[2];
+static struct lis_api *g_multiplexer = NULL;
 
 static int tests_multiplexer_init(void)
 {
@@ -16,19 +16,19 @@ static int tests_multiplexer_init(void)
 	int ret;
 
 	err = lis_api_dumb(&g_dumbs[0], "dummy0");
-	ret = LIS_IS_OK(err);
-	if (!ret)
+	ret = LIS_IS_OK(err) ? 0 : -1;
+	if (ret)
 		goto end;
 	lis_dumb_set_nb_devices(g_dumbs[0], 1);
 
 	err = lis_api_dumb(&g_dumbs[1], "dummy1");
-	ret = LIS_IS_OK(err);
-	if (!ret)
+	ret = LIS_IS_OK(err) ? 0 : -1;
+	if (ret)
 		goto end;
 	lis_dumb_set_nb_devices(g_dumbs[1], 2);
 
 	err = lis_api_multiplexer(g_dumbs, LIS_COUNT_OF(g_dumbs), &g_multiplexer);
-	ret = LIS_IS_OK(err);
+	ret = LIS_IS_OK(err) ? 0 : -1;
 
 end:
 	return ret;
@@ -37,7 +37,7 @@ end:
 static int tests_multiplexer_clean(void)
 {
 	g_multiplexer->cleanup(g_multiplexer);
-	return 1;
+	return 0;
 }
 
 static void test_list_devices_prefix(void)
