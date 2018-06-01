@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # make
-# make install
+# sudo make install
 # export GI_TYPELIB_PATH=/usr/local/lib/girepository-1.0
 # export LD_LIBRARY_PATH=/usr/local/lib
 # libinsane-gobject/examples/scan.py
