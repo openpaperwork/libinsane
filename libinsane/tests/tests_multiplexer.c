@@ -7,6 +7,9 @@
 #include <libinsane/multiplexer.h>
 #include <libinsane/util.h>
 
+#include "util.h"
+
+
 static struct lis_api *g_dumbs[2];
 static struct lis_api *g_multiplexer = NULL;
 
@@ -48,24 +51,24 @@ static void test_list_devices_prefix(void)
 	err = g_multiplexer->list_devices(
 		g_multiplexer, LIS_DEVICE_LOCATIONS_ANY, &descs
 	);
-	CU_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
 
-	CU_ASSERT_EQUAL(strncmp(descs[0]->dev_id, "dummy0:", 7), 0);
-	CU_ASSERT_NOT_EQUAL(descs[0]->impl, NULL);
-	CU_ASSERT_NOT_EQUAL(descs[0]->vendor, NULL);
-	CU_ASSERT_NOT_EQUAL(descs[0]->model, NULL);
+	LIS_ASSERT_EQUAL(strncmp(descs[0]->dev_id, "dummy0:", 7), 0);
+	LIS_ASSERT_NOT_EQUAL(descs[0]->impl, NULL);
+	LIS_ASSERT_NOT_EQUAL(descs[0]->vendor, NULL);
+	LIS_ASSERT_NOT_EQUAL(descs[0]->model, NULL);
 
-	CU_ASSERT_EQUAL(strncmp(descs[1]->dev_id, "dummy1:", 7), 0);
-	CU_ASSERT_NOT_EQUAL(descs[1]->impl, NULL);
-	CU_ASSERT_NOT_EQUAL(descs[1]->vendor, NULL);
-	CU_ASSERT_NOT_EQUAL(descs[1]->model, NULL);
+	LIS_ASSERT_EQUAL(strncmp(descs[1]->dev_id, "dummy1:", 7), 0);
+	LIS_ASSERT_NOT_EQUAL(descs[1]->impl, NULL);
+	LIS_ASSERT_NOT_EQUAL(descs[1]->vendor, NULL);
+	LIS_ASSERT_NOT_EQUAL(descs[1]->model, NULL);
 
-	CU_ASSERT_EQUAL(strncmp(descs[2]->dev_id, "dummy1:", 7), 0);
-	CU_ASSERT_NOT_EQUAL(descs[2]->impl, NULL);
-	CU_ASSERT_NOT_EQUAL(descs[2]->vendor, NULL);
-	CU_ASSERT_NOT_EQUAL(descs[2]->model, NULL);
+	LIS_ASSERT_EQUAL(strncmp(descs[2]->dev_id, "dummy1:", 7), 0);
+	LIS_ASSERT_NOT_EQUAL(descs[2]->impl, NULL);
+	LIS_ASSERT_NOT_EQUAL(descs[2]->vendor, NULL);
+	LIS_ASSERT_NOT_EQUAL(descs[2]->model, NULL);
 
-	CU_ASSERT_EQUAL(descs[3], NULL);
+	LIS_ASSERT_EQUAL(descs[3], NULL);
 }
 
 static void test_list_devices_ko(void)
@@ -78,21 +81,21 @@ static void test_list_devices_ko(void)
 	err = g_multiplexer->list_devices(
 		g_multiplexer, LIS_DEVICE_LOCATIONS_ANY, &descs
 	);
-	CU_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
 
-	CU_ASSERT_EQUAL(strncmp(descs[0]->dev_id, "dummy0:", 7), 0);
-	CU_ASSERT_NOT_EQUAL(descs[0]->impl, NULL);
-	CU_ASSERT_NOT_EQUAL(descs[0]->vendor, NULL);
-	CU_ASSERT_NOT_EQUAL(descs[0]->model, NULL);
+	LIS_ASSERT_EQUAL(strncmp(descs[0]->dev_id, "dummy0:", 7), 0);
+	LIS_ASSERT_NOT_EQUAL(descs[0]->impl, NULL);
+	LIS_ASSERT_NOT_EQUAL(descs[0]->vendor, NULL);
+	LIS_ASSERT_NOT_EQUAL(descs[0]->model, NULL);
 
-	CU_ASSERT_EQUAL(descs[1], NULL);
+	LIS_ASSERT_EQUAL(descs[1], NULL);
 
 	/* if none work, then multiplexer shouln't work */
 	lis_dumb_set_list_devices_return(g_dumbs[0], LIS_ERR_JAMMED);
 	err = g_multiplexer->list_devices(
 		g_multiplexer, LIS_DEVICE_LOCATIONS_ANY, &descs
 	);
-	CU_ASSERT_TRUE(LIS_IS_ERROR(err));
+	LIS_ASSERT_TRUE(LIS_IS_ERROR(err));
 }
 
 static void test_get_device_ok(void)
@@ -101,16 +104,16 @@ static void test_get_device_ok(void)
 	enum lis_error err;
 
 	err = g_multiplexer->get_device(g_multiplexer, "dummy0:dumb dev0", &dev);
-	CU_ASSERT_TRUE(LIS_IS_OK(err));
-	CU_ASSERT_NOT_EQUAL(dev, NULL);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(dev, NULL);
 
 	err = g_multiplexer->get_device(g_multiplexer, "dummy1:dumb dev0", &dev);
-	CU_ASSERT_TRUE(LIS_IS_OK(err));
-	CU_ASSERT_NOT_EQUAL(dev, NULL);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(dev, NULL);
 
 	err = g_multiplexer->get_device(g_multiplexer, "dummy1:dumb dev1", &dev);
-	CU_ASSERT_TRUE(LIS_IS_OK(err));
-	CU_ASSERT_NOT_EQUAL(dev, NULL);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(dev, NULL);
 
 }
 
@@ -120,12 +123,12 @@ static void test_get_device_not_found(void)
 	enum lis_error err;
 
 	err = g_multiplexer->get_device(g_multiplexer, "dummy0:doesnotexists", &dev);
-	CU_ASSERT_TRUE(LIS_IS_ERROR(err));
-	CU_ASSERT_EQUAL(dev, NULL);
+	LIS_ASSERT_TRUE(LIS_IS_ERROR(err));
+	LIS_ASSERT_EQUAL(dev, NULL);
 
 	err = g_multiplexer->get_device(g_multiplexer, "doesnotexists:dumb dev0", &dev);
-	CU_ASSERT_TRUE(LIS_IS_ERROR(err));
-	CU_ASSERT_EQUAL(dev, NULL);
+	LIS_ASSERT_TRUE(LIS_IS_ERROR(err));
+	LIS_ASSERT_EQUAL(dev, NULL);
 }
 
 static void test_get_device_ko(void)
@@ -136,12 +139,12 @@ static void test_get_device_ko(void)
 	lis_dumb_set_get_device_return(g_dumbs[0], LIS_ERR_JAMMED);
 
 	err = g_multiplexer->get_device(g_multiplexer, "dummy0:dumb dev0", &dev);
-	CU_ASSERT_EQUAL(err, LIS_ERR_JAMMED);
-	CU_ASSERT_EQUAL(dev, NULL);
+	LIS_ASSERT_EQUAL(err, LIS_ERR_JAMMED);
+	LIS_ASSERT_EQUAL(dev, NULL);
 
 	err = g_multiplexer->get_device(g_multiplexer, "dummy1:dumb dev0", &dev);
-	CU_ASSERT_TRUE(LIS_IS_OK(err));
-	CU_ASSERT_NOT_EQUAL(dev, NULL);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(dev, NULL);
 }
 
 int register_tests(void)

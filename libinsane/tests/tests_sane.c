@@ -7,6 +7,8 @@
 #include <libinsane/sane.h>
 #include <libinsane/util.h>
 
+#include "util.h"
+
 #define TEST_DEV_ID "test:0"
 
 
@@ -48,18 +50,20 @@ static void tests_sane_list_devices(void)
 	int has_test0 = 0;
 
 	err = g_sane->list_devices(g_sane, LIS_DEVICE_LOCATIONS_LOCAL_ONLY, &devs);
-	CU_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
 
 	for (i = 0 ; devs[i] != NULL ; i++) {
-		CU_ASSERT_NOT_EQUAL(devs[i]->dev_id, NULL);
+		LIS_ASSERT_NOT_EQUAL(devs[i]->dev_id, NULL);
 		if (devs[i]->dev_id != NULL && strcmp(devs[i]->dev_id, TEST_DEV_ID) == 0) {
 			has_test0 = 1;
 		}
-		CU_ASSERT_NOT_EQUAL(devs[i]->vendor, NULL);
-		CU_ASSERT_NOT_EQUAL(devs[i]->model, NULL);
-		CU_ASSERT_NOT_EQUAL(devs[i]->type, NULL);
+		LIS_ASSERT_NOT_EQUAL(devs[i]->vendor, NULL);
+		LIS_ASSERT_NOT_EQUAL(devs[i]->model, NULL);
+		LIS_ASSERT_NOT_EQUAL(devs[i]->type, NULL);
 	}
-	CU_ASSERT_TRUE(has_test0);
+	LIS_ASSERT_TRUE(has_test0);
+}
+
 }
 
 
