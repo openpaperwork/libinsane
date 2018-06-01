@@ -35,7 +35,6 @@ Will install dynamic (libinsane.so) and static library (libinsane.a) in /usr/loc
 
 # Usage
 
-
 ## In a C project
 
 ```
@@ -149,7 +148,17 @@ end:
 
 ## In a project in any other programming language
 
-Example: Python 3
+### Environment variables
+
+By default, `make install` installs everything in `/usr/local`. However gobject-introspection
+looks only in `/usr`. So there are some environment variables to define:
+
+```
+export GI_TYPELIB_PATH=/usr/local/lib/girepository-1.0
+export LD_LIBRARY_PATH=/usr/local/lib
+```
+
+### Example: Python 3
 
 \todo TODO
 
