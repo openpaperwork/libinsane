@@ -64,9 +64,6 @@ static void tests_sane_list_devices(void)
 	LIS_ASSERT_TRUE(has_test0);
 }
 
-}
-
-
 int register_tests(void)
 {
 	CU_pSuite suite = NULL;
