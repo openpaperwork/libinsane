@@ -14,17 +14,47 @@ will probably work.
 Then write code.
 
 
+# Checking, Testing and Documenting
+
+## On GNU/Linux Debian:
+
+```
+apt install \
+    clang-tidy-4.0 \
+    valgrind \
+    libcunit1-ncurses-dev
+```
+
+You must also enable the Sane test backend in `/etc/sane.d/dll.conf`.
+
+Then just run:
+* Static analysis: `make check`
+* Unit tests: `make test`
+* Documentation generation: `make doc`
+
+
+## Microsoft Windows
+
+On Windows, there is no automated tests for WIA2 or TWAIN support (there is no
+test backend).
+But it's still worth running `make test` to test all the workarounds and normalizers.
+
+`make check` and `make doc` may or may not work on Windows.
+
+
 # [Buildbot](https://origami.openpaper.work) is always right
 
-Tests must all pass. If some tests pass on your computer but not on the Buildbot,
-then the Buildbot is right and your changes won't be accepted.
+Tests must all pass. The Buildbot is the reference. If some tests pass on your
+computer but not on the Buildbot, then the Buildbot is right and your changes
+won't be accepted.
 
 
 # Buildbot works mainly with GNU/Linux
 
 After each commit, [Buildbot](https://origami.openpaper.work) will build LibInsane.
 It will build versions for both GNU/Linux and Windows on GNU/Linux.
-It will also build the documentation and run tests on GNU/Linux.
+It will also build the documentation, run static analysis and run tests on
+GNU/Linux.
 
 Buildbot builds everything with:
 
@@ -49,7 +79,7 @@ Therefore:
 When coding on LibInsane, please try to stick to
 [Linux coding style](https://www.kernel.org/doc/html/v4.15/process/coding-style.html). There
 is only one exception, line lengths. In LibInsane, line lengths longer than 80 characters but
-lower than 100 characters are allowed.
+shorter than 100 characters are tolerated.
 
 If you want to fix style issues, please make dedicated commits.
 
