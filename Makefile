@@ -84,8 +84,8 @@ install_py:
 
 
 install_c: build_c
-	(cd libinsane/build ; $(MAKE) VERBOSE=${VERBOSE} install)
-	(cd libinsane-gobject/build ; $(MAKE) VERBOSE=${VERBOSE} install)
+	$(MAKE) -C libinsane/build VERBOSE=${VERBOSE} install
+	$(MAKE) -C libinsane-gobject/build VERBOSE=${VERBOSE} install
 
 
 uninstall_py:
