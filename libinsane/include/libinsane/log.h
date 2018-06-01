@@ -43,4 +43,11 @@ extern void lis_log(enum lis_log_level lvl, const char *file, int line, const ch
 #define lis_log_warning(...) lis_log(LIS_LOG_LVL_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__);
 #define lis_log_error(...) lis_log(LIS_LOG_LVL_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__);
 
+/*!
+ * \brief default log callback provided for convenience.
+ * Will log to stderr.
+ */
+lis_log_callback lis_log_stderr;
+
+
 #endif

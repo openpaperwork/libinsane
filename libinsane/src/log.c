@@ -7,15 +7,12 @@
 #include <libinsane/log.h>
 
 
-static lis_log_callback log_stderr;
-
-
 const struct lis_log_callbacks g_default_callbacks = {
 	.callbacks = {
-		[LIS_LOG_LVL_DEBUG] = log_stderr,
-		[LIS_LOG_LVL_INFO] = log_stderr,
-		[LIS_LOG_LVL_WARNING] = log_stderr,
-		[LIS_LOG_LVL_ERROR] = log_stderr,
+		[LIS_LOG_LVL_DEBUG] = lis_log_stderr,
+		[LIS_LOG_LVL_INFO] = lis_log_stderr,
+		[LIS_LOG_LVL_WARNING] = lis_log_stderr,
+		[LIS_LOG_LVL_ERROR] = lis_log_stderr,
 	}
 };
 
@@ -32,7 +29,7 @@ void lis_set_log_callbacks(const struct lis_log_callbacks *callbacks)
 }
 
 
-static void log_stderr(enum lis_log_level lis_lvl, const char *msg)
+void lis_log_stderr(enum lis_log_level lis_lvl, const char *msg)
 {
 	const char *lvl = "UNKNOWN";
 

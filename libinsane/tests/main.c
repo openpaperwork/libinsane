@@ -3,14 +3,29 @@
 
 #include <CUnit/Basic.h>
 
+#include <libinsane/log.h>
+
 
 int register_tests(void);
 
+
+static void noop() {}
+
+const struct lis_log_callbacks g_log_callbacks = {
+	.callbacks = {
+		[LIS_LOG_LVL_DEBUG] = noop,
+		[LIS_LOG_LVL_INFO] = lis_log_stderr,
+		[LIS_LOG_LVL_WARNING] = lis_log_stderr,
+		[LIS_LOG_LVL_ERROR] = lis_log_stderr,
+	}
+};
 
 int main(int argc, char **argv)
 {
 	CU_ErrorCode err;
 	int has_failed;
+
+	lis_set_log_callbacks(&g_log_callbacks);
 
 	if (CU_initialize_registry() != CUE_SUCCESS) {
 		fprintf(stderr, "CU_initialize_registry() failed\n");
