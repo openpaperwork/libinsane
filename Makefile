@@ -18,12 +18,12 @@ build_py:
 build_libinsane:
 	mkdir -p libinsane/build
 	(cd libinsane/build ; cmake .. -DCMAKE_INSTALL_PREFIX=${DESTDIR})
-	make -j4 -C libinsane/build VERBOSE=${VERBOSE}
+	$(MAKE) -C libinsane/build VERBOSE=${VERBOSE}
 
 build_libinsane_gobject: build_libinsane
 	mkdir -p libinsane-gobject/build
 	(cd libinsane-gobject/build ; cmake .. -DCMAKE_INSTALL_PREFIX=${DESTDIR})
-	make -j4 -C libinsane-gobject/build VERBOSE=${VERBOSE}
+	$(MAKE) -C libinsane-gobject/build VERBOSE=${VERBOSE}
 
 build_c: build_libinsane build_libinsane_gobject
 
@@ -34,7 +34,7 @@ doxygen:
 	doxygen doc/doxygen.conf
 
 gtkdoc: build_libinsane_gobject
-	make -C libinsane-gobject/build doc
+	$(MAKE) -C libinsane-gobject/build doc
 	mv libinsane-gobject/build/libinsane_gobject/html doc/build/gtkdoc
 
 doc: doxygen gtkdoc
@@ -51,7 +51,7 @@ check: build_c
 test: build_libinsane
 	@echo
 	@echo "### TEST libinsane ###"
-	(cd libinsane/build ; CTEST_OUTPUT_ON_FAILURE=1 make test)
+	(cd libinsane/build ; CTEST_OUTPUT_ON_FAILURE=1 $(MAKE) test)
 
 linux_exe:
 
@@ -59,7 +59,7 @@ windows_exe:
 
 release:
 ifeq (${RELEASE}, )
-	@echo "You must specify a release version (make release RELEASE=1.2.3)"
+	@echo "You must specify a release version ($(MAKE) release RELEASE=1.2.3)"
 else
 	@echo "Will release: ${RELEASE}"
 	@echo "Checking release is in ChangeLog ..."
@@ -84,8 +84,8 @@ install_py:
 
 
 install_c: build_c
-	(cd libinsane/build ; make VERBOSE=${VERBOSE} install)
-	(cd libinsane-gobject/build ; make VERBOSE=${VERBOSE} install)
+	(cd libinsane/build ; $(MAKE) VERBOSE=${VERBOSE} install)
+	(cd libinsane-gobject/build ; $(MAKE) VERBOSE=${VERBOSE} install)
 
 
 uninstall_py:
