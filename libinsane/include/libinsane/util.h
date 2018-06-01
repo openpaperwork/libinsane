@@ -43,6 +43,12 @@ enum lis_error lis_set_option(struct lis_item *item, const char *opt_name, const
  */
 enum lis_error lis_maximize_scan_area(struct lis_item *item);
 
+
+/*!
+ * \brief tries to convert variable type as well as possible.
+ */
+
+
 #ifdef __cplusplus
 }
 #endif

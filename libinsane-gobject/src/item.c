@@ -4,6 +4,8 @@
 #include <libinsane-gobject/error.h>
 #include <libinsane-gobject/error_private.h>
 #include <libinsane-gobject/item.h>
+#include <libinsane-gobject/option_descriptor.h>
+#include <libinsane-gobject/option_descriptor_private.h>
 
 
 struct _LibinsaneItemPrivate
@@ -99,7 +101,7 @@ GList *libinsane_item_get_children(LibinsaneItem *self, GError **error)
 	err = private->item->get_children(private->item, &children);
 	if (LIS_IS_ERROR(err)) {
 		SET_LIBINSANE_GOBJECT_ERROR(error, err,
-			"Libinsane item_get_children() error: 0x%X, %s",
+			"Libinsane item->get_children() error: 0x%X, %s",
 			err, lis_strerror(err));
 		lis_log_debug("error");
 		return NULL;
@@ -122,11 +124,34 @@ GList *libinsane_item_get_children(LibinsaneItem *self, GError **error)
  *
  * See [C-API](../doxygen/html/structlis__item.html#aa2e301604accfe64461b36e28365bf9e)
  *
- * Returns: (transfer full): item scan options.
+ * Returns: (element-type Libinsane.OptionDescriptor) (transfer full): item scan options.
  */
-GValueArray *libinsane_item_get_options(LibinsaneItem *self, GError **error)
+GList *libinsane_item_get_options(LibinsaneItem *self, GError **error)
 {
-	return NULL; /* TODO */
+	LibinsaneItemPrivate *private = LIBINSANE_ITEM_GET_PRIVATE(self);
+	enum lis_error err;
+	struct lis_option_descriptor **opts;
+	LibinsaneOptionDescriptor *desc;
+	int i;
+	GList *out = NULL;
+
+	lis_log_debug("enter");
+	err = private->item->get_options(private->item, &opts);
+	if (LIS_IS_ERROR(err)) {
+		SET_LIBINSANE_GOBJECT_ERROR(error, err,
+			"Libinsane item->get_options() error: 0x%X, %s",
+			err, lis_strerror(err));
+		lis_log_debug("error");
+		return NULL;
+	}
+
+	for (i = 0 ; opts[i] != NULL ; i++) {
+		desc = libinsane_option_descriptor_new_from_libinsane(opts[i]);
+		out = g_list_prepend(out, desc);
+	}
+
+	lis_log_debug("leave");
+	return g_list_reverse(out);
 }
 
 

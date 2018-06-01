@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#define LIS_ENUM_ERROR 0xFFFFFFF
+
 #define LIS_ERR_BIT (1 << 30)
 #define LIS_ERR_INTERNAL_BIT (1 << 29)
 

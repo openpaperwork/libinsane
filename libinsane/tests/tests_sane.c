@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include <CUnit/Basic.h>
 
@@ -64,6 +65,62 @@ static void tests_sane_list_devices(void)
 	LIS_ASSERT_TRUE(has_test0);
 }
 
+
+static void tests_sane_get_device_ko(void)
+{
+	enum lis_error err;
+	struct lis_item *item = NULL;
+
+	err = g_sane->get_device(g_sane, "non-existing", &item);
+	LIS_ASSERT_EQUAL(err, LIS_ERR_INVALID_VALUE);
+	LIS_ASSERT_EQUAL(item, NULL);
+}
+
+
+static void tests_sane_item_get_children(void)
+{
+	enum lis_error err;
+	struct lis_item **children = NULL;
+
+	err = g_test_device->get_children(g_test_device, &children);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(children, NULL);
+	LIS_ASSERT_EQUAL(children[0], NULL);
+}
+
+
+static void tests_sane_get_resolution(void)
+{
+	enum lis_error err;
+	struct lis_option_descriptor **options = NULL;
+	/* union lis_value value; */
+	int i;
+
+	err = g_test_device->get_options(g_test_device, &options);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(options, NULL);
+
+	for (i = 0 ; options[i] != NULL ; i++) {
+		if (strcmp(options[i]->name, "resolution") == 0) {
+			break;
+		}
+	}
+	LIS_ASSERT_NOT_EQUAL(options[i], NULL);
+
+	LIS_ASSERT_NOT_EQUAL(options[i]->title, NULL);
+	LIS_ASSERT_NOT_EQUAL(options[i]->desc, NULL);
+	LIS_ASSERT_EQUAL(options[i]->capabilities, LIS_CAP_SW_SELECT);
+	LIS_ASSERT_EQUAL(options[i]->value.type, LIS_TYPE_DOUBLE);
+	LIS_ASSERT_EQUAL(options[i]->value.unit, LIS_UNIT_DPI);
+	LIS_ASSERT_EQUAL(options[i]->constraint.type, LIS_CONSTRAINT_RANGE);
+
+	/*
+	err = options[i]->fn.get_value(options[i], &value);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	*/
+}
+
+
 int register_tests(void)
 {
 	CU_pSuite suite = NULL;
@@ -74,7 +131,10 @@ int register_tests(void)
 		return 0;
 	}
 
-	if (CU_add_test(suite, "list_devices()", tests_sane_list_devices) == NULL) {
+	if (CU_add_test(suite, "list_devices()", tests_sane_list_devices) == NULL
+			|| CU_add_test(suite, "get_device() ko", tests_sane_get_device_ko) == NULL
+			|| CU_add_test(suite, "get_children()", tests_sane_item_get_children) == NULL
+			|| CU_add_test(suite, "get resolution", tests_sane_get_resolution) == NULL) {
 		fprintf(stderr, "CU_add_test() has failed\n");
 		return 0;
 	}

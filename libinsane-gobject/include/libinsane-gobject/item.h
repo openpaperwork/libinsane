@@ -40,7 +40,7 @@ const char *libinsane_item_get_name(LibinsaneItem *self);
 LibinsaneItemType libinsane_item_get_item_type(LibinsaneItem *self);
 void libinsane_item_close(LibinsaneItem *self, GError **error);
 GList *libinsane_item_get_children(LibinsaneItem *self, GError **error);
-GValueArray *libinsane_item_get_options(LibinsaneItem *self, GError **error); /* TODO */
+GList *libinsane_item_get_options(LibinsaneItem *self, GError **error); /* TODO */
 LibinsaneScanParameters *libinsane_item_get_scan_parameters(LibinsaneItem *self, GError **error);
 LibinsaneScanSession *libinsane_item_scan_start(LibinsaneItem *self, GError **error); /* TODO */
 

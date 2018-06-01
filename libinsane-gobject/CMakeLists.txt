@@ -30,7 +30,6 @@ add_definitions(${GLIB2_CFLAGS_OTHER})
 
 set(INSANE_GOBJECT_SRCS
     generated/enums.c
-    src/constraint.c
     src/device_descriptor.c
     src/error.c
     src/item.c
@@ -85,7 +84,7 @@ add_custom_command(
 
 add_library(insane_gobject SHARED ${INSANE_GOBJECT_SRCS})
 target_link_libraries(insane_gobject insane ${GLIB2_LIBRARIES})
-target_include_directories(insane_gobject PUBLIC include)
+target_include_directories(insane_gobject PUBLIC include generated)
 
 install(TARGETS insane_gobject
     RUNTIME DESTINATION bin

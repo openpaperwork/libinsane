@@ -8,8 +8,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 include(GNUInstallDirs)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wunused -pedantic -g -ggdb -O2")
-set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wunused -pedantic -g -ggdb -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wunused -pedantic -g -ggdb -O2 -fstack-protector-all")
+set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wunused -pedantic -g -ggdb -O2 -fstack-protector-all")
 
 set(LIBINSANE_SRCS
     src/bases/dumb.c

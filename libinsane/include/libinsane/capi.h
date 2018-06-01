@@ -31,9 +31,9 @@ struct lis_device_descriptor {
  * \brief Variable type.
  */
 enum lis_value_type {
-	LIS_TYPE_BOOL, /*!< int: 0 (false) or 1 (true)*/
+	LIS_TYPE_BOOL = 0, /*!< int: 0 (false) or 1 (true)*/
 	LIS_TYPE_INTEGER, /*!< int */
-	LIS_TYPE_FLOAT, /*!< float */
+	LIS_TYPE_DOUBLE, /*!< double */
 	LIS_TYPE_STRING, /*!< (char *) */
 	LIS_TYPE_IMAGE_FORMAT /*!< Image format. See \ref lis_img_format . */
 };
@@ -54,7 +54,7 @@ enum lis_img_format {
 	 *
 	 * No header, just pixels.
 	 */
-	LIS_IMG_FORMAT_RAW_RGB_24,
+	LIS_IMG_FORMAT_RAW_RGB_24 = 0,
 
 	LIS_IMG_FORMAT_GRAYSCALE_8,
 	LIS_IMG_FORMAT_BW_1,
@@ -62,6 +62,17 @@ enum lis_img_format {
 	LIS_IMG_FORMAT_GIF,
 	LIS_IMG_FORMAT_JPEG,
 	LIS_IMG_FORMAT_PNG,
+};
+
+
+enum lis_unit {
+	LIS_UNIT_NONE = 0,
+	LIS_UNIT_PIXEL,
+	LIS_UNIT_BIT,
+	LIS_UNIT_MM,
+	LIS_UNIT_DPI,
+	LIS_UNIT_PERCENT,
+	LIS_UNIT_MICROSECOND,
 };
 
 /*!
@@ -72,10 +83,25 @@ enum lis_img_format {
 union lis_value {
 	int boolean;
 	int integer;
-	float flt;
+	double dbl;
 	const char *string;
 	enum lis_img_format format;
 };
+
+
+
+struct lis_value_range {
+	union lis_value min;
+	union lis_value max;
+	union lis_value interval;
+};
+
+
+struct lis_value_list {
+	int nb_values;
+	union lis_value *values;
+};
+
 
 /*!
  * \brief Describes a scanner or source option and provides callback to read or change its value.
@@ -95,6 +121,9 @@ struct lis_option_descriptor {
  */
 #define LIS_CAP_INACTIVE (1<<4)
 
+#define LIS_OPT_IS_READWRITE(opt_desc) ((opt_desc)->capabilities & LIS_CAP_SW_SELECT)
+#define LIS_OPT_IS_READONLY(opt_desc) (!LIS_OPT_IS_READWRITE(opt_desc))
+
 	/*!
 	 * \brief Option capabilities.
 	 *
@@ -112,16 +141,7 @@ struct lis_option_descriptor {
 	 */
 	struct {
 		enum lis_value_type type; /*!< Type of this option. */
-
-		enum {
-			LIS_UNIT_NONE,
-			LIS_UNIT_PIXEL,
-			LIS_UNIT_BIT,
-			LIS_UNIT_MM,
-			LIS_UNIT_DPI,
-			LIS_UNIT_PERCENT,
-			LIS_UNIT_MICROSECOND,
-		} unit; /*!< Unit of this value. Only useful for integers and float */
+		enum lis_unit unit; /*!< Unit of this value. Only useful for integers and float */
 	} value;
 
 	/*!
@@ -142,19 +162,12 @@ struct lis_option_descriptor {
 			/*!
 			 * If \ref lis_option_descriptor.type == \ref LIS_CONSTRAINT_RANGE.
 			 */
-			struct {
-				int min;
-				int max;
-				int interval;
-			} range;
+			struct lis_value_range range;
+
 			/*!
 			 * If \ref lis_option_descriptor.type == \ref LIS_CONSTRAINT_LIST.
 			 */
-			struct {
-				enum lis_value_type type;
-				int nb_values;
-				union lis_value *values;
-			} list;
+			struct lis_value_list list;
 		} possible;
 	} constraint;
 
@@ -176,7 +189,7 @@ struct lis_option_descriptor {
 		 * \retval LIS_IO_ERROR things are going the wrong way. \ref value may or may not be set.
 		 *		See \ref LIS_IS_ERROR.
 		 */
-		enum lis_error (*get_value)(struct lis_option_descriptor *opt, union lis_value **value);
+		enum lis_error (*get_value)(struct lis_option_descriptor *opt, union lis_value *value);
 
 		/*!
 		 * \brief set the option value.
@@ -190,7 +203,7 @@ struct lis_option_descriptor {
 		 * \retval LIS_INVALID_VALUE value doesn't match in type or doesn't fit in expected
 		 *		constraints. See \ref LIS_IS_ERROR.
 		 */
-		enum lis_error (*set_value)(struct lis_option_descriptor *opt, const union lis_value *value);
+		enum lis_error (*set_value)(struct lis_option_descriptor *opt, const union lis_value value);
 	} fn; /*!< Functions to read and set the option value */
 };
 
