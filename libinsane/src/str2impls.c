@@ -78,8 +78,8 @@ enum lis_error lis_str2impls(const char *list_of_impls, struct lis_api **impls)
 				err = lis_api_normalizer_raw(*impls, &next);
 			} else if (strcmp(tok, "raw24") == 0) {
 				err = lis_api_normalizer_raw24(*impls, &next);
-			} else if (strcmp(tok, "resolution_constraint") == 0) {
-				err = lis_api_normalizer_resolution_constraint_format(*impls, &next);
+			} else if (strcmp(tok, "resolution") == 0) {
+				err = lis_api_normalizer_resolution_format(*impls, &next);
 			} else if (strcmp(tok, "scan_area_opts") == 0) {
 				err = lis_api_normalizer_scan_area_opts(*impls, &next);
 			} else if (strcmp(tok, "source_nodes") == 0) {

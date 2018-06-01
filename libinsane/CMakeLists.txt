@@ -22,7 +22,7 @@ set(LIBINSANE_SRCS
     src/normalizers/min_one_source.c
     src/normalizers/raw.c
     src/normalizers/raw24.c
-    src/normalizers/resolution_constraint_format.c
+    src/normalizers/resolution_format.c
     src/normalizers/scan_area_opts.c
     src/normalizers/source_names.c
     src/normalizers/source_nodes.c

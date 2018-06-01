@@ -96,10 +96,14 @@ extern enum lis_error lis_api_normalizer_scan_area_opts(
  * a list. If the range has an interval < 25dpi, the interval used to generate the
  * list will be 25dpi.
  *
+ * Sane: Resolution can be expressed as integers or as SANE_Fixed values
+ * (16 bits integer / 16 bits non-integer) (converted as float for the
+ * C API)
+ *
  * \param[in] to_wrap Base implementation to wrap.
  * \param[out] impl Implementation of the API including the workaround.
  */
-extern enum lis_error lis_api_normalizer_resolution_constraint_format(
+extern enum lis_error lis_api_normalizer_resolution_format(
 	struct lis_api *to_wrap, struct lis_api **impl
 );
 

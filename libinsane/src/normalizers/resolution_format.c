@@ -2,7 +2,7 @@
 #include <libinsane/util.h>
 
 
-enum lis_error lis_api_normalizer_resolution_constraint_format(struct lis_api *to_wrap, struct lis_api **api)
+enum lis_error lis_api_normalizer_resolution_format(struct lis_api *to_wrap, struct lis_api **api)
 {
 	LIS_UNUSED(to_wrap);
 	LIS_UNUSED(api);
