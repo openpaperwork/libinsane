@@ -62,6 +62,9 @@ static void lis_sane_item_close(struct lis_item *dev);
 /* option descriptor functions */
 static enum lis_error lis_sane_opt_get_value(struct lis_option_descriptor *opt,
 		union lis_value *value);
+static enum lis_error lis_sane_opt_set_value(struct lis_option_descriptor *self,
+		const union lis_value value,
+		int *set_flags);
 
 
 static struct lis_api g_sane_impl_template = {
@@ -85,6 +88,7 @@ static struct lis_item g_sane_item_template = {
 static struct lis_option_descriptor g_sane_option_template = {
 	.fn = {
 		.get_value = lis_sane_opt_get_value,
+		.set_value = lis_sane_opt_set_value,
 	},
 };
 
@@ -697,22 +701,24 @@ error:
 }
 
 
-static enum lis_error get_sane_value(
+static enum lis_error control_sane_value(
 	struct lis_sane_option *private,
-	union lis_value *value)
+	SANE_Action action,
+	union lis_value *value,
+	int *set_flags)
 {
 	SANE_Status sane_status;
+	int fixed_value;
 
-	switch(private->parent.value.type)
-	{
+	switch(private->parent.value.type) {
 		case LIS_TYPE_BOOL:
 			assert(private->value_size == sizeof(value->boolean));
 			sane_status = sane_control_option(
 				private->item->handle,
 				private->opt_idx,
-				SANE_ACTION_GET_VALUE,
+				action,
 				&value->boolean,
-				NULL
+				set_flags
 			);
 			return sane_status_to_lis_error(sane_status);
 		case LIS_TYPE_INTEGER:
@@ -720,41 +726,63 @@ static enum lis_error get_sane_value(
 			sane_status = sane_control_option(
 				private->item->handle,
 				private->opt_idx,
-				SANE_ACTION_GET_VALUE,
+				action,
 				&value->integer,
-				NULL
+				set_flags
 			);
 			return sane_status_to_lis_error(sane_status);
 		case LIS_TYPE_DOUBLE:
 			/* Sane stores doubles as integer by "fixing" them */
-			assert(private->value_size == sizeof(value->integer));
-			sane_status = sane_control_option(
-				private->item->handle,
-				private->opt_idx,
-				SANE_ACTION_GET_VALUE,
-				&value->integer,
-				NULL
-			);
-			value->dbl = SANE_UNFIX(value->integer);
-			return sane_status_to_lis_error(sane_status);
-		case LIS_TYPE_STRING:
-			free(private->value_buf);
-			private->value_buf = malloc(private->value_size);
-			if (private->value_buf == NULL) {
-				lis_log_error("Out of memory");
-				return LIS_ERR_NO_MEM;
+			assert(private->value_size == sizeof(int));
+			if (action == SANE_ACTION_SET_VALUE) {
+				fixed_value = SANE_FIX(value->dbl);
 			}
 			sane_status = sane_control_option(
 				private->item->handle,
 				private->opt_idx,
-				SANE_ACTION_GET_VALUE,
-				private->value_buf,
-				NULL
+				action,
+				&fixed_value,
+				set_flags
 			);
-			if (sane_status == SANE_STATUS_GOOD) {
-				value->string = private->value_buf;
-			} else {
-				value->string = NULL;
+			if (action == SANE_ACTION_GET_VALUE) {
+				value->dbl = SANE_UNFIX(fixed_value);
+			}
+			return sane_status_to_lis_error(sane_status);
+		case LIS_TYPE_STRING:
+			switch(action) {
+				case SANE_ACTION_GET_VALUE:
+					free(private->value_buf);
+					private->value_buf = malloc(private->value_size);
+					if (private->value_buf == NULL) {
+						lis_log_error("Out of memory");
+						return LIS_ERR_NO_MEM;
+					}
+					sane_status = sane_control_option(
+						private->item->handle,
+						private->opt_idx,
+						SANE_ACTION_GET_VALUE,
+						private->value_buf,
+						set_flags
+					);
+					if (sane_status == SANE_STATUS_GOOD) {
+						value->string = private->value_buf;
+					} else {
+						value->string = NULL;
+					}
+					break;
+				case SANE_ACTION_SET_VALUE:
+					sane_status = sane_control_option(
+						private->item->handle,
+						private->opt_idx,
+						SANE_ACTION_SET_VALUE,
+						(void *)value->string, // strip const attribute
+						set_flags
+					);
+					break;
+				case SANE_ACTION_SET_AUTO:
+					assert(action != SANE_ACTION_SET_AUTO);
+					lis_log_error("Unsupported action: SANE_ACTION_SET_AUTO");
+					return LIS_ERR_INTERNAL_NOT_IMPLEMENTED;
 			}
 			return sane_status_to_lis_error(sane_status);
 		case LIS_TYPE_IMAGE_FORMAT:
@@ -776,9 +804,11 @@ static enum lis_error lis_sane_opt_get_value(struct lis_option_descriptor *self,
 
 	lis_log_debug("%s->%s->sane_control_option(GET_VALUE) ...",
 			private->item->parent.name, self->name);
-	err = get_sane_value(
+	err = control_sane_value(
 		private,
-		value
+		SANE_ACTION_GET_VALUE,
+		value,
+		NULL
 	);
 	lis_log_debug("%s->%s->sane_control_option(GET_VALUE): %d, %s",
 			private->item->parent.name, self->name,
@@ -790,6 +820,48 @@ static enum lis_error lis_sane_opt_get_value(struct lis_option_descriptor *self,
 		return err;
 	}
 
+	return LIS_OK;
+}
+
+
+static enum lis_error lis_sane_opt_set_value(struct lis_option_descriptor *self,
+		union lis_value value,
+		int *set_flags)
+{
+	struct lis_sane_option *private = LIS_SANE_OPTION(self);
+	enum lis_error err;
+	int sane_set_flags = 0;
+
+	lis_log_debug("%s->%s->sane_control_option(SET_VALUE) ...",
+			private->item->parent.name, self->name);
+	err = control_sane_value(
+		private,
+		SANE_ACTION_SET_VALUE,
+		&value,
+		&sane_set_flags
+	);
+	lis_log_debug("%s->%s->sane_control_option(SET_VALUE): %d, %s",
+			private->item->parent.name, self->name,
+			err, lis_strerror(err));
+	if (LIS_IS_ERROR(err)) {
+		lis_log_error("%s->%s->sane_control_option(SET_VALUE) failed: %d, %s",
+			private->item->parent.name, self->name,
+			err, lis_strerror(err))
+		return err;
+	}
+
+	if (set_flags != NULL) {
+		*set_flags = 0;
+		if (sane_set_flags & SANE_INFO_INEXACT) {
+			*set_flags |= LIS_SET_FLAG_INEXACT;
+		}
+		if (sane_set_flags & SANE_INFO_RELOAD_OPTIONS) {
+			*set_flags |= LIS_SET_FLAG_MUST_RELOAD_OPTIONS;
+		}
+		if (sane_set_flags & SANE_INFO_RELOAD_PARAMS) {
+			*set_flags |= LIS_SET_FLAG_MUST_RELOAD_PARAMS;
+		}
+	}
 
 	return LIS_OK;
 }

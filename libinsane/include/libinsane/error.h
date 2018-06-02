@@ -12,7 +12,6 @@ extern "C" {
 
 enum lis_error {
 	LIS_OK = 0, /*!< Everything is fine. */
-	LIS_APPROXIMATE_VALUE, /*!< Value set on the option is not exactly the one provided. */
 
 	LIS_CANCELLED, /*!< Scan was cancelled, either by software or by hardware. */
 	LIS_END_OF_PAGE, /*!< End of page. Beware there may be other pages until LIS_END_OF_FEED. */

@@ -25,7 +25,6 @@ LibinsaneError lis_error_to_gobject(enum lis_error err)
 {
 	switch(err) {
 		case LIS_OK:
-		case LIS_APPROXIMATE_VALUE:
 			return LIBINSANE_ERROR_OK;
 		case LIS_CANCELLED:
 			return LIBINSANE_ERROR_CANCELLED;

@@ -9,6 +9,13 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    LIBINSANE_SET_FLAG_NONE = 0,
+    LIBINSANE_SET_FLAG_INEXACT = (1<<0),
+    LIBINSANE_SET_FLAG_MUST_RELOAD_OPTIONS = (1<<1),
+    LIBINSANE_SET_FLAG_MUST_RELOAD_PARAMS = (1<<2),
+} LibinsaneSetFlag;
+
 #define LIBINSANE_OPTION_DESCRIPTOR_TYPE \
      (libinsane_option_descriptor_get_type())
 #define LIBINSANE_OPTION_DESCRIPTOR(obj) \
@@ -46,7 +53,7 @@ gboolean libinsane_option_descriptor_is_readable(LibinsaneOptionDescriptor *self
 gboolean libinsane_option_descriptor_is_writable(LibinsaneOptionDescriptor *self);
 
 const GValue *libinsane_option_descriptor_get_value(LibinsaneOptionDescriptor *self, GError **error);
-void libinsane_option_descriptor_set_value(LibinsaneOptionDescriptor *self, GValue *value, GError **error);
+LibinsaneSetFlag libinsane_option_descriptor_set_value(LibinsaneOptionDescriptor *self, GValue *value, GError **error);
 
 G_END_DECLS
 

@@ -1,3 +1,6 @@
+#include <assert.h>
+#include <stdio.h>
+
 #include <libinsane/capi.h>
 #include <libinsane/log.h>
 
@@ -311,11 +314,103 @@ const GValue *libinsane_option_descriptor_get_value(LibinsaneOptionDescriptor *s
 }
 
 
-void libinsane_option_descriptor_set_value(LibinsaneOptionDescriptor *self,
+static int gvalue_to_lis_value(const GValue *in, enum lis_value_type type, union lis_value *out)
+{
+	GValue converted = G_VALUE_INIT;
+
+	switch(type) {
+		case LIS_TYPE_BOOL:
+			g_value_init(&converted, G_TYPE_BOOLEAN);
+			if (!g_value_transform(in, &converted)) {
+				lis_log_error("Failed to convert value to boolean");
+				return 0;
+			}
+			out->boolean = g_value_get_boolean(&converted);
+			return 1;
+		case LIS_TYPE_INTEGER:
+			g_value_init(&converted, G_TYPE_INT);
+			if (!g_value_transform(in, &converted)) {
+				lis_log_error("Failed to convert value to integer");
+				return 0;
+			}
+			out->integer = g_value_get_int(&converted);
+			return 1;
+		case LIS_TYPE_DOUBLE:
+			g_value_init(&converted, G_TYPE_DOUBLE);
+			if (!g_value_transform(in, &converted)) {
+				lis_log_error("Failed to convert value to double");
+				return 0;
+			}
+			out->dbl = g_value_get_double(&converted);
+			return 1;
+		case LIS_TYPE_STRING:
+			g_value_init(&converted, G_TYPE_STRING);
+			g_value_transform(in, &converted);
+			if (!g_value_transform(in, &converted)) {
+				lis_log_error("Failed to convert value to string");
+				return 0;
+			}
+			out->string = g_value_get_string(&converted);
+			return 1;
+		case LIS_TYPE_IMAGE_FORMAT:
+			g_value_init(&converted, LIBINSANE_TYPE_IMG_FORMAT);
+			g_value_transform(in, &converted);
+			if (!g_value_transform(in, &converted)) {
+				lis_log_error("Failed to convert value to string");
+				return 0;
+			}
+			out->format = g_value_get_enum(&converted);
+			return 1;
+	}
+
+	assert(0);
+	lis_log_error("Unknown type: %d", type);
+	return 0;
+}
+
+
+LibinsaneSetFlag libinsane_option_descriptor_set_value(LibinsaneOptionDescriptor *self,
 		GValue *value, GError **error
 	)
 {
-	/* TODO */
+	LibinsaneOptionDescriptorPrivate *private = LIBINSANE_OPTION_DESCRIPTOR_GET_PRIVATE(self);
+	enum lis_error err;
+	union lis_value val;
+	int set_flags = 0;
+	LibinsaneSetFlag out;
+
+	lis_log_debug("enter");
+	if (!gvalue_to_lis_value(value, private->opt->value.type, &val)) {
+		err = LIS_ERR_INVALID_VALUE;
+		SET_LIBINSANE_GOBJECT_ERROR(error, err,
+			"Libinsane opt[%s]->set_value() conversion error: 0x%X, %s",
+			private->opt->name, err, lis_strerror(err));
+		lis_log_debug("conversion error");
+		return LIBINSANE_SET_FLAG_NONE;
+	}
+
+	err = private->opt->fn.set_value(private->opt, val, &set_flags);
+	if (!LIS_IS_OK(err)) {
+		SET_LIBINSANE_GOBJECT_ERROR(error, err,
+			"Libinsane opt[%s]->set_value() error: 0x%X, %s",
+			private->opt->name, err, lis_strerror(err));
+		lis_log_debug("error");
+		return LIBINSANE_SET_FLAG_NONE;
+	}
+
+	out = LIBINSANE_SET_FLAG_NONE;
+	if (set_flags & LIS_SET_FLAG_INEXACT) {
+		out |= LIBINSANE_SET_FLAG_INEXACT;
+	}
+	if (set_flags & LIS_SET_FLAG_MUST_RELOAD_OPTIONS) {
+		out |= LIBINSANE_SET_FLAG_MUST_RELOAD_OPTIONS;
+	}
+	if (set_flags & LIS_SET_FLAG_MUST_RELOAD_PARAMS) {
+		out |= LIBINSANE_SET_FLAG_MUST_RELOAD_PARAMS;
+	}
+
+	lis_log_debug("leave");
+	return out;
 }
 
 

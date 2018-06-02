@@ -8,9 +8,12 @@
 #include <libinsane-gobject/device_descriptor_private.h>
 #include <libinsane-gobject/error.h>
 #include <libinsane-gobject/error_private.h>
+#include <libinsane-gobject/img_format.h>
 #include <libinsane-gobject/item.h>
 #include <libinsane-gobject/item_private.h>
 #include <libinsane-gobject/libinsane-api.h>
+
+#include <enums.h>
 
 
 struct _LibinsaneApiPrivate
@@ -29,6 +32,38 @@ static void libinsane_api_finalize(GObject *self)
 }
 
 
+static void str2img_format(const GValue *src_value, GValue *dest_value)
+{
+	const char *str;
+	LibinsaneImgFormat format;
+
+	assert(G_VALUE_HOLDS_STRING(src_value));
+
+	str = g_value_get_string(src_value);
+
+	if (strcasecmp(str, "raw24") == 0 || strcasecmp(str, "raw") == 0) {
+		format = LIBINSANE_IMG_FORMAT_RAW_RGB_24;
+	} else if (strcasecmp(str, "raw_grayscale") == 0) {
+		format = LIBINSANE_IMG_FORMAT_GRAYSCALE_8;
+	} else if (strcasecmp(str, "raw_bw") == 0) {
+		format = LIBINSANE_IMG_FORMAT_BW_1;
+	} else if (strcasecmp(str, "bmp") == 0) {
+		format = LIBINSANE_IMG_FORMAT_BMP;
+	} else if (strcasecmp(str, "gif") == 0) {
+		format = LIBINSANE_IMG_FORMAT_GIF;
+	} else if (strcasecmp(str, "jpeg") == 0 || strcasecmp(str, "jpg") == 0) {
+		format = LIBINSANE_IMG_FORMAT_JPEG;
+	} else if (strcasecmp(str, "png") == 0) {
+		format = LIBINSANE_IMG_FORMAT_PNG;
+	} else {
+		lis_log_warning("Unknown image format '%s'. Assuming raw RGB 24bits", str);
+		format = LIBINSANE_IMG_FORMAT_RAW_RGB_24;
+	}
+
+	g_value_set_enum(dest_value, format);
+}
+
+
 static void libinsane_api_class_init(LibinsaneApiClass *cls)
 {
 	GObjectClass *go_cls;
@@ -36,6 +71,8 @@ static void libinsane_api_class_init(LibinsaneApiClass *cls)
 	g_type_class_add_private(cls, sizeof(LibinsaneApiPrivate));
 	go_cls = G_OBJECT_CLASS(cls);
 	go_cls->finalize = libinsane_api_finalize;
+
+	g_value_register_transform_func(G_TYPE_STRING, LIBINSANE_TYPE_IMG_FORMAT, str2img_format);
 }
 
 

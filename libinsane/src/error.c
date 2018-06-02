@@ -7,8 +7,6 @@ const char *lis_strerror(enum lis_error err)
 	switch(err) {
 		case LIS_OK:
 			return "Success";
-		case LIS_APPROXIMATE_VALUE:
-			return "Value approximated";
 		case LIS_CANCELLED:
 			return "Operation cancelled";
 		case LIS_END_OF_PAGE:

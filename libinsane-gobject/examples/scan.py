@@ -18,7 +18,7 @@ from gi.repository import Libinsane  # noqa: E402
 
 class ExampleLogger(GObject.GObject, Libinsane.Logger):
     def do_log(self, lvl, msg):
-        if lvl <= Libinsane.LogLevel.DEBUG:
+        if lvl <= Libinsane.LogLevel.ERROR:
             return
         print("{}: {}".format(lvl.value_nick, msg))
 
@@ -74,7 +74,24 @@ def main():
     print("Will use scan source {}".format(source.get_name()))
 
     # set the options
-    # TODO
+    opts = source.get_options()
+    opts = {opt.get_name(): opt for opt in opts}
+
+    print("Setting resolution to 300")
+    print("- Old resolution: {}".format(opts['resolution'].get_value()))
+    print("- Allowed resolutions: {}".format(
+        opts['resolution'].get_constraint())
+    )
+    opts['resolution'].set_value(150)
+    print("- New resolution: {}".format(opts['resolution'].get_value()))
+
+    print("Setting mode to Color")
+    print("- Old mode: {}".format(opts['mode'].get_value()))
+    print("- Allowed modes: {}".format(opts['mode'].get_constraint()))
+    opts['mode'].set_value('Color')
+    print("- New mode: {}".format(opts['mode'].get_value()))
+
+    print("Options set")
 
     # scan
     # TODO

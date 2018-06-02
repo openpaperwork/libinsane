@@ -14,8 +14,8 @@ static void noop() {}
 const struct lis_log_callbacks g_log_callbacks = {
 	.callbacks = {
 		[LIS_LOG_LVL_DEBUG] = noop,
-		[LIS_LOG_LVL_INFO] = lis_log_stderr,
-		[LIS_LOG_LVL_WARNING] = lis_log_stderr,
+		[LIS_LOG_LVL_INFO] = noop,
+		[LIS_LOG_LVL_WARNING] = noop,
 		[LIS_LOG_LVL_ERROR] = lis_log_stderr,
 	}
 };

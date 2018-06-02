@@ -116,6 +116,94 @@ static void tests_sane_get_resolution(void)
 
 	err = options[i]->fn.get_value(options[i], &value);
 	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(value.dbl, 50.0); // check current value
+}
+
+
+static void tests_sane_set_resolution(void)
+{
+	enum lis_error err;
+	struct lis_option_descriptor **options = NULL;
+	union lis_value value;
+	int i;
+	int set_flags;
+
+	err = g_test_device->get_options(g_test_device, &options);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(options, NULL);
+
+	for (i = 0 ; options[i] != NULL ; i++) {
+		if (strcmp(options[i]->name, "resolution") == 0) {
+			break;
+		}
+	}
+	LIS_ASSERT_NOT_EQUAL(options[i], NULL);
+
+	LIS_ASSERT_EQUAL(options[i]->value.type, LIS_TYPE_DOUBLE);
+	LIS_ASSERT_EQUAL(options[i]->constraint.type, LIS_CONSTRAINT_RANGE);
+	LIS_ASSERT_EQUAL(options[i]->constraint.possible.range.min.dbl, 1.0);
+	LIS_ASSERT_EQUAL(options[i]->constraint.possible.range.max.dbl, 1200.0);
+	LIS_ASSERT_EQUAL(options[i]->constraint.possible.range.interval.dbl, 1.0);
+
+	err = options[i]->fn.get_value(options[i], &value);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(value.dbl, 50.0); // check current value
+
+	value.dbl = 1000.0;
+	err = options[i]->fn.set_value(options[i], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, LIS_SET_FLAG_MUST_RELOAD_PARAMS);
+
+	err = options[i]->fn.get_value(options[i], &value);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(value.dbl, 1000.0); // check new value has been taken into account
+
+	value.dbl = 50.0; // restore previous value
+	err = options[i]->fn.set_value(options[i], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, LIS_SET_FLAG_MUST_RELOAD_PARAMS);
+}
+
+
+static void tests_sane_set_resolution_ko(void)
+{
+	enum lis_error err;
+	struct lis_option_descriptor **options = NULL;
+	union lis_value value;
+	int i;
+	int set_flags;
+
+	err = g_test_device->get_options(g_test_device, &options);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(options, NULL);
+
+	for (i = 0 ; options[i] != NULL ; i++) {
+		if (strcmp(options[i]->name, "resolution") == 0) {
+			break;
+		}
+	}
+	LIS_ASSERT_NOT_EQUAL(options[i], NULL);
+
+	LIS_ASSERT_EQUAL(options[i]->value.type, LIS_TYPE_DOUBLE);
+	LIS_ASSERT_EQUAL(options[i]->constraint.type, LIS_CONSTRAINT_RANGE);
+	LIS_ASSERT_EQUAL(options[i]->constraint.possible.range.min.dbl, 1.0);
+	LIS_ASSERT_EQUAL(options[i]->constraint.possible.range.max.dbl, 1200.0);
+	LIS_ASSERT_EQUAL(options[i]->constraint.possible.range.interval.dbl, 1.0);
+
+	value.dbl = 2000.0; // out of range
+	err = options[i]->fn.set_value(options[i], value, &set_flags);
+	// but for some reason, dum-dum says "ok" ...
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, LIS_SET_FLAG_MUST_RELOAD_PARAMS | LIS_SET_FLAG_INEXACT);
+
+	err = options[i]->fn.get_value(options[i], &value);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(value.dbl, 1200.0); // check new value has been taken into account
+
+	value.dbl = 50.0; // restore previous value
+	err = options[i]->fn.set_value(options[i], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, LIS_SET_FLAG_MUST_RELOAD_PARAMS);
 }
 
 
@@ -132,7 +220,10 @@ int register_tests(void)
 	if (CU_add_test(suite, "list_devices()", tests_sane_list_devices) == NULL
 			|| CU_add_test(suite, "get_device() ko", tests_sane_get_device_ko) == NULL
 			|| CU_add_test(suite, "get_children()", tests_sane_item_get_children) == NULL
-			|| CU_add_test(suite, "get resolution", tests_sane_get_resolution) == NULL) {
+			|| CU_add_test(suite, "get resolution", tests_sane_get_resolution) == NULL
+			|| CU_add_test(suite, "set_resolution", tests_sane_set_resolution) == NULL
+			|| CU_add_test(suite, "set_resolution_ko",
+				tests_sane_set_resolution_ko) == NULL) {
 		fprintf(stderr, "CU_add_test() has failed\n");
 		return 0;
 	}

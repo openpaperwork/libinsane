@@ -61,6 +61,12 @@ support, you will have to:
 - Maintain it.
 
 
+Limitations of Libinsane support:
+
+- Some Sane options that accepted complex values (arrays, etc) are not
+  supported and are ignored by Libinsane.
+
+
 # TWAIN
 
 - Operating systems:

@@ -212,8 +212,7 @@ struct lis_option_descriptor {
 		 *		constraints. See \ref LIS_IS_ERROR.
 		 */
 		enum lis_error (*set_value)(struct lis_option_descriptor *self,
-				const union lis_value value,
-				int set_flags);
+				union lis_value value, int *set_flags);
 	} fn; /*!< Functions to read and set the option value */
 };
 
