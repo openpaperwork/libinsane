@@ -121,8 +121,8 @@ struct lis_option_descriptor {
  */
 #define LIS_CAP_INACTIVE (1<<4)
 
-#define LIS_OPT_IS_READWRITE(opt_desc) ((opt_desc)->capabilities & LIS_CAP_SW_SELECT)
-#define LIS_OPT_IS_READONLY(opt_desc) (!LIS_OPT_IS_READWRITE(opt_desc))
+#define LIS_OPT_IS_READABLE(opt_desc) (!((opt_desc)->capabilities & LIS_CAP_INACTIVE))
+#define LIS_OPT_IS_WRITABLE(opt_desc) ((opt_desc)->capabilities & LIS_CAP_SW_SELECT)
 
 	/*!
 	 * \brief Option capabilities.
@@ -175,9 +175,9 @@ struct lis_option_descriptor {
 		/*!
 		 * \brief return the option value.
 		 *
-		 * No need to free the value. However further calls to this library functions may modify
-		 * the value. Depending on the backend and the driver, setting another value may also
-		 * change this value. If you need to keep the value, you
+		 * No need to free the value. However further calls to this library functions may
+		 * modify the value. Depending on the backend and the driver, setting another value
+		 * may also change this value. If you need to keep the value, you
 		 * \ref lis_copy "should copy the value".
 		 *
 		 * \param[in] opt option for which we want the value.
@@ -186,16 +186,24 @@ struct lis_option_descriptor {
 		 * \retval LIS_OK value successful read. See \ref LIS_IS_OK.
 		 * \retval LIS_ACCESS_DENIED value cannot be read because the option is inactive.
 		 *		\ref value may or may not be set. See \ref LIS_IS_ERROR.
-		 * \retval LIS_IO_ERROR things are going the wrong way. \ref value may or may not be set.
+		 * \retval LIS_IO_ERROR things are going the wrong way. \ref value may or may not
+		 *		be set.
 		 *		See \ref LIS_IS_ERROR.
 		 */
-		enum lis_error (*get_value)(struct lis_option_descriptor *opt, union lis_value *value);
+		enum lis_error (*get_value)(struct lis_option_descriptor *self,
+				union lis_value *value);
+
+#define LIS_SET_FLAG_INEXACT (1<<0) /*!< value was set, but not specifically at the given value */
+#define LIS_SET_FLAG_MUST_RELOAD_OPTIONS (1<<1) /*!< has changed values of other options */
+#define LIS_SET_FLAG_MUST_RELOAD_PARAMS (1<<2) /*!< has changed scan parameters */
 
 		/*!
 		 * \brief set the option value.
 		 *
 		 * \param[in] opt option for which we want the value.
-		 * \param[out] value option value. Type is defined by \ref lis_option_descriptor.type.
+		 * \param[out] value option value. Type is defined by
+		 *		\ref lis_option_descriptor.type.
+		 * \param[out] set_flags (can be NULL). Indicates side effect of setting this value.
 		 * \retval LIS_OK value has been successfully set. See \ref LIS_IS_OK.
 		 * \retval LIS_APPROXIMATE_VALUE value has been successfully set, but value has been
 		 *		approximated. See \ref LIS_IS_OK.
@@ -203,7 +211,9 @@ struct lis_option_descriptor {
 		 * \retval LIS_INVALID_VALUE value doesn't match in type or doesn't fit in expected
 		 *		constraints. See \ref LIS_IS_ERROR.
 		 */
-		enum lis_error (*set_value)(struct lis_option_descriptor *opt, const union lis_value value);
+		enum lis_error (*set_value)(struct lis_option_descriptor *self,
+				const union lis_value value,
+				int set_flags);
 	} fn; /*!< Functions to read and set the option value */
 };
 

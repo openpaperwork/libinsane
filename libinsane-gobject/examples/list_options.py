@@ -44,8 +44,13 @@ def main():
                 print("|   |   |-- Unit: {}".format(opt.get_value_unit()))
                 print("|   |   |-- Constraint type: {}".format(
                       opt.get_constraint_type()))
-                print("|   |   |-- Constraint: {}".format(opt.get_constraint()))
-                # print("|   |   |-- Value: {}".format(opt.get_value()))
+                print("|   |   |-- Constraint: {}".format(
+                    opt.get_constraint())
+                )
+                if opt.is_readable():
+                    print("|   |   |-- Value: {}".format(opt.get_value()))
+                else:
+                    print("|   |   |-- Value: (unavailable)")
         print("")
         dev.close()
 

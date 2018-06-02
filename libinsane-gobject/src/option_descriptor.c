@@ -2,6 +2,8 @@
 #include <libinsane/log.h>
 
 #include <libinsane-gobject/constraint.h>
+#include <libinsane-gobject/error.h>
+#include <libinsane-gobject/error_private.h>
 #include <libinsane-gobject/option_descriptor.h>
 #include <libinsane-gobject/img_format.h>
 #include <libinsane-gobject/unit.h>
@@ -12,6 +14,7 @@
 struct _LibinsaneOptionDescriptorPrivate
 {
 	struct lis_option_descriptor *opt;
+	GValue last_value;
 };
 
 #define LIBINSANE_OPTION_DESCRIPTOR_GET_PRIVATE(obj) \
@@ -50,7 +53,13 @@ LibinsaneOptionDescriptor *libinsane_option_descriptor_new_from_libinsane(
 	lis_log_debug("[gobject] enter");
 	opt = g_object_new(LIBINSANE_OPTION_DESCRIPTOR_TYPE, NULL);
 	private = LIBINSANE_OPTION_DESCRIPTOR_GET_PRIVATE(opt);
+
 	private->opt = lis_opt;
+
+	/* set a default 'last_value' ; won't be actually used ; just here to be freed */
+	g_value_init(&private->last_value, G_TYPE_INT);
+	g_value_set_int(&private->last_value, 0);
+
 	lis_log_debug("[gobject] leave");
 
 	return opt;
@@ -180,33 +189,32 @@ static LibinsaneImgFormat lis_format_to_gobject_format(enum lis_img_format fmt)
 }
 
 
-static GValue lis_value_to_gvalue(enum lis_value_type type, union lis_value value)
+static void lis_value_to_gvalue(enum lis_value_type type, union lis_value value, GValue *out)
 {
-	GValue out = G_VALUE_INIT;
-
+	g_value_unset(out);
 	switch(type) {
 		case LIS_TYPE_BOOL:
-			g_value_init(&out, G_TYPE_BOOLEAN);
-			g_value_set_boolean(&out, value.boolean > 0);
-			break;
+			g_value_init(out, G_TYPE_BOOLEAN);
+			g_value_set_boolean(out, value.boolean > 0);
+			return;
 		case LIS_TYPE_INTEGER:
-			g_value_init(&out, G_TYPE_INT);
-			g_value_set_int(&out, value.integer);
-			break;
+			g_value_init(out, G_TYPE_INT);
+			g_value_set_int(out, value.integer);
+			return;
 		case LIS_TYPE_DOUBLE:
-			g_value_init(&out, G_TYPE_DOUBLE);
-			g_value_set_double(&out, value.dbl);
-			break;
+			g_value_init(out, G_TYPE_DOUBLE);
+			g_value_set_double(out, value.dbl);
+			return;
 		case LIS_TYPE_STRING:
-			g_value_init(&out, G_TYPE_STRING);
-			g_value_set_static_string(&out, value.string);
-			break;
+			g_value_init(out, G_TYPE_STRING);
+			g_value_set_static_string(out, value.string);
+			return;
 		case LIS_TYPE_IMAGE_FORMAT:
-			g_value_init(&out, LIBINSANE_TYPE_IMG_FORMAT);
-			g_value_set_enum(&out, lis_format_to_gobject_format(value.format));
-			break;
+			g_value_init(out, LIBINSANE_TYPE_IMG_FORMAT);
+			g_value_set_enum(out, lis_format_to_gobject_format(value.format));
+			return;
 	}
-	return out;
+	lis_log_error("Unknown value type: %d", type);
 }
 
 /**
@@ -227,20 +235,23 @@ GArray *libinsane_option_descriptor_get_constraint(LibinsaneOptionDescriptor *se
 			return NULL;
 		case LIS_CONSTRAINT_RANGE:
 			out = g_array_sized_new(FALSE /* !zero terminated */,
-					TRUE /* cleared to 0 when allocated */,
-					sizeof(GValue),
-					3 /* nb elements */);
+				TRUE /* cleared to 0 when allocated */,
+				sizeof(GValue),
+				3 /* nb elements */);
 
-			val = lis_value_to_gvalue(private->opt->value.type,
-					private->opt->constraint.possible.range.min);
+			lis_value_to_gvalue(private->opt->value.type,
+				private->opt->constraint.possible.range.min,
+				&val);
 			out = g_array_append_val(out, val);
 
-			val = lis_value_to_gvalue(private->opt->value.type,
-					private->opt->constraint.possible.range.max);
+			lis_value_to_gvalue(private->opt->value.type,
+				private->opt->constraint.possible.range.max,
+				&val);
 			out = g_array_append_val(out, val);
 
-			val = lis_value_to_gvalue(private->opt->value.type,
-					private->opt->constraint.possible.range.interval);
+			lis_value_to_gvalue(private->opt->value.type,
+				private->opt->constraint.possible.range.interval,
+				&val);
 			out = g_array_append_val(out, val);
 
 			return out;
@@ -252,8 +263,9 @@ GArray *libinsane_option_descriptor_get_constraint(LibinsaneOptionDescriptor *se
 					/* nb elements */
 					private->opt->constraint.possible.list.nb_values);
 			for (i = 0 ; i < private->opt->constraint.possible.list.nb_values ; i++) {
-				val = lis_value_to_gvalue(private->opt->value.type,
-						private->opt->constraint.possible.list.values[i]);
+				lis_value_to_gvalue(private->opt->value.type,
+					private->opt->constraint.possible.list.values[i],
+					&val);
 				out = g_array_append_val(out, val);
 			}
 			return out;
@@ -263,17 +275,45 @@ GArray *libinsane_option_descriptor_get_constraint(LibinsaneOptionDescriptor *se
 }
 
 
-GValue libinsane_option_descriptor_get_value(LibinsaneOptionDescriptor *self, GError **error)
+gboolean libinsane_option_descriptor_is_readable(LibinsaneOptionDescriptor *self)
 {
-	GValue val = G_VALUE_INIT;
-	/* TODO */
-	g_value_init(&val, G_TYPE_INT);
-	g_value_set_int(&val, 0);
-	return val;
+	LibinsaneOptionDescriptorPrivate *private = LIBINSANE_OPTION_DESCRIPTOR_GET_PRIVATE(self);
+	return LIS_OPT_IS_READABLE(private->opt);
 }
 
 
-void libinsane_option_descriptor_set_value(LibinsaneOptionDescriptor *self, GValue *value, GError **error)
+gboolean libinsane_option_descriptor_is_writable(LibinsaneOptionDescriptor *self)
+{
+	LibinsaneOptionDescriptorPrivate *private = LIBINSANE_OPTION_DESCRIPTOR_GET_PRIVATE(self);
+	return LIS_OPT_IS_WRITABLE(private->opt);
+}
+
+
+const GValue *libinsane_option_descriptor_get_value(LibinsaneOptionDescriptor *self, GError **error)
+{
+	LibinsaneOptionDescriptorPrivate *private = LIBINSANE_OPTION_DESCRIPTOR_GET_PRIVATE(self);
+	enum lis_error err;
+	union lis_value val;
+
+	lis_log_debug("enter");
+	err = private->opt->fn.get_value(private->opt, &val);
+	if (LIS_IS_ERROR(err)) {
+		SET_LIBINSANE_GOBJECT_ERROR(error, err,
+			"Libinsane opt[%s]->get_value() error: 0x%X, %s",
+			private->opt->name, err, lis_strerror(err));
+		lis_log_debug("error");
+		return NULL;
+	}
+
+	lis_value_to_gvalue(private->opt->value.type, val, &private->last_value);
+	lis_log_debug("enter");
+	return &private->last_value;
+}
+
+
+void libinsane_option_descriptor_set_value(LibinsaneOptionDescriptor *self,
+		GValue *value, GError **error
+	)
 {
 	/* TODO */
 }

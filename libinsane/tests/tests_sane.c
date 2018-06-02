@@ -93,7 +93,7 @@ static void tests_sane_get_resolution(void)
 {
 	enum lis_error err;
 	struct lis_option_descriptor **options = NULL;
-	/* union lis_value value; */
+	union lis_value value;
 	int i;
 
 	err = g_test_device->get_options(g_test_device, &options);
@@ -114,10 +114,8 @@ static void tests_sane_get_resolution(void)
 	LIS_ASSERT_EQUAL(options[i]->value.unit, LIS_UNIT_DPI);
 	LIS_ASSERT_EQUAL(options[i]->constraint.type, LIS_CONSTRAINT_RANGE);
 
-	/*
 	err = options[i]->fn.get_value(options[i], &value);
 	LIS_ASSERT_TRUE(LIS_IS_OK(err));
-	*/
 }
 
 

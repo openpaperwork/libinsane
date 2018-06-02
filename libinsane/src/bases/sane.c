@@ -23,6 +23,9 @@ struct lis_sane
 struct lis_sane_option
 {
 	struct lis_option_descriptor parent;
+	int opt_idx;
+	size_t value_size;
+	char *value_buf;
 	struct lis_sane_item *item;
 };
 #define LIS_SANE_OPTION(impl) ((struct lis_sane_option *)(impl))
@@ -49,9 +52,16 @@ static enum lis_error lis_sane_get_device(struct lis_api *impl, const char *dev_
 
 
 /* item functions */
-enum lis_error lis_sane_item_get_children(struct lis_item *self, struct lis_item ***children);
-enum lis_error lis_sane_item_get_options(struct lis_item *self,
+static enum lis_error lis_sane_item_get_children(struct lis_item *self,
+		struct lis_item ***children);
+static enum lis_error lis_sane_item_get_options(struct lis_item *self,
 		struct lis_option_descriptor ***descs);
+static void lis_sane_item_close(struct lis_item *dev);
+
+
+/* option descriptor functions */
+static enum lis_error lis_sane_opt_get_value(struct lis_option_descriptor *opt,
+		union lis_value *value);
 
 
 static struct lis_api g_sane_impl_template = {
@@ -62,8 +72,6 @@ static struct lis_api g_sane_impl_template = {
 };
 
 
-static void lis_sane_item_close(struct lis_item *dev);
-
 static struct lis_item g_sane_item_template = {
 	.type = LIS_ITEM_UNIDENTIFIED,
 	.get_children = lis_sane_item_get_children,
@@ -72,6 +80,14 @@ static struct lis_item g_sane_item_template = {
 	.scan_start = NULL, /* TODO */
 	.close = lis_sane_item_close,
 };
+
+
+static struct lis_option_descriptor g_sane_option_template = {
+	.fn = {
+		.get_value = lis_sane_opt_get_value,
+	},
+};
+
 
 /* sane implementation: root has no children */
 static struct lis_item *g_children[] = { NULL };
@@ -297,6 +313,8 @@ static void cleanup_options(struct lis_sane_item *private)
 			free(private->options[i].parent.constraint.possible.list.values);
 			private->options[i].parent.constraint.possible.list.values = NULL;
 		}
+		free(private->options[i].value_buf);
+		private->options[i].value_buf = NULL;
 	}
 
 	free(private->options);
@@ -315,7 +333,7 @@ static void lis_sane_item_close(struct lis_item *device)
 }
 
 
-enum lis_error lis_sane_item_get_children(struct lis_item *self, struct lis_item ***children)
+static enum lis_error lis_sane_item_get_children(struct lis_item *self, struct lis_item ***children)
 {
 	LIS_UNUSED(self);
 	*children = g_children;
@@ -498,7 +516,66 @@ static struct lis_value_list sane_string_list_to_lis_list(enum lis_value_type ty
 	return lis_list;
 }
 
-enum lis_error lis_sane_item_get_options(struct lis_item *self,
+
+static int lis_sane_check_opt_descriptor(const char *item_name, int opt_idx,
+		const SANE_Option_Descriptor *sane_desc)
+{
+	/* Integrity check of the option descriptor, becauxse there are some
+	 * weird things in this world ... */
+
+	int has_expected_size = 1;
+	int expected_size = -1;
+
+	if (sane_desc->name == NULL || sane_desc->name[0] == '\0') {
+		// Seen on: Sane test backend + Brother DS-620 driver
+		// crappy option descriptor from the test backend of Sane
+		lis_log_warning("Invalid option descriptor: missing option name");
+		goto failed;
+	}
+
+	switch(sane_desc->type)
+	{
+		case SANE_TYPE_BOOL:
+		case SANE_TYPE_INT:
+		case SANE_TYPE_FIXED:
+			expected_size = sizeof(int);
+			break;
+		case SANE_TYPE_STRING:
+			has_expected_size = 0;
+			break;
+		case SANE_TYPE_BUTTON:
+		case SANE_TYPE_GROUP:
+			lis_log_warning("Unsupported option type: %s=%d",
+					sane_desc->name, sane_desc->type);
+			goto failed;
+	}
+
+	if (has_expected_size) {
+		if (expected_size != sane_desc->size) {
+			lis_log_warning("Unexpected value size for option %s(%d) = %dB. Expected: %dB",
+					sane_desc->name, sane_desc->type, sane_desc->size,
+					expected_size);
+			goto failed;
+		}
+	}
+
+	return 1;
+
+failed:
+	lis_log_warning(
+		"Device [%s]: Invalid or unsupported option descriptor [%s](%d ; [%s] ; [%s])."
+		" Ignored",
+		item_name,
+		sane_desc->name != NULL ? sane_desc->name : "(null)",
+		opt_idx,
+		sane_desc->title != NULL ? sane_desc->title : "(null)",
+		sane_desc->desc != NULL ? sane_desc->desc : "(null)"
+	);
+	return 0;
+}
+
+
+static enum lis_error lis_sane_item_get_options(struct lis_item *self,
 		struct lis_option_descriptor ***descs)
 {
 	struct lis_sane_item *private = LIS_SANE_ITEM_PRIVATE(self);
@@ -532,6 +609,10 @@ enum lis_error lis_sane_item_get_options(struct lis_item *self,
 		err = LIS_ERR_NO_MEM;
 		goto error;
 	}
+	for (out = 0 ; out < nb_opts ; out++) {
+		memcpy(&private->options[out].parent, &g_sane_option_template,
+				sizeof(private->options[out].parent));
+	}
 
 	for (in = 0, out = 0 ; in < nb_opts ; in++) {
 		lis_log_debug("%s->sane_get_option_descriptor(%d) ...", self->name, in + 1);
@@ -544,24 +625,22 @@ enum lis_error lis_sane_item_get_options(struct lis_item *self,
 			goto error;
 		}
 
-		if (sane_desc->name == NULL || sane_desc->name[0] == '\0') {
-			// crappy option descriptor from the test backend of Sane
-			lis_log_warning("%s->sane_get_option_descriptor(%d):"
-					" Invalid option descriptor: missing option name",
-					self->name, in + 1);
+		if (!lis_sane_check_opt_descriptor(self->name, in + 1, sane_desc)) {
 			continue;
 		}
 
 		lis_log_debug("Option: %s->%s(%d) (%s, %s)",
 			self->name, sane_desc->name, in + 1, sane_desc->title, sane_desc->desc)
 
-		if (sane_desc->type == SANE_TYPE_BUTTON || sane_desc->type == SANE_TYPE_GROUP) {
-			lis_log_warning("Unsupported option type: %s=%d. Option skipped",
-				sane_desc->name, sane_desc->type);
+		if (sane_desc->size <= 0) {
+			lis_log_warning("Unsupported option value size: %s=%d. Option skipped",
+				sane_desc->name, sane_desc->size);
 			continue;
 		}
 
 		private->options[out].item = private;
+		private->options[out].opt_idx = in + 1;
+		private->options[out].value_size = sane_desc->size;
 		// reuse libsane pointers: they are valid until we call sane_close()
 		// --> same as us
 		private->options[out].parent.name = sane_desc->name;
@@ -617,3 +696,100 @@ error:
 	return err;
 }
 
+
+static enum lis_error get_sane_value(
+	struct lis_sane_option *private,
+	union lis_value *value)
+{
+	SANE_Status sane_status;
+
+	switch(private->parent.value.type)
+	{
+		case LIS_TYPE_BOOL:
+			assert(private->value_size == sizeof(value->boolean));
+			sane_status = sane_control_option(
+				private->item->handle,
+				private->opt_idx,
+				SANE_ACTION_GET_VALUE,
+				&value->boolean,
+				NULL
+			);
+			return sane_status_to_lis_error(sane_status);
+		case LIS_TYPE_INTEGER:
+			assert(private->value_size == sizeof(value->integer));
+			sane_status = sane_control_option(
+				private->item->handle,
+				private->opt_idx,
+				SANE_ACTION_GET_VALUE,
+				&value->integer,
+				NULL
+			);
+			return sane_status_to_lis_error(sane_status);
+		case LIS_TYPE_DOUBLE:
+			/* Sane stores doubles as integer by "fixing" them */
+			assert(private->value_size == sizeof(value->integer));
+			sane_status = sane_control_option(
+				private->item->handle,
+				private->opt_idx,
+				SANE_ACTION_GET_VALUE,
+				&value->integer,
+				NULL
+			);
+			value->dbl = SANE_UNFIX(value->integer);
+			return sane_status_to_lis_error(sane_status);
+		case LIS_TYPE_STRING:
+			free(private->value_buf);
+			private->value_buf = malloc(private->value_size);
+			if (private->value_buf == NULL) {
+				lis_log_error("Out of memory");
+				return LIS_ERR_NO_MEM;
+			}
+			sane_status = sane_control_option(
+				private->item->handle,
+				private->opt_idx,
+				SANE_ACTION_GET_VALUE,
+				private->value_buf,
+				NULL
+			);
+			if (sane_status == SANE_STATUS_GOOD) {
+				value->string = private->value_buf;
+			} else {
+				value->string = NULL;
+			}
+			return sane_status_to_lis_error(sane_status);
+		case LIS_TYPE_IMAGE_FORMAT:
+			assert(private->parent.value.type == LIS_TYPE_IMAGE_FORMAT);
+			break;
+	}
+
+	lis_log_error("Unknown value type: %d", private->parent.value.type);
+	assert(0);
+	return LIS_ERR_INTERNAL_UNKNOWN_ERROR;
+}
+
+
+static enum lis_error lis_sane_opt_get_value(struct lis_option_descriptor *self,
+		union lis_value *value)
+{
+	struct lis_sane_option *private = LIS_SANE_OPTION(self);
+	enum lis_error err;
+
+	lis_log_debug("%s->%s->sane_control_option(GET_VALUE) ...",
+			private->item->parent.name, self->name);
+	err = get_sane_value(
+		private,
+		value
+	);
+	lis_log_debug("%s->%s->sane_control_option(GET_VALUE): %d, %s",
+			private->item->parent.name, self->name,
+			err, lis_strerror(err));
+	if (LIS_IS_ERROR(err)) {
+		lis_log_error("%s->%s->sane_control_option(GET_VALUE) failed: %d, %s",
+			private->item->parent.name, self->name,
+			err, lis_strerror(err))
+		return err;
+	}
+
+
+	return LIS_OK;
+}

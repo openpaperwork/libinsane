@@ -80,5 +80,12 @@ void lis_log(
 		return;
 	}
 
+	for (r = 0 ; g_buffer[r] != '\0' ; r++) {
+		/* no line return allowed */
+		if (g_buffer[r] == '\n' || g_buffer[r] == '\r') {
+			g_buffer[r] = '_';
+		}
+	}
+
 	g_current_callbacks->callbacks[lvl](lvl, g_buffer);
 }

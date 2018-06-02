@@ -42,7 +42,10 @@ GType libinsane_option_descriptor_get_value_type(LibinsaneOptionDescriptor *self
 LibinsaneUnit libinsane_option_descriptor_get_value_unit(LibinsaneOptionDescriptor *self);
 LibinsaneConstraintType libinsane_option_descriptor_get_constraint_type(LibinsaneOptionDescriptor *self);
 GArray *libinsane_option_descriptor_get_constraint(LibinsaneOptionDescriptor *self);
-GValue libinsane_option_descriptor_get_value(LibinsaneOptionDescriptor *self, GError **error);
+gboolean libinsane_option_descriptor_is_readable(LibinsaneOptionDescriptor *self);
+gboolean libinsane_option_descriptor_is_writable(LibinsaneOptionDescriptor *self);
+
+const GValue *libinsane_option_descriptor_get_value(LibinsaneOptionDescriptor *self, GError **error);
 void libinsane_option_descriptor_set_value(LibinsaneOptionDescriptor *self, GValue *value, GError **error);
 
 G_END_DECLS
