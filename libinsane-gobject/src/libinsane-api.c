@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdlib.h>
+#include <strings.h>
 
 #include <libinsane/log.h>
 #include <libinsane/safebet.h>
