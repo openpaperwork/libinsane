@@ -707,7 +707,7 @@ static enum lis_error control_sane_value(
 	union lis_value *value,
 	int *set_flags)
 {
-	SANE_Status sane_status;
+	SANE_Status sane_status = SANE_STATUS_UNSUPPORTED;
 	int fixed_value;
 
 	switch(private->parent.value.type) {
