@@ -318,6 +318,23 @@ extern enum lis_error lis_api_normalizer_sources_order(
 );
 
 
+/*!
+ * \brief Automatically reload options when required
+ *
+ * When setting an option, the flag LIS_SET_FLAG_MUST_RELOAD_OPTIONS may be returned,
+ * in which case, options must be reloaded through \ref lis_item.get-options.
+ * This normalizer makes it happen automatically. However, it means previously
+ * returned option descriptors may be updated automatically.
+ *
+ * \param[in] to_wrap Base implementation to wrap.
+ * \param[out] impl Implementation of the API including the workaround.
+ */
+extern enum lis_error lis_api_normalizer_auto_opt_reload(
+	struct lis_api *to_wrap, struct lis_api **impl
+);
+
+
+
 #ifdef __cplusplus
 }
 #endif

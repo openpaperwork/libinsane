@@ -207,6 +207,102 @@ static void tests_sane_set_resolution_ko(void)
 }
 
 
+static void tests_sane_scan_parameters(void)
+{
+	enum lis_error err;
+	struct lis_option_descriptor **options = NULL;
+	union lis_value value;
+	int resolution_idx = -1;
+	int mode_idx = -1;
+	int i;
+	int set_flags;
+	struct lis_scan_parameters scan_parameters;
+
+	err = g_test_device->get_options(g_test_device, &options);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(options, NULL);
+
+	for (i = 0 ; options[i] != NULL ; i++) {
+		if (strcmp(options[i]->name, "mode") == 0) {
+			mode_idx = i;
+		}
+	}
+	LIS_ASSERT_NOT_EQUAL(mode_idx, -1);
+
+	value.string = "Color";
+	err = options[mode_idx]->fn.set_value(options[mode_idx], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, LIS_SET_FLAG_MUST_RELOAD_PARAMS | LIS_SET_FLAG_MUST_RELOAD_OPTIONS);
+
+	err = g_test_device->get_options(g_test_device, &options);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(options, NULL);
+	resolution_idx = -1;
+	mode_idx = -1;
+	for (i = 0 ; options[i] != NULL ; i++) {
+		if (strcmp(options[i]->name, "resolution") == 0) {
+			resolution_idx = i;
+		} else if (strcmp(options[i]->name, "mode") == 0) {
+			mode_idx = i;
+		}
+	}
+	LIS_ASSERT_NOT_EQUAL(resolution_idx, -1);
+	LIS_ASSERT_NOT_EQUAL(mode_idx, -1);
+
+	value.dbl = 100.0;
+	err = options[resolution_idx]->fn.set_value(options[resolution_idx], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, LIS_SET_FLAG_MUST_RELOAD_PARAMS);
+
+	err = g_test_device->get_scan_parameters(g_test_device, &scan_parameters);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(scan_parameters.format, LIS_IMG_FORMAT_RAW_RGB_24);
+	LIS_ASSERT_EQUAL(scan_parameters.width, 314);
+	LIS_ASSERT_EQUAL(scan_parameters.height, 393);
+	LIS_ASSERT_EQUAL(scan_parameters.image_size, 370206);
+
+	value.dbl = 50.0;
+	err = options[resolution_idx]->fn.set_value(options[resolution_idx], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, LIS_SET_FLAG_MUST_RELOAD_PARAMS);
+
+	err = g_test_device->get_scan_parameters(g_test_device, &scan_parameters);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(scan_parameters.format, LIS_IMG_FORMAT_RAW_RGB_24);
+	LIS_ASSERT_EQUAL(scan_parameters.width, 157);
+	LIS_ASSERT_EQUAL(scan_parameters.height, 196);
+	LIS_ASSERT_EQUAL(scan_parameters.image_size, 92316);
+
+	value.string = "Gray";
+	err = options[mode_idx]->fn.set_value(options[mode_idx], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, LIS_SET_FLAG_MUST_RELOAD_PARAMS | LIS_SET_FLAG_MUST_RELOAD_OPTIONS);
+
+	err = g_test_device->get_options(g_test_device, &options);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(options, NULL);
+	resolution_idx = -1;
+	for (i = 0 ; options[i] != NULL ; i++) {
+		if (strcmp(options[i]->name, "resolution") == 0) {
+			resolution_idx = i;
+		}
+	}
+	LIS_ASSERT_NOT_EQUAL(resolution_idx, -1);
+
+	value.dbl = 100.0;
+	err = options[resolution_idx]->fn.set_value(options[resolution_idx], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, LIS_SET_FLAG_MUST_RELOAD_PARAMS);
+
+	err = g_test_device->get_scan_parameters(g_test_device, &scan_parameters);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(scan_parameters.format, LIS_IMG_FORMAT_GRAYSCALE_8);
+	LIS_ASSERT_EQUAL(scan_parameters.width, 314);
+	LIS_ASSERT_EQUAL(scan_parameters.height, 393);
+	LIS_ASSERT_EQUAL(scan_parameters.image_size, 123402);
+}
+
+
 int register_tests(void)
 {
 	CU_pSuite suite = NULL;
@@ -223,7 +319,8 @@ int register_tests(void)
 			|| CU_add_test(suite, "get resolution", tests_sane_get_resolution) == NULL
 			|| CU_add_test(suite, "set_resolution", tests_sane_set_resolution) == NULL
 			|| CU_add_test(suite, "set_resolution_ko",
-				tests_sane_set_resolution_ko) == NULL) {
+				tests_sane_set_resolution_ko) == NULL
+			|| CU_add_test(suite, "scan_parameters", tests_sane_scan_parameters) == NULL) {
 		fprintf(stderr, "CU_add_test() has failed\n");
 		return 0;
 	}

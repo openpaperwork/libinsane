@@ -30,7 +30,7 @@ def main():
         print(
             "Syntax: {}"
             " [<output file>]"
-            " [<scan dev id> [<scan source name>]]"
+            " [<scan dev id> [<scan source name>]]".format(sys.argv[0])
         )
         sys.exit(1)
 
@@ -76,6 +76,13 @@ def main():
     # set the options
     opts = source.get_options()
     opts = {opt.get_name(): opt for opt in opts}
+    print("Setting mode to Color")
+    print("- Old mode: {}".format(opts['mode'].get_value()))
+    print("- Allowed modes: {}".format(opts['mode'].get_constraint()))
+    opts['mode'].set_value('Color')
+    opts = source.get_options()
+    opts = {opt.get_name(): opt for opt in opts}
+    print("- New mode: {}".format(opts['mode'].get_value()))
 
     print("Setting resolution to 300")
     print("- Old resolution: {}".format(opts['resolution'].get_value()))
@@ -83,15 +90,17 @@ def main():
         opts['resolution'].get_constraint())
     )
     opts['resolution'].set_value(150)
+    opts = source.get_options()
+    opts = {opt.get_name(): opt for opt in opts}
     print("- New resolution: {}".format(opts['resolution'].get_value()))
 
-    print("Setting mode to Color")
-    print("- Old mode: {}".format(opts['mode'].get_value()))
-    print("- Allowed modes: {}".format(opts['mode'].get_constraint()))
-    opts['mode'].set_value('Color')
-    print("- New mode: {}".format(opts['mode'].get_value()))
-
     print("Options set")
+
+    scan_params = dev.get_scan_parameters()
+    print("Expected scan parameters: {} ; {}x{} = {} bytes".format(
+          scan_params.get_format(),
+          scan_params.get_width(), scan_params.get_height(),
+          scan_params.get_image_size()))
 
     # scan
     # TODO

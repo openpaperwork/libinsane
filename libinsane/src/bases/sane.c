@@ -56,6 +56,9 @@ static enum lis_error lis_sane_item_get_children(struct lis_item *self,
 		struct lis_item ***children);
 static enum lis_error lis_sane_item_get_options(struct lis_item *self,
 		struct lis_option_descriptor ***descs);
+static enum lis_error lis_sane_item_get_scan_parameters(
+	struct lis_item *self, struct lis_scan_parameters *parameters
+);
 static void lis_sane_item_close(struct lis_item *dev);
 
 
@@ -79,7 +82,7 @@ static struct lis_item g_sane_item_template = {
 	.type = LIS_ITEM_UNIDENTIFIED,
 	.get_children = lis_sane_item_get_children,
 	.get_options = lis_sane_item_get_options,
-	.get_scan_parameters = NULL, /* TODO */
+	.get_scan_parameters = lis_sane_item_get_scan_parameters,
 	.scan_start = NULL, /* TODO */
 	.close = lis_sane_item_close,
 };
@@ -92,9 +95,6 @@ static struct lis_option_descriptor g_sane_option_template = {
 	},
 };
 
-
-/* sane implementation: root has no children */
-static struct lis_item *g_children[] = { NULL };
 
 /* ref counter */
 static int g_sane_initialized = 0;
@@ -327,9 +327,52 @@ static void cleanup_options(struct lis_sane_item *private)
 	private->option_ptrs = NULL;
 }
 
-static void lis_sane_item_close(struct lis_item *device)
+
+static enum lis_error lis_sane_item_get_scan_parameters(
+		struct lis_item *self, struct lis_scan_parameters *out_p
+	)
 {
-	struct lis_sane_item *private = LIS_SANE_ITEM_PRIVATE(device);
+	struct lis_sane_item *private = LIS_SANE_ITEM_PRIVATE(self);
+	enum lis_error err;
+	SANE_Parameters p = { 0 }; // don't trust sane drivers --> init to 0.
+
+	err = sane_status_to_lis_error(sane_get_parameters(private->handle, &p));
+	if (LIS_IS_ERROR(err)) {
+		lis_log_error("%s->sane_get_parameters(): 0x%X, %s",
+				self->name, err, lis_strerror(err));
+		return err;
+	}
+
+	memset(out_p, 0, sizeof(struct lis_scan_parameters));
+
+	out_p->width = p.pixels_per_line;
+	out_p->height = p.lines;
+	out_p->image_size = out_p->width * out_p->height;
+	/* ignore p.last_frame */
+
+	switch(p.format) {
+		case SANE_FRAME_GRAY:
+			out_p->format = LIS_IMG_FORMAT_GRAYSCALE_8;
+			break;
+		case SANE_FRAME_RGB:
+			out_p->format = LIS_IMG_FORMAT_RAW_RGB_24;
+			out_p->image_size *= 3;
+			break;
+		case SANE_FRAME_RED:
+		case SANE_FRAME_GREEN:
+		case SANE_FRAME_BLUE:
+			lis_log_warning("Will get only one color channel. Will be turned to gray");
+			out_p->format = LIS_IMG_FORMAT_GRAYSCALE_8;
+			break;
+	}
+
+	return err;
+}
+
+
+static void lis_sane_item_close(struct lis_item *self)
+{
+	struct lis_sane_item *private = LIS_SANE_ITEM_PRIVATE(self);
 	cleanup_options(private);
 	lis_log_debug("sane_close()");
 	free((void *)private->parent.name);
@@ -337,10 +380,13 @@ static void lis_sane_item_close(struct lis_item *device)
 }
 
 
-static enum lis_error lis_sane_item_get_children(struct lis_item *self, struct lis_item ***children)
+static enum lis_error lis_sane_item_get_children(struct lis_item *self,
+		struct lis_item ***out_children)
 {
+	/* sane implementation: root has no children */
+	static struct lis_item *children[] = { NULL };
 	LIS_UNUSED(self);
-	*children = g_children;
+	*out_children = children;
 	return LIS_OK;
 }
 
@@ -593,7 +639,7 @@ static enum lis_error lis_sane_item_get_options(struct lis_item *self,
 	));
 	assert(LIS_IS_OK(err));
 	if (LIS_IS_ERROR(err)) {
-		lis_log_error("%s->sane_control_option(NUMBER OF OPTIONS): %d, %s",
+		lis_log_error("%s->sane_control_option(NUMBER OF OPTIONS): 0x%X, %s",
 				self->name, err, lis_strerror(err));
 		return err;
 	}
@@ -810,11 +856,11 @@ static enum lis_error lis_sane_opt_get_value(struct lis_option_descriptor *self,
 		value,
 		NULL
 	);
-	lis_log_debug("%s->%s->sane_control_option(GET_VALUE): %d, %s",
+	lis_log_debug("%s->%s->sane_control_option(GET_VALUE): 0x%X, %s",
 			private->item->parent.name, self->name,
 			err, lis_strerror(err));
 	if (LIS_IS_ERROR(err)) {
-		lis_log_error("%s->%s->sane_control_option(GET_VALUE) failed: %d, %s",
+		lis_log_error("%s->%s->sane_control_option(GET_VALUE) failed: 0x%X, %s",
 			private->item->parent.name, self->name,
 			err, lis_strerror(err))
 		return err;
@@ -840,11 +886,11 @@ static enum lis_error lis_sane_opt_set_value(struct lis_option_descriptor *self,
 		&value,
 		&sane_set_flags
 	);
-	lis_log_debug("%s->%s->sane_control_option(SET_VALUE): %d, %s",
+	lis_log_debug("%s->%s->sane_control_option(SET_VALUE): 0x%X, %s",
 			private->item->parent.name, self->name,
 			err, lis_strerror(err));
 	if (LIS_IS_ERROR(err)) {
-		lis_log_error("%s->%s->sane_control_option(SET_VALUE) failed: %d, %s",
+		lis_log_error("%s->%s->sane_control_option(SET_VALUE) failed: 0x%X, %s",
 			private->item->parent.name, self->name,
 			err, lis_strerror(err))
 		return err;
