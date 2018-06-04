@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include <libinsane/capi.h>
 #include <libinsane/log.h>
 
