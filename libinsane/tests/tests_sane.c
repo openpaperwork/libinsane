@@ -38,6 +38,7 @@ static int tests_sane_init(void)
 
 static int tests_sane_clean(void)
 {
+	g_test_device->close(g_test_device);
 	g_sane->cleanup(g_sane);
 	return 0;
 }
