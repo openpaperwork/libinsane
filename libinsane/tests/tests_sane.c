@@ -225,9 +225,12 @@ static void tests_sane_scan_parameters(void)
 	for (i = 0 ; options[i] != NULL ; i++) {
 		if (strcmp(options[i]->name, "mode") == 0) {
 			mode_idx = i;
+		} else if (strcmp(options[i]->name, "resolution") == 0) {
+			resolution_idx = i;
 		}
 	}
 	LIS_ASSERT_NOT_EQUAL(mode_idx, -1);
+	LIS_ASSERT_NOT_EQUAL(resolution_idx, -1);
 
 	value.string = "Color";
 	err = options[mode_idx]->fn.set_value(options[mode_idx], value, &set_flags);
@@ -237,17 +240,6 @@ static void tests_sane_scan_parameters(void)
 	err = g_test_device->get_options(g_test_device, &options);
 	LIS_ASSERT_TRUE(LIS_IS_OK(err));
 	LIS_ASSERT_NOT_EQUAL(options, NULL);
-	resolution_idx = -1;
-	mode_idx = -1;
-	for (i = 0 ; options[i] != NULL ; i++) {
-		if (strcmp(options[i]->name, "resolution") == 0) {
-			resolution_idx = i;
-		} else if (strcmp(options[i]->name, "mode") == 0) {
-			mode_idx = i;
-		}
-	}
-	LIS_ASSERT_NOT_EQUAL(resolution_idx, -1);
-	LIS_ASSERT_NOT_EQUAL(mode_idx, -1);
 
 	value.dbl = 100.0;
 	err = options[resolution_idx]->fn.set_value(options[resolution_idx], value, &set_flags);
@@ -281,13 +273,6 @@ static void tests_sane_scan_parameters(void)
 	err = g_test_device->get_options(g_test_device, &options);
 	LIS_ASSERT_TRUE(LIS_IS_OK(err));
 	LIS_ASSERT_NOT_EQUAL(options, NULL);
-	resolution_idx = -1;
-	for (i = 0 ; options[i] != NULL ; i++) {
-		if (strcmp(options[i]->name, "resolution") == 0) {
-			resolution_idx = i;
-		}
-	}
-	LIS_ASSERT_NOT_EQUAL(resolution_idx, -1);
 
 	value.dbl = 100.0;
 	err = options[resolution_idx]->fn.set_value(options[resolution_idx], value, &set_flags);
