@@ -11,7 +11,7 @@
 #include <libinsane/util.h>
 
 #define API_NAME "sane"
-
+#define MAX_OPTS 128
 
 struct lis_sane
 {
@@ -305,6 +305,69 @@ static enum lis_error lis_sane_get_device(struct lis_api *impl, const char *dev_
 	return LIS_OK;
 }
 
+
+static void free_option(struct lis_sane_option *opt)
+{
+	if (opt->parent.constraint.type == LIS_CONSTRAINT_LIST) {
+		FREE(opt->parent.constraint.possible.list.values);
+	}
+	FREE(opt->value_buf);
+	opt->value_buf = NULL;
+}
+
+
+static enum lis_error resize_options(struct lis_sane_item *private, int nb_options)
+{
+	int i;
+
+	/* we allocate the option arrays only once: Sane returns pretty much always
+	 * the same list of options, so when the user calls again get_options(),
+	 * we can return the very same pointers. This reduce drastically the risk of
+	 * mistakes and segfault at higher level (GObject, Python, etc).
+	 */
+
+	if (nb_options > MAX_OPTS) {
+		lis_log_error("Too many options on this device: %d > %d !", nb_options, MAX_OPTS);
+		return LIS_ERR_NO_MEM;
+	}
+
+	/* alloc */
+	if (private->options == NULL) {
+		private->options = calloc(MAX_OPTS, sizeof(struct lis_sane_option));
+		private->option_ptrs = calloc(MAX_OPTS + 1, sizeof(struct lis_option_descriptor *));
+	}
+	if (private->options == NULL || private->option_ptrs == NULL) {
+		lis_log_error("Out of memory");
+		FREE(private->options);
+		FREE(private->option_ptrs);
+		private->nb_opts = 0;
+		return LIS_ERR_NO_MEM;
+	}
+
+	/* drop obsolete option slots if any */
+	for (i = nb_options ; i < private->nb_opts ; i++) {
+		free_option(&private->options[i]);
+	}
+
+	/* init new slots if any */
+	if (nb_options - private->nb_opts > 0) {
+		memset(private->options + private->nb_opts, 0,
+			sizeof(struct lis_sane_option) * (nb_options - private->nb_opts));
+		for (i = private->nb_opts ; i < nb_options ; i++) {
+			memcpy(&private->options[i].parent, &g_sane_option_template,
+					sizeof(private->options[i].parent));
+		}
+	}
+
+	/* cleanup pointers (they will updated later) */
+	memset(private->option_ptrs, 0, (MAX_OPTS + 1) * sizeof(struct lis_option_descriptor *));
+
+	private->nb_opts = nb_options;
+
+	return LIS_OK;
+}
+
+
 static void cleanup_options(struct lis_sane_item *private)
 {
 	int i;
@@ -313,18 +376,11 @@ static void cleanup_options(struct lis_sane_item *private)
 	// them
 
 	for (i = 0 ; i < private->nb_opts ; i++) {
-		if (private->options[i].parent.constraint.type == LIS_CONSTRAINT_LIST) {
-			free(private->options[i].parent.constraint.possible.list.values);
-			private->options[i].parent.constraint.possible.list.values = NULL;
-		}
-		free(private->options[i].value_buf);
-		private->options[i].value_buf = NULL;
+		free_option(&private->options[i]);
 	}
 
-	free(private->options);
-	private->options = NULL;
-	free(private->option_ptrs);
-	private->option_ptrs = NULL;
+	FREE(private->options);
+	FREE(private->option_ptrs);
 }
 
 
@@ -651,17 +707,9 @@ static enum lis_error lis_sane_item_get_options(struct lis_item *self,
 	}
 	nb_opts--; // number of options include the first option, which is the number of options
 
-	cleanup_options(private);
-	private->options = calloc(nb_opts, sizeof(struct lis_sane_option));
-	private->option_ptrs = calloc(nb_opts + 1, sizeof(struct lis_option_descriptor *));
-	if (private->options == NULL || private->option_ptrs == NULL) {
-		lis_log_error("sane get options: Out of memory");
-		err = LIS_ERR_NO_MEM;
+	err = resize_options(private, nb_opts);
+	if (LIS_IS_ERROR(err)) {
 		goto error;
-	}
-	for (out = 0 ; out < nb_opts ; out++) {
-		memcpy(&private->options[out].parent, &g_sane_option_template,
-				sizeof(private->options[out].parent));
 	}
 
 	for (in = 0, out = 0 ; in < nb_opts ; in++) {
@@ -735,6 +783,7 @@ static enum lis_error lis_sane_item_get_options(struct lis_item *self,
 		}
 
 		private->option_ptrs[out] = &private->options[out].parent;
+
 		out++;
 	}
 

@@ -12,6 +12,11 @@ extern "C" {
 #define LIS_UNUSED(x) (void)(x)
 #define LIS_COUNT_OF(x) (sizeof(x) / sizeof((x)[0]))
 
+#define FREE(x) do { \
+		free(x); \
+		(x) = NULL; \
+	} while(0);
+
 /*!
  * \brief Copy a value.
  * You *must* \ref lis_free "free the copy" once you're done with it.
