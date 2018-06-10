@@ -8,14 +8,23 @@
 
 int register_tests(void);
 
+// #define LOG_DEBUG
 
+#ifndef LOG_DEBUG
 static void noop() {}
+#endif
 
 const struct lis_log_callbacks g_log_callbacks = {
 	.callbacks = {
+#ifdef LOG_DEBUG
+		[LIS_LOG_LVL_DEBUG] = lis_log_stderr,
+		[LIS_LOG_LVL_INFO] = lis_log_stderr,
+		[LIS_LOG_LVL_WARNING] = lis_log_stderr,
+#else
 		[LIS_LOG_LVL_DEBUG] = noop,
 		[LIS_LOG_LVL_INFO] = noop,
 		[LIS_LOG_LVL_WARNING] = noop,
+#endif
 		[LIS_LOG_LVL_ERROR] = lis_log_stderr,
 	}
 };

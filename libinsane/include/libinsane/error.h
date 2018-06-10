@@ -12,13 +12,11 @@ extern "C" {
 
 enum lis_error {
 	LIS_OK = 0, /*!< Everything is fine. */
-
-	LIS_CANCELLED, /*!< Scan was cancelled, either by software or by hardware. */
-	LIS_END_OF_PAGE, /*!< End of page. Beware there may be other pages until LIS_END_OF_FEED. */
-	LIS_END_OF_FEED, /*!< End of page feed. No more pages will come. */
 	LIS_WARMING_UP, /*!< Lamp must warm up first. */
 
 	LIS_ERR_DEVICE_BUSY = LIS_ERR_BIT, /*!< Device already used by another process. */
+	LIS_ERR_CANCELLED, /*!< Scan was cancelled, either by software or by hardware but scan_read()
+						* was attempted anyway */
 	LIS_ERR_UNSUPPORTED, /*!< Operation is not supported. */
 	LIS_ERR_INVALID_VALUE, /*!< Invalid value. */
 	LIS_ERR_JAMMED, /*!< Your scanner is a mess. Go unmess it first. */

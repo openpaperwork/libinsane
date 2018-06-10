@@ -33,6 +33,12 @@ GType libinsane_scan_session_get_type(void) G_GNUC_CONST;
 
 /* no public constructor */
 
+gboolean libinsane_scan_session_end_of_feed(LibinsaneScanSession *self);
+gboolean libinsane_scan_session_end_of_page(LibinsaneScanSession *self);
+gssize libinsane_scan_session_read(LibinsaneScanSession *self, void *buffer, gsize lng, GError **error);
+GBytes *libinsane_scan_session_read_bytes(LibinsaneScanSession *self, gsize lng, GError **error);
+void libinsane_scan_session_cancel(LibinsaneScanSession *self);
+
 G_END_DECLS
 
 #endif

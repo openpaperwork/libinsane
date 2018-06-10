@@ -334,7 +334,6 @@ extern enum lis_error lis_api_normalizer_auto_opt_reload(
 );
 
 
-
 #ifdef __cplusplus
 }
 #endif

@@ -104,35 +104,20 @@ void lets_scan(void)
     CHECK_ERR(sources[0]->scan_start(sources[0], &scan_session));
 
     do {
-        bufsize = sizeof(img_buffer);
-        err = scan_session->scan_read(scan_session, img_buffer, &bufsize);
-        CHECK_ERR(err);
+        do {
+            bufsize = sizeof(img_buffer);
+            err = scan_session->scan_read(scan_session, img_buffer, &bufsize);
+            CHECK_ERR(err);
 
-        switch(err) {
-            case LIS_WARMING_UP:
+            if (err == LIS_WARMING_UP) {
                 // old scanners need warming time. No data has been returned.
                 assert(bufsize == 0);
                 sleep(1);
-                break;
-            case LIS_OK:
-                // do something with the chunk of the image/page that has just been read
-                break;
-            case LIS_CANCELLED:
-                // user cancelled
-                assert(bufsize == 0);
-                goto end;
-            case LIS_END_OF_PAGE:
-                // one page scanned
-                assert(bufsize == 0);
-                break;
-            case LIS_END_OF_FEED:
-                // end of scan session
-                assert(bufsize == 0);
-                break;
-            default:
-                break;
-        };
-    } while(err != LIS_END_OF_FEED);
+            }
+        } while (!scan_session->end_of_page(scan_session));
+
+        // do something with the chunk of the image/page that has just been read
+    } while (!scan_session->end_of_feed(scan_session));
 
 end:
     if (device != NULL) {

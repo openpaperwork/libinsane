@@ -28,7 +28,18 @@ struct lis_sane_option
 	char *value_buf;
 	struct lis_sane_item *item;
 };
-#define LIS_SANE_OPTION(impl) ((struct lis_sane_option *)(impl))
+#define LIS_SANE_OPTION_PRIVATE(impl) ((struct lis_sane_option *)(impl))
+
+
+struct lis_sane_scan_session
+{
+	struct lis_scan_session parent;
+	struct lis_sane_item *item;
+
+	int end_of_page;
+	int end_of_feed;
+};
+#define LIS_SANE_SCAN_SESSION_PRIVATE(impl) ((struct lis_sane_scan_session *)(impl))
 
 struct lis_sane_item
 {
@@ -39,6 +50,8 @@ struct lis_sane_item
 	struct lis_sane_option *options;
 	/*!< pointer array pointing to elements of options */
 	struct lis_option_descriptor **option_ptrs;
+
+	struct lis_sane_scan_session session;
 };
 #define LIS_SANE_ITEM_PRIVATE(impl) ((struct lis_sane_item *)(impl))
 
@@ -59,6 +72,8 @@ static enum lis_error lis_sane_item_get_options(struct lis_item *self,
 static enum lis_error lis_sane_item_get_scan_parameters(
 	struct lis_item *self, struct lis_scan_parameters *parameters
 );
+static enum lis_error lis_sane_scan_start(struct lis_item *self,
+	struct lis_scan_session **session);
 static void lis_sane_item_close(struct lis_item *dev);
 
 
@@ -68,6 +83,15 @@ static enum lis_error lis_sane_opt_get_value(struct lis_option_descriptor *opt,
 static enum lis_error lis_sane_opt_set_value(struct lis_option_descriptor *self,
 		const union lis_value value,
 		int *set_flags);
+
+
+/* scan session functions */
+static int lis_sane_end_of_feed(struct lis_scan_session *session);
+static int lis_sane_end_of_page(struct lis_scan_session *session);
+static enum lis_error lis_sane_scan_read(
+		struct lis_scan_session *session, void *out_buffer, size_t *buffer_size
+	);
+static void lis_sane_cancel(struct lis_scan_session *session);
 
 
 static struct lis_api g_sane_impl_template = {
@@ -83,8 +107,16 @@ static struct lis_item g_sane_item_template = {
 	.get_children = lis_sane_item_get_children,
 	.get_options = lis_sane_item_get_options,
 	.get_scan_parameters = lis_sane_item_get_scan_parameters,
-	.scan_start = NULL, /* TODO */
+	.scan_start = lis_sane_scan_start,
 	.close = lis_sane_item_close,
+};
+
+
+static struct lis_scan_session g_sane_scan_session_template = {
+	.end_of_feed = lis_sane_end_of_feed,
+	.end_of_page = lis_sane_end_of_page,
+	.scan_read = lis_sane_scan_read,
+	.cancel = lis_sane_cancel,
 };
 
 
@@ -121,17 +153,20 @@ static enum lis_error sane_status_to_lis_error(SANE_Status status)
 		case SANE_STATUS_UNSUPPORTED:
 			return LIS_ERR_UNSUPPORTED;
 		case SANE_STATUS_CANCELLED:
-			return LIS_CANCELLED;
+			assert(status != SANE_STATUS_CANCELLED);
+			break;
 		case SANE_STATUS_DEVICE_BUSY:
 			return LIS_ERR_DEVICE_BUSY;
 		case SANE_STATUS_INVAL:
 			return LIS_ERR_INVALID_VALUE;
 		case SANE_STATUS_EOF:
-			return LIS_END_OF_PAGE;
+			assert(status != SANE_STATUS_EOF);
+			break;
 		case SANE_STATUS_JAMMED:
 			return LIS_ERR_JAMMED;
 		case SANE_STATUS_NO_DOCS:
-			return LIS_END_OF_FEED;
+			assert(status != SANE_STATUS_NO_DOCS);
+			break;
 		case SANE_STATUS_COVER_OPEN:
 			return LIS_ERR_COVER_OPEN;
 		case SANE_STATUS_IO_ERROR:
@@ -693,7 +728,6 @@ static enum lis_error lis_sane_item_get_options(struct lis_item *self,
 		private->handle, 0 /* option 0 = number of options */,
 		SANE_ACTION_GET_VALUE, &nb_opts, NULL
 	));
-	assert(LIS_IS_OK(err));
 	if (LIS_IS_ERROR(err)) {
 		lis_log_error("%s->sane_control_option(NUMBER OF OPTIONS): 0x%X, %s",
 				self->name, err, lis_strerror(err));
@@ -894,7 +928,7 @@ static enum lis_error control_sane_value(
 static enum lis_error lis_sane_opt_get_value(struct lis_option_descriptor *self,
 		union lis_value *value)
 {
-	struct lis_sane_option *private = LIS_SANE_OPTION(self);
+	struct lis_sane_option *private = LIS_SANE_OPTION_PRIVATE(self);
 	enum lis_error err;
 
 	lis_log_debug("%s->%s->sane_control_option(GET_VALUE) ...",
@@ -923,7 +957,7 @@ static enum lis_error lis_sane_opt_set_value(struct lis_option_descriptor *self,
 		union lis_value value,
 		int *set_flags)
 {
-	struct lis_sane_option *private = LIS_SANE_OPTION(self);
+	struct lis_sane_option *private = LIS_SANE_OPTION_PRIVATE(self);
 	enum lis_error err;
 	int sane_set_flags = 0;
 
@@ -959,4 +993,104 @@ static enum lis_error lis_sane_opt_set_value(struct lis_option_descriptor *self,
 	}
 
 	return LIS_OK;
+}
+
+
+static enum lis_error lis_sane_scan_start(struct lis_item *self,
+	struct lis_scan_session **session)
+{
+	struct lis_sane_item *private = LIS_SANE_ITEM_PRIVATE(self);
+	SANE_Status sane_err;
+
+	memset(&private->session, 0, sizeof(private->session));
+	memcpy(&private->session.parent, &g_sane_scan_session_template,
+			sizeof(private->session.parent));
+	private->session.item = private;
+	*session = &private->session.parent;
+
+	lis_log_debug("sane_start() ...");
+	sane_err = sane_start(private->handle);
+	lis_log_debug("sane_start(): %d", sane_err);
+	if (sane_err == SANE_STATUS_EOF || sane_err == SANE_STATUS_NO_DOCS) {
+		lis_log_warning("sane_start() returned EOF (%d) --> No document in the feeder",
+				sane_err);
+		private->session.end_of_page = 1;
+		private->session.end_of_feed = 1;
+		return LIS_OK;
+	}
+	return sane_status_to_lis_error(sane_err);
+}
+
+
+static int lis_sane_end_of_feed(struct lis_scan_session *session)
+{
+	struct lis_sane_scan_session *private = LIS_SANE_SCAN_SESSION_PRIVATE(session);
+	return private->end_of_feed;
+}
+
+
+static int lis_sane_end_of_page(struct lis_scan_session *session)
+{
+	struct lis_sane_scan_session *private = LIS_SANE_SCAN_SESSION_PRIVATE(session);
+	return private->end_of_page;
+}
+
+
+static enum lis_error lis_sane_scan_read(
+		struct lis_scan_session *session, void *out_buffer, size_t *buffer_size
+	)
+{
+	SANE_Status sane_err;
+	SANE_Int len = 0;
+	struct lis_sane_scan_session *private = LIS_SANE_SCAN_SESSION_PRIVATE(session);
+	enum lis_error err;
+
+	lis_log_debug("sane_read() ...");
+	sane_err = sane_read(private->item->handle, out_buffer, (int)(*buffer_size), &len);
+	lis_log_debug("sane_read(): %d (%dB)", sane_err, len);
+
+	*buffer_size = len;
+
+	switch(sane_err) {
+		case SANE_STATUS_GOOD:
+			private->end_of_page = 0;
+			private->end_of_feed = 0;
+			return LIS_OK;
+		case SANE_STATUS_EOF:
+			private->end_of_page = 1;
+
+			lis_log_debug("sane_start() ...");
+			sane_err = sane_start(private->item->handle);
+			lis_log_debug("sane_start(): %d", sane_err);
+			if (sane_err == SANE_STATUS_EOF || sane_err == SANE_STATUS_NO_DOCS) {
+				lis_log_warning("sane_start() returned EOF (%d) --> No document in the feeder",
+						sane_err);
+				private->end_of_feed = 1;
+				return LIS_OK;
+			}
+
+			err = sane_status_to_lis_error(sane_err);
+			if (LIS_IS_ERROR(err)) {
+				lis_log_warning("sane_start() failed: %d, %s",
+					err, lis_strerror(err));
+			}
+			return err;
+		case SANE_STATUS_NO_DOCS:
+			private->end_of_page = 1;
+			private->end_of_feed = 1;
+			lis_sane_cancel(&private->parent);
+			return LIS_OK;
+		default:
+			err = sane_status_to_lis_error(sane_err);
+			lis_log_warning("Unexpected error from sane_read(): %d, %s",
+					err, lis_strerror(err));
+			return sane_status_to_lis_error(sane_err);
+	}
+}
+
+
+static void lis_sane_cancel(struct lis_scan_session *session)
+{
+	struct lis_sane_scan_session *private = LIS_SANE_SCAN_SESSION_PRIVATE(session);
+	sane_cancel(private->item->handle);
 }

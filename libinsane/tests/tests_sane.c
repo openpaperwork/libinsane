@@ -193,7 +193,7 @@ static void tests_sane_set_resolution_ko(void)
 
 	value.dbl = 2000.0; // out of range
 	err = options[i]->fn.set_value(options[i], value, &set_flags);
-	// but for some reason, dum-dum says "ok" ...
+	// XXX(JFlesch): but for some reason, dum-dum says "ok" ...
 	LIS_ASSERT_TRUE(LIS_IS_OK(err));
 	LIS_ASSERT_EQUAL(set_flags, LIS_SET_FLAG_MUST_RELOAD_PARAMS | LIS_SET_FLAG_INEXACT);
 
@@ -289,6 +289,156 @@ static void tests_sane_scan_parameters(void)
 }
 
 
+static void tests_sane_scan_single(void)
+{
+	enum lis_error err;
+	struct lis_option_descriptor **options = NULL;
+	union lis_value value;
+	int resolution_idx = -1;
+	int mode_idx = -1;
+	int i;
+	int set_flags;
+	struct lis_scan_parameters scan_parameters;
+	struct lis_scan_session *session = NULL;
+	char buffer[1024];
+	size_t bufsize;
+	size_t bread;
+
+	err = g_test_device->get_options(g_test_device, &options);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(options, NULL);
+
+	for (i = 0 ; options[i] != NULL ; i++) {
+		if (strcmp(options[i]->name, "mode") == 0) {
+			mode_idx = i;
+		} else if (strcmp(options[i]->name, "resolution") == 0) {
+			resolution_idx = i;
+		}
+	}
+	LIS_ASSERT_NOT_EQUAL(mode_idx, -1);
+	LIS_ASSERT_NOT_EQUAL(resolution_idx, -1);
+
+	value.string = "Gray";
+	err = options[mode_idx]->fn.set_value(options[mode_idx], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, 0 /* value unchanged --> nothing to reload */);
+
+	value.dbl = 50.0;
+	err = options[resolution_idx]->fn.set_value(options[resolution_idx], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, LIS_SET_FLAG_MUST_RELOAD_PARAMS);
+
+	err = g_test_device->get_scan_parameters(g_test_device, &scan_parameters);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(scan_parameters.format, LIS_IMG_FORMAT_GRAYSCALE_8);
+	LIS_ASSERT_EQUAL(scan_parameters.width, 157);
+	LIS_ASSERT_EQUAL(scan_parameters.height, 196);
+	LIS_ASSERT_EQUAL(scan_parameters.image_size, 30772);
+
+	err = g_test_device->scan_start(g_test_device, &session);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+
+	bread = 0;
+	while(!session->end_of_page(session)) {
+		bufsize = sizeof(buffer);
+		err = session->scan_read(session, buffer, &bufsize);
+		LIS_ASSERT_TRUE(LIS_IS_OK(err));
+		bread += bufsize;
+	}
+	LIS_ASSERT_EQUAL(bread, scan_parameters.image_size);
+	/* XXX(JFlesch): dum-dum says ok for another scan, even if we are scanning from a Flatbed ... */
+	/* LIS_ASSERT_TRUE(session->end_of_feed(session)); */
+	session->cancel(session); /* XXX(Jflesch): shouldn't have to to that ... */
+
+	/* set resolution back to default for other tests */
+	value.dbl = 100.0;
+	err = options[resolution_idx]->fn.set_value(options[resolution_idx], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+}
+
+
+static void tests_sane_scan_multiple(void)
+{
+	enum lis_error err;
+	struct lis_option_descriptor **options = NULL;
+	union lis_value value;
+	int resolution_idx = -1;
+	int mode_idx = -1;
+	int source_idx = -1;
+	int i;
+	int set_flags;
+	struct lis_scan_parameters scan_parameters;
+	struct lis_scan_session *session = NULL;
+	char buffer[1024];
+	size_t bufsize;
+	size_t bread;
+	int nb_pages;
+
+	err = g_test_device->get_options(g_test_device, &options);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_NOT_EQUAL(options, NULL);
+
+	for (i = 0 ; options[i] != NULL ; i++) {
+		if (strcmp(options[i]->name, "mode") == 0) {
+			mode_idx = i;
+		} else if (strcmp(options[i]->name, "resolution") == 0) {
+			resolution_idx = i;
+		} else if (strcmp(options[i]->name, "source") == 0) {
+			source_idx = i;
+		}
+	}
+	LIS_ASSERT_NOT_EQUAL(mode_idx, -1);
+	LIS_ASSERT_NOT_EQUAL(resolution_idx, -1);
+	LIS_ASSERT_NOT_EQUAL(source_idx, -1);
+
+	value.string = "Automatic Document Feeder";
+	err = options[source_idx]->fn.set_value(options[source_idx], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, 0);
+
+	value.string = "Gray";
+	err = options[mode_idx]->fn.set_value(options[mode_idx], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, 0 /* value unchanged --> nothing to reload */);
+
+	value.dbl = 50.0;
+	err = options[resolution_idx]->fn.set_value(options[resolution_idx], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(set_flags, LIS_SET_FLAG_MUST_RELOAD_PARAMS);
+
+	err = g_test_device->get_scan_parameters(g_test_device, &scan_parameters);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+	LIS_ASSERT_EQUAL(scan_parameters.format, LIS_IMG_FORMAT_GRAYSCALE_8);
+	LIS_ASSERT_EQUAL(scan_parameters.width, 157);
+	LIS_ASSERT_EQUAL(scan_parameters.height, 196);
+	LIS_ASSERT_EQUAL(scan_parameters.image_size, 30772);
+
+	err = g_test_device->scan_start(g_test_device, &session);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+
+	nb_pages = 0;
+	do {
+		bread = 0;
+		do {
+			bufsize = sizeof(buffer);
+			err = session->scan_read(session, buffer, &bufsize);
+			LIS_ASSERT_TRUE(LIS_IS_OK(err));
+			bread += bufsize;
+		} while (!session->end_of_page(session));
+		LIS_ASSERT_EQUAL(bread, scan_parameters.image_size);
+		nb_pages++;
+	} while (!session->end_of_feed(session));
+	/* number of pages returned depends whether the test "tests_sane_scan_single"
+	 * was run before this one or not. Nevermind the fact that we changed source ... */
+	LIS_ASSERT_TRUE(nb_pages == 8 || nb_pages == 10);
+
+	/* set resolution back to default for other tests */
+	value.dbl = 100.0;
+	err = options[resolution_idx]->fn.set_value(options[resolution_idx], value, &set_flags);
+	LIS_ASSERT_TRUE(LIS_IS_OK(err));
+}
+
+
 int register_tests(void)
 {
 	CU_pSuite suite = NULL;
@@ -299,6 +449,7 @@ int register_tests(void)
 		return 0;
 	}
 
+	/* order of tests may matter because of Sane test backend ... and that makes me a sad panda .. :( */
 	if (CU_add_test(suite, "list_devices()", tests_sane_list_devices) == NULL
 			|| CU_add_test(suite, "get_device() ko", tests_sane_get_device_ko) == NULL
 			|| CU_add_test(suite, "get_children()", tests_sane_item_get_children) == NULL
@@ -306,7 +457,9 @@ int register_tests(void)
 			|| CU_add_test(suite, "set_resolution", tests_sane_set_resolution) == NULL
 			|| CU_add_test(suite, "set_resolution_ko",
 				tests_sane_set_resolution_ko) == NULL
-			|| CU_add_test(suite, "scan_parameters", tests_sane_scan_parameters) == NULL) {
+			|| CU_add_test(suite, "scan_parameters", tests_sane_scan_parameters) == NULL
+			|| CU_add_test(suite, "scan_single", tests_sane_scan_single) == NULL
+			|| CU_add_test(suite, "scan_multiple", tests_sane_scan_multiple) == NULL) {
 		fprintf(stderr, "CU_add_test() has failed\n");
 		return 0;
 	}

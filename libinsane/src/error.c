@@ -2,19 +2,16 @@
 
 #include <libinsane/error.h>
 
+
 const char *lis_strerror(enum lis_error err)
 {
 	switch(err) {
 		case LIS_OK:
 			return "Success";
-		case LIS_CANCELLED:
-			return "Operation cancelled";
-		case LIS_END_OF_PAGE:
-			return "End of page";
-		case LIS_END_OF_FEED:
-			return "End of feed";
 		case LIS_WARMING_UP:
 			return "Device is warming up";
+		case LIS_ERR_CANCELLED:
+			return "Operation cancelled";
 		case LIS_ERR_DEVICE_BUSY:
 			return "Device busy";
 		case LIS_ERR_UNSUPPORTED:

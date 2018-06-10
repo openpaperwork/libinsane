@@ -8,6 +8,8 @@
 #include <libinsane-gobject/option_descriptor_private.h>
 #include <libinsane-gobject/scan_parameters.h>
 #include <libinsane-gobject/scan_parameters_private.h>
+#include <libinsane-gobject/scan_session.h>
+#include <libinsane-gobject/scan_session_private.h>
 
 
 struct _LibinsaneItemPrivate
@@ -53,6 +55,7 @@ LibinsaneItem *libinsane_item_new_from_libinsane(struct lis_item *lis_item)
 	return item;
 }
 
+
 /**
  * libinsane_item_get_name:
  * @self: current item
@@ -68,13 +71,28 @@ const char *libinsane_item_get_name(LibinsaneItem *self)
 
 LibinsaneItemType libinsane_item_get_item_type(LibinsaneItem *self)
 {
-	return 0; /* TODO */
+	LibinsaneItemPrivate *private = LIBINSANE_ITEM_GET_PRIVATE(self);
+	switch(private->item->type)
+	{
+		case LIS_ITEM_DEVICE:
+			return LIBINSANE_ITEM_TYPE_DEVICE;
+		case LIS_ITEM_FLATBED:
+			return LIBINSANE_ITEM_TYPE_FLATBED;
+		case LIS_ITEM_ADF:
+			return LIBINSANE_ITEM_TYPE_ADF;
+		case LIS_ITEM_UNIDENTIFIED:
+			return LIBINSANE_ITEM_TYPE_UNIDENTIFIED;
+	}
+
+	lis_log_warning("Unexpected item type: %d", private->item->type);
+	return LIBINSANE_ITEM_TYPE_UNIDENTIFIED;
 }
 
 
 void libinsane_item_close(LibinsaneItem *self, GError **error)
 {
-	/* TODO */
+	LibinsaneItemPrivate *private = LIBINSANE_ITEM_GET_PRIVATE(self);
+	private->item->close(private->item);
 }
 
 
@@ -190,7 +208,24 @@ LibinsaneScanParameters *libinsane_item_get_scan_parameters(LibinsaneItem *self,
  */
 LibinsaneScanSession *libinsane_item_scan_start(LibinsaneItem *self, GError **error)
 {
-	return NULL; /* TODO */
+	LibinsaneItemPrivate *private = LIBINSANE_ITEM_GET_PRIVATE(self);
+	enum lis_error err;
+	struct lis_scan_session *lis_scan_session = NULL;
+	LibinsaneScanSession *scan_session;
+
+	lis_log_debug("enter");
+	err = private->item->scan_start(private->item, &lis_scan_session);
+	if (LIS_IS_ERROR(err)) {
+		SET_LIBINSANE_GOBJECT_ERROR(error, err,
+			"Libinsane item->scan_start() error: 0x%X, %s",
+			err, lis_strerror(err));
+		lis_log_debug("error");
+		return NULL;
+	}
+
+	scan_session = libinsane_scan_session_new_from_libinsane(lis_scan_session);
+	lis_log_debug("leave");
+	return scan_session;
 }
 
 

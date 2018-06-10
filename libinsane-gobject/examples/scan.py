@@ -6,7 +6,9 @@
 # export LD_LIBRARY_PATH=/usr/local/lib
 # libinsane-gobject/examples/scan.py
 
+import PIL.Image
 import sys
+import traceback
 
 import gi
 gi.require_version('Libinsane', '0.1')
@@ -18,9 +20,49 @@ from gi.repository import Libinsane  # noqa: E402
 
 class ExampleLogger(GObject.GObject, Libinsane.Logger):
     def do_log(self, lvl, msg):
-        if lvl <= Libinsane.LogLevel.ERROR:
+        if lvl < Libinsane.LogLevel.ERROR:
             return
         print("{}: {}".format(lvl.value_nick, msg))
+
+
+def set_opt(source, opt_name, opt_value):
+    try:
+        print("Setting {} to {}".format(opt_name, opt_value))
+        opts = source.get_options()
+        opts = {opt.get_name(): opt for opt in opts}
+        print("- Old {}: {}".format(opt_name, opts[opt_name].get_value()))
+        print("- Allowed values: {}".format(opts[opt_name].get_constraint()))
+        opts[opt_name].set_value(opt_value)
+        opts = source.get_options()
+        opts = {opt.get_name(): opt for opt in opts}
+        print("- New {}: {}".format(opt_name, opts[opt_name].get_value()))
+    except Exception as exc:
+        print("Failed to set {} to {}: {}".format(
+            opt_name, opt_value, str(exc)
+        ))
+        traceback.print_exc()
+
+
+def raw_to_img(params, img_bytes):
+    fmt = params.get_format()
+    if fmt == Libinsane.ImgFormat.RAW_RGB_24:
+        (w, h) = (
+            params.get_width(),
+            int(len(img_bytes) / 3 / params.get_width())
+        )
+        mode = "RGB"
+    elif fmt == Libinsane.ImgFormat.GRAYSCALE_8:
+        (w, h) = (
+            params.get_width(),
+            int(len(img_bytes) / params.get_width())
+        )
+        mode = "L"
+    elif fmt == Libinsane.ImgFormat.BW_1:
+        assert()  # TODO
+    else:
+        assert()  # unexpected format
+    print("Mode: {} : Size: {}x{}".format(mode, w, h))
+    return PIL.Image.frombuffer(mode, (w, h), img_bytes, "raw", mode, 0, 1)
 
 
 def main():
@@ -74,36 +116,41 @@ def main():
     print("Will use scan source {}".format(source.get_name()))
 
     # set the options
-    opts = source.get_options()
-    opts = {opt.get_name(): opt for opt in opts}
-    print("Setting mode to Color")
-    print("- Old mode: {}".format(opts['mode'].get_value()))
-    print("- Allowed modes: {}".format(opts['mode'].get_constraint()))
-    opts['mode'].set_value('Color')
-    opts = source.get_options()
-    opts = {opt.get_name(): opt for opt in opts}
-    print("- New mode: {}".format(opts['mode'].get_value()))
-
-    print("Setting resolution to 300")
-    print("- Old resolution: {}".format(opts['resolution'].get_value()))
-    print("- Allowed resolutions: {}".format(
-        opts['resolution'].get_constraint())
-    )
-    opts['resolution'].set_value(150)
-    opts = source.get_options()
-    opts = {opt.get_name(): opt for opt in opts}
-    print("- New resolution: {}".format(opts['resolution'].get_value()))
-
-    print("Options set")
+    set_opt(source, 'source', 'Automatic Document Feeder')
+    set_opt(source, 'mode', 'Color')
+    set_opt(source, 'resolution', 300)
+    set_opt(source, 'test-picture', 'Color pattern')
 
     scan_params = dev.get_scan_parameters()
     print("Expected scan parameters: {} ; {}x{} = {} bytes".format(
           scan_params.get_format(),
           scan_params.get_width(), scan_params.get_height(),
           scan_params.get_image_size()))
+    total = scan_params.get_image_size()
 
-    # scan
-    # TODO
+    session = dev.scan_start()
+    try:
+        page_nb = 0
+        while not session.end_of_feed() and page_nb < 20:
+            img = []
+            out = output_file.format(page_nb)
+            r = 0
+            print("Scanning page {} --> {}".format(page_nb, out))
+            while True:
+                data = session.read_bytes(32 * 1024)
+                data = data.get_data()
+                img.append(data)
+                r += len(data)
+                print("Got {}/{} bytes".format(r, total))
+                if session.end_of_page():
+                    break
+            img = b"".join(img)
+            img = raw_to_img(scan_params, img)
+            img.save(out)
+            page_nb += 1
+    finally:
+        session.cancel()
+
 
 if __name__ == "__main__":
     main()

@@ -249,6 +249,18 @@ struct lis_scan_parameters {
 
 struct lis_scan_session {
 	/*!
+	 * \brief Indicates if we have reached the end of the feed
+	 */
+	int (*end_of_feed)(struct lis_scan_session *session);
+
+	/*!
+	 * \brief Indicates if we have reached the end of the page being currently scanned
+	 * If an error must occur, it will occur on \ref scan_read(), including a possible
+	 * LIS_ER_
+	 */
+	int (*end_of_page)(struct lis_scan_session *session);
+
+	/*!
 	 * \brief Read a chunk of the scanned image.
 	 * \param[in] session Scan session.
 	 * \param[out] out_buffer Image chunk.
@@ -259,13 +271,13 @@ struct lis_scan_session {
 	 *		\ref LIS_IS_ERROR().
 	 * \warning You should manage every non-error return value carefully.
 	 * \retval LIS_OK A chunk of the current page/image has been read.
-	 * \retval LIS_ERR_CANCELLED Scan has been cancelled by \ref scan_cancel() or by hardware.
+	 * \retval LIS_CANCELLED Scan has been cancelled by \ref scan_cancel() or by hardware.
 	 *		You can throw the image chunks you got away. Do not call again \ref scan_read().
 	 *		Do not call \ref scan_read() or \ref scan_cancel() again.
-	 * \retval LIS_ERR_END_OF_PAGE A whole page has been read. Call again \ref scan_read() to read
+	 * \retval LIS_END_OF_PAGE A whole page has been read. Call again \ref scan_read() to read
 	 *		the next page.
-	 * \retval LIS_ERR_END_OF_FEED A whole page feed has been read. Do not call \ref scan_cancel().
-	 * \retval LIS_ERR_WARMING_UP Scanner is warming up. No data available yet. Keep calling
+	 * \retval LIS_END_OF_FEED A whole page feed has been read. Do not call \ref scan_cancel().
+	 * \retval LIS_WARMING_UP Scanner is warming up. No data available yet. Keep calling
 	 *		\ref scan_read() until there is.
 	 */
 	enum lis_error (*scan_read) (
@@ -278,7 +290,7 @@ struct lis_scan_session {
 	 * This function stops the current scan session and releases any resource related to the scan
 	 * session.
 	 */
-	void (*scan_cancel)(struct lis_scan_session *session);
+	void (*cancel)(struct lis_scan_session *session);
 };
 
 
@@ -318,9 +330,9 @@ struct lis_item {
 	/*!
 	 * \brief Returns a description of what will be returned when scanning.
 	 *
-	 * This is only an estimation. While the image format and the width of the image are certain,
-	 * the height may actually vary. Application must handle the case where something different
-	 * will be scanned (longer or shorter image).
+	 * This is only an estimation. While the image format and the width of the
+	 * image are certain, the height may actually vary. Application must handle the
+	 * case where something different will be scanned (longer or shorter image).
 	 *
 	 * \param[in] self Item from which the scan will be done.
 	 * \param[out] parameters Estimation of what will be scanned.

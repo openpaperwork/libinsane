@@ -21,20 +21,17 @@ GQuark libinsane_error_quark(void)
 	return q;
 }
 
+
 LibinsaneError lis_error_to_gobject(enum lis_error err)
 {
 	switch(err) {
 		case LIS_OK:
 			return LIBINSANE_ERROR_OK;
-		case LIS_CANCELLED:
+		case LIS_ERR_CANCELLED:
 			return LIBINSANE_ERROR_CANCELLED;
-		case LIS_END_OF_PAGE:
-		case LIS_END_OF_FEED:
 		case LIS_WARMING_UP:
 			/* shouldn't be arrive here */
-			assert(err != LIS_END_OF_PAGE
-					&& err != LIS_END_OF_FEED
-					&& err != LIS_WARMING_UP);
+			assert(err != LIS_WARMING_UP);
 			break;
 		case LIS_ERR_DEVICE_BUSY:
 			return LIBINSANE_ERROR_DEVICE_BUSY;
