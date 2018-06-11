@@ -83,7 +83,7 @@ add_custom_command(
 ## Build libinsane_gobject itself
 
 add_library(insane_gobject SHARED ${INSANE_GOBJECT_SRCS})
-if(${CMAKE_CURRENT_SOURCE_DIR} EQUAL ${CMAKE_SOURCE_DIR})
+if(NOT HAS_TOPLEVEL_CMAKELISTS)
   target_link_libraries(insane_gobject insane ${GLIB2_LIBRARIES})
 else()
   # XXX: Statically linked for now until CMake restructuring is done.
@@ -120,7 +120,7 @@ get_directory_property(_tmp_includes INCLUDE_DIRECTORIES)
 _list_prefix(_includes _tmp_includes "-I")
 
 # XXX: Only do this workaround if we don't have a top-level CMakeLists.txt
-if(${CMAKE_CURRENT_SOURCE_DIR} EQUAL ${CMAKE_SOURCE_DIR})
+if(NOT HAS_TOPLEVEL_CMAKELISTS)
   set(Libinsane_0_1_gir_CFLAGS
     ${_includes}
     -L${CMAKE_BINARY_DIR}
@@ -155,7 +155,7 @@ file(
 )
 
 # XXX: Only do this workaround if we don't have a top-level CMakeLists.txt
-if(${CMAKE_CURRENT_SOURCE_DIR} EQUAL ${CMAKE_SOURCE_DIR})
+if(NOT HAS_TOPLEVEL_CMAKELISTS)
   # WORKAROUND(JFlesch):
   # gtk-doc seems to accept only one LDPATH ?
   file(
