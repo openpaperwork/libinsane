@@ -83,7 +83,12 @@ add_custom_command(
 ## Build libinsane_gobject itself
 
 add_library(insane_gobject SHARED ${INSANE_GOBJECT_SRCS})
-target_link_libraries(insane_gobject insane ${GLIB2_LIBRARIES})
+if(${CMAKE_CURRENT_SOURCE_DIR} EQUAL ${CMAKE_SOURCE_DIR})
+  target_link_libraries(insane_gobject insane ${GLIB2_LIBRARIES})
+else()
+  # XXX: Statically linked for now until CMake restructuring is done.
+  target_link_libraries(insane_gobject libinsane_static ${GLIB2_LIBRARIES})
+endif()
 target_include_directories(insane_gobject PUBLIC include generated)
 
 install(TARGETS insane_gobject
@@ -113,12 +118,19 @@ set(Libinsane_0_1_gir "libinsane-gobject")
 set(Libinsane_0_1_gir_INCLUDES GObject-2.0)
 get_directory_property(_tmp_includes INCLUDE_DIRECTORIES)
 _list_prefix(_includes _tmp_includes "-I")
-set(Libinsane_0_1_gir_CFLAGS
-  ${_includes}
-  -L${CMAKE_BINARY_DIR}
-  -L${CMAKE_CURRENT_SOURCE_DIR}/../libinsane/build
-  -linsane
-)
+
+# XXX: Only do this workaround if we don't have a top-level CMakeLists.txt
+if(${CMAKE_CURRENT_SOURCE_DIR} EQUAL ${CMAKE_SOURCE_DIR})
+  set(Libinsane_0_1_gir_CFLAGS
+    ${_includes}
+    -L${CMAKE_BINARY_DIR}
+    -L${CMAKE_CURRENT_SOURCE_DIR}/../libinsane/build
+    -linsane
+  )
+else()
+  set(Libinsane_0_1_gir_CFLAGS ${_includes})
+endif()
+
 set(Libinsane_0_1_gir_LIBS insane_gobject)
 _list_prefix(_abs_introspection_files introspection_files "${CMAKE_CURRENT_SOURCE_DIR}/")
 set(Libinsane_0_1_gir_FILES ${_abs_introspection_files})
@@ -141,12 +153,16 @@ file(
   COPY ${CMAKE_CURRENT_SOURCE_DIR}/doc/gtkdocentities.ent
   DESTINATION ${CMAKE_BINARY_DIR}/libinsane_gobject/xml
 )
-# WORKAROUND(JFlesch):
-# gtk-doc seems to accept only one LDPATH ?
-file(
-  COPY ${CMAKE_CURRENT_SOURCE_DIR}/../libinsane/build/libinsane.so
-  DESTINATION ${CMAKE_BINARY_DIR}
-)
+
+# XXX: Only do this workaround if we don't have a top-level CMakeLists.txt
+if(${CMAKE_CURRENT_SOURCE_DIR} EQUAL ${CMAKE_SOURCE_DIR})
+  # WORKAROUND(JFlesch):
+  # gtk-doc seems to accept only one LDPATH ?
+  file(
+    COPY ${CMAKE_CURRENT_SOURCE_DIR}/../libinsane/build/libinsane.so
+    DESTINATION ${CMAKE_BINARY_DIR}
+  )
+endif()
 
 gtk_doc_add_module(
   libinsane_gobject
