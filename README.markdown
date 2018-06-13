@@ -1,3 +1,2 @@
-Work In Progress
+Moved to [Gnome's Gitlab](https://gnome.gitlab.org/World/OpenPaperwork/libinsane).
 
-[Documentation](https://doc.openpaper.work/libinsane/latest/)
