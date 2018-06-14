@@ -4,7 +4,7 @@ project(Libinsane)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 include(GNUInstallDirs)
 
@@ -138,28 +138,34 @@ endif()
 
 
 # libinsane tests
-enable_testing()
+find_package(PkgConfig)
+pkg_check_modules(CUNIT "cunit")
+if(CUNIT_FOUND)
+    enable_testing()
 
-find_program(MEMORYCHECK_COMMAND valgrind)
-set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes" "--leak-check=full" "--error-exitcode=10")
-set(ENV{CTEST_OUTPUT_ON_FAILURE} "1")
-MESSAGE(STATUS "Valgrind: ${MEMORYCHECK_COMMAND} ${MEMORYCHECK_COMMAND_OPTIONS}")
+    find_program(MEMORYCHECK_COMMAND valgrind)
+    set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes" "--leak-check=full" "--error-exitcode=10")
+    set(ENV{CTEST_OUTPUT_ON_FAILURE} "1")
+    MESSAGE(STATUS "Valgrind: ${MEMORYCHECK_COMMAND} ${MEMORYCHECK_COMMAND_OPTIONS}")
 
-foreach(test ${LIBINSANE_TESTS})
-    add_executable(tests_${test} ${LIBINSANE_SRCS} tests/main.c tests/tests_${test}.c)
-    target_include_directories(tests_${test} PUBLIC include ${LIBINSANE_INCLUDES})
-    target_link_libraries(tests_${test} ${LIBINSANE_LIBS} -lcunit)
-    add_test(
-        NAME tests_${test}
-        COMMAND ${CMAKE_BINARY_DIR}/tests_${test}
-    )
-endforeach(test)
-foreach(test ${LIBINSANE_VALGRIND_TESTS})
-    add_executable(tests_${test} ${LIBINSANE_SRCS} tests/main.c tests/tests_${test}.c)
-    target_include_directories(tests_${test} PUBLIC include ${LIBINSANE_INCLUDES})
-    target_link_libraries(tests_${test} ${LIBINSANE_LIBS} -lcunit)
-    add_test(
-        NAME tests_${test}
-        COMMAND ${MEMORYCHECK_COMMAND} ${MEMORYCHECK_COMMAND_OPTIONS} -- ${CMAKE_BINARY_DIR}/tests_${test}
-    )
-endforeach(test)
+    foreach(test ${LIBINSANE_TESTS})
+        add_executable(tests_${test} ${LIBINSANE_SRCS} tests/main.c tests/tests_${test}.c)
+        target_include_directories(tests_${test} PUBLIC include ${LIBINSANE_INCLUDES})
+        target_compile_options(tests_${test} PUBLIC ${CUNIT_CFLAGS})
+        target_link_libraries(tests_${test} ${LIBINSANE_LIBS} ${CUNIT_LDFLAGS})
+        add_test(
+            NAME tests_${test}
+            COMMAND ${CMAKE_BINARY_DIR}/tests_${test}
+        )
+    endforeach(test)
+    foreach(test ${LIBINSANE_VALGRIND_TESTS})
+        add_executable(tests_${test} ${LIBINSANE_SRCS} tests/main.c tests/tests_${test}.c)
+        target_include_directories(tests_${test} PUBLIC include ${LIBINSANE_INCLUDES})
+        target_compile_options(tests_${test} PUBLIC ${CUNIT_CFLAGS})
+        target_link_libraries(tests_${test} ${LIBINSANE_LIBS} ${CUNIT_LDFLAGS})
+        add_test(
+            NAME tests_${test}
+            COMMAND ${MEMORYCHECK_COMMAND} ${MEMORYCHECK_COMMAND_OPTIONS} -- ${CMAKE_BINARY_DIR}/tests_${test}
+        )
+    endforeach(test)
+endif(CUNIT_FOUND)
