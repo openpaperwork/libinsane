@@ -1,2 +1,2 @@
-Moved to [Gnome's Gitlab](https://gnome.gitlab.org/World/OpenPaperwork/libinsane).
+Moved to [Gnome's Gitlab](https://gitlab.gnome.org/World/OpenPaperwork/libinsane).
 
