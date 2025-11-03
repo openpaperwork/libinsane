@@ -170,7 +170,7 @@ def scan(source, output_file):
                 print("Saving page as {} ...".format(out))
                 if scan_params.get_format() == Libinsane.ImgFormat.RAW_RGB_24:
                     img = raw_to_img(scan_params, img)
-                    img.save(out, format="PNG")
+                    img.save(out)
                 else:
                     print("Warning: output format is {}".format(
                         scan_params.get_format()
