@@ -59,10 +59,9 @@ static int open_bmp(struct bmp *out, const char *file)
 static void write_header(struct bmp *out, const struct lis_scan_parameters *params)
 {
 	char header[BMP_HEADER_SIZE];
-	fpos_t cur_pos;
-	memcpy(&out->params, params, sizeof(struct lis_scan_parameters));
-	fgetpos(out->fp, &cur_pos);
+	long int cur_pos = ftell(out->fp);
 
+	memcpy(&out->params, params, sizeof(struct lis_scan_parameters));
 	/* Normalizers ensure us that we will always get RAW_RGB_24. So this
 	 * could actually be an assert. However it's useful for testing
 	 * to be able to handle other formats as is.
@@ -84,7 +83,10 @@ static void write_header(struct bmp *out, const struct lis_scan_parameters *para
 	lis_scan_params2bmp(params, header, 24 /* assuming RGB24 */);
 	fseek(out->fp, 0, SEEK_SET );
 	fwrite(header, sizeof(header), 1, out->fp);
-	fsetpos(out->fp, &cur_pos );
+	
+	if (cur_pos > 0) {
+		fseek(out->fp, cur_pos, SEEK_SET );
+	}
 
 	// TODO(JFlesch): check fwrite() result
 }
