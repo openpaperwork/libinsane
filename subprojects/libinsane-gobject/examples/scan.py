@@ -15,13 +15,20 @@ from gi.repository import GObject  # noqa: E402
 
 from gi.repository import Libinsane  # noqa: E402
 
-
 #! [ExampleLogger]
 class ExampleLogger(GObject.GObject, Libinsane.Logger):
+    def __init__(self):
+        super().__init__()
+        self.prefix = dict()
+        self.prefix[Libinsane.LogLevel.DEBUG] = "DBG"
+        self.prefix[Libinsane.LogLevel.INFO] = "INF"
+        self.prefix[Libinsane.LogLevel.WARNING] = "WRN"
+        self.prefix[Libinsane.LogLevel.ERROR] = "ERR"
+
     def do_log(self, lvl, msg):
         if lvl <= Libinsane.LogLevel.INFO:
             return
-        print("{}: {}".format(lvl.value_nick, msg))
+        print("{}: {}".format(self.prefix[lvl], msg))
         sys.stdout.flush()
 #! [ExampleLogger]
 
