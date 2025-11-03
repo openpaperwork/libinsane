@@ -59,9 +59,9 @@ static int open_bmp(struct bmp *out, const char *file)
 static void write_header(struct bmp *out, const struct lis_scan_parameters *params)
 {
 	char header[BMP_HEADER_SIZE];
+	long int cur_pos = ftell(out->fp);
 
 	memcpy(&out->params, params, sizeof(struct lis_scan_parameters));
-
 	/* Normalizers ensure us that we will always get RAW_RGB_24. So this
 	 * could actually be an assert. However it's useful for testing
 	 * to be able to handle other formats as is.
@@ -81,8 +81,12 @@ static void write_header(struct bmp *out, const struct lis_scan_parameters *para
 	}
 
 	lis_scan_params2bmp(params, header, 24 /* assuming RGB24 */);
-
+	fseek(out->fp, 0, SEEK_SET );
 	fwrite(header, sizeof(header), 1, out->fp);
+	
+	if (cur_pos > 0) {
+		fseek(out->fp, cur_pos, SEEK_SET );
+	}
 
 	// TODO(JFlesch): check fwrite() result
 }
@@ -250,7 +254,19 @@ static void lets_scan(struct bmp *out, const char *dev_id)
 			// here for example we write simply to a BMP file
 			write_pixels(out, img_buffer, bufsize);
 		}
+	
 		// do something with the whole image/page that has just been scanned
+		CHECK_ERR(scan_session->get_scan_parameters(
+			scan_session, &parameters
+		));
+		parameters.height = obtained / 3 / parameters.width;
+		parameters.image_size = obtained;
+		printf(
+			"Final: Scan will be: %d px x %d px (%ld bytes)\n",
+			parameters.width, parameters.height,
+			(long)parameters.image_size
+		);
+		write_header(out, &parameters);
 	}
 
 	// do something with all the images/pages that have just been scanned

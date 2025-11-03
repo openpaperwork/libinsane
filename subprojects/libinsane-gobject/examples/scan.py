@@ -9,7 +9,8 @@ import sys
 import traceback
 
 import gi
-gi.require_version('Libinsane', '1.0')
+
+gi.require_version("Libinsane", "1.0")
 from gi.repository import GObject  # noqa: E402
 
 
@@ -18,11 +19,21 @@ from gi.repository import Libinsane  # noqa: E402
 
 #! [ExampleLogger]
 class ExampleLogger(GObject.GObject, Libinsane.Logger):
+    def __init__(self):
+        super().__init__()
+        self.prefix = dict()
+        self.prefix[Libinsane.LogLevel.DEBUG] = "DBG"
+        self.prefix[Libinsane.LogLevel.INFO] = "INF"
+        self.prefix[Libinsane.LogLevel.WARNING] = "WRN"
+        self.prefix[Libinsane.LogLevel.ERROR] = "ERR"
+
     def do_log(self, lvl, msg):
         if lvl <= Libinsane.LogLevel.INFO:
             return
-        print("{}: {}".format(lvl.value_nick, msg))
+        print("{}: {}".format(self.prefix[lvl], msg))
         sys.stdout.flush()
+
+
 #! [ExampleLogger]
 
 
@@ -40,6 +51,8 @@ def get_device(api, dev_id=None):
     dev = api.get_device(dev_id)
     print("Using device {}".format(dev.get_name()))
     return dev
+
+
 #! [ExampleListGetDevice]
 
 
@@ -63,6 +76,8 @@ def get_source(dev, source_name):
             sys.exit(2)
     print("Will use scan source {}".format(source.get_name()))
     return source
+
+
 #! [ExampleListGetScanSource]
 
 
@@ -83,12 +98,12 @@ def set_opt(item, opt_name, opt_value):
         opts = {opt.get_name(): opt for opt in opts}
         print("- New {}: {}".format(opt_name, opts[opt_name].get_value()))
     except Exception as exc:
-        print("Failed to set {} to {}: {}".format(
-            opt_name, opt_value, str(exc)
-        ))
+        print("Failed to set {} to {}: {}".format(opt_name, opt_value, str(exc)))
         traceback.print_exc()
     finally:
         print("")
+
+
 #! [ExampleSetOption]
 
 
@@ -98,27 +113,24 @@ def list_opts(item):
     print("Options:")
     for opt in opts:
         try:
-            print("- {}={} ({})".format(
-                opt.get_name(), opt.get_value(), opt.get_constraint()
-            ))
+            print("- {}={} ({})".format(opt.get_name(), opt.get_value(), opt.get_constraint()))
         except Exception as exc:
-            print("Failed to read option {}: {}".format(
-                opt.get_name(), str(exc)
-            ))
+            print("Failed to read option {}: {}".format(opt.get_name(), str(exc)))
     print("")
+
+
 #! [ExampleListOptions]
 
 
 #! [ExampleRawToImg]
 def raw_to_img(params, img_bytes):
     fmt = params.get_format()
-    assert(fmt == Libinsane.ImgFormat.RAW_RGB_24)
-    (w, h) = (
-        params.get_width(),
-        int(len(img_bytes) / 3 / params.get_width())
-    )
+    assert fmt == Libinsane.ImgFormat.RAW_RGB_24
+    (w, h) = (params.get_width(), int(len(img_bytes) / 3 / params.get_width()))
     print("Mode: RGB : Size: {}x{}".format(w, h))
     return PIL.Image.frombuffer("RGB", (w, h), img_bytes, "raw", "RGB", 0, 1)
+
+
 #! [ExampleRawToImg]
 
 
@@ -163,12 +175,10 @@ def scan(source, output_file):
                 print("Saving page as {} ...".format(out))
                 if scan_params.get_format() == Libinsane.ImgFormat.RAW_RGB_24:
                     img = raw_to_img(scan_params, img)
-                    img.save(out, format="PNG")
+                    img.save(out)
                 else:
-                    print("Warning: output format is {}".format(
-                        scan_params.get_format()
-                    ))
-                    with open(out, 'wb') as fd:
+                    print("Warning: output format is {}".format(scan_params.get_format()))
+                    with open(out, "wb") as fd:
                         fd.write(img)
             page_nb += 1
             print("Page {} scanned".format(page_nb))
@@ -176,40 +186,38 @@ def scan(source, output_file):
             print("No page in feeder ?")
     finally:
         session.cancel()
+
+
 #! [ExampleScan]
 
 
 def main():
     if False:
-        os.environ['LIBINSANE_NORMALIZER_ALL_OPTS_ON_ALL_SOURCES'] = "0"
-        os.environ['LIBINSANE_NORMALIZER_BMP2RAW'] = "0"
-        os.environ['LIBINSANE_NORMALIZER_CLEAN_DEV_DESCS'] = "0"
-        os.environ['LIBINSANE_NORMALIZER_MIN_ONE_SOURCE'] = "0"
-        os.environ['LIBINSANE_NORMALIZER_OPT_ALIASES'] = "0"
-        os.environ['LIBINSANE_NORMALIZER_RAW24'] = "0"
-        os.environ['LIBINSANE_NORMALIZER_RESOLUTION'] = "0"
-        os.environ['LIBINSANE_NORMALIZER_SAFE_DEFAULTS'] = "0"
-        os.environ['LIBINSANE_NORMALIZER_SOURCE_NAMES'] = "0"
-        os.environ['LIBINSANE_NORMALIZER_SOURCE_NODES'] = "0"
-        os.environ['LIBINSANE_NORMALIZER_SOURCE_TYPES'] = "0"
-        os.environ['LIBINSANE_WORKAROUND_CACHE'] = "0"
-        os.environ['LIBINSANE_WORKAROUND_CHECK_CAPABILITIES'] = "0"
-        os.environ['LIBINSANE_WORKAROUND_DEDICATED_THREAD'] = "0"
-        os.environ['LIBINSANE_WORKAROUND_LAMP'] = "0"
-        os.environ['LIBINSANE_WORKAROUND_ONE_PAGE_FLATBED'] = "0"
-        os.environ['LIBINSANE_WORKAROUND_OPT_NAMES'] = "0"
-        os.environ['LIBINSANE_WORKAROUND_OPT_VALUES'] = "0"
+        os.environ["LIBINSANE_NORMALIZER_ALL_OPTS_ON_ALL_SOURCES"] = "0"
+        os.environ["LIBINSANE_NORMALIZER_BMP2RAW"] = "0"
+        os.environ["LIBINSANE_NORMALIZER_CLEAN_DEV_DESCS"] = "0"
+        os.environ["LIBINSANE_NORMALIZER_MIN_ONE_SOURCE"] = "0"
+        os.environ["LIBINSANE_NORMALIZER_OPT_ALIASES"] = "0"
+        os.environ["LIBINSANE_NORMALIZER_RAW24"] = "0"
+        os.environ["LIBINSANE_NORMALIZER_RESOLUTION"] = "0"
+        os.environ["LIBINSANE_NORMALIZER_SAFE_DEFAULTS"] = "0"
+        os.environ["LIBINSANE_NORMALIZER_SOURCE_NAMES"] = "0"
+        os.environ["LIBINSANE_NORMALIZER_SOURCE_NODES"] = "0"
+        os.environ["LIBINSANE_NORMALIZER_SOURCE_TYPES"] = "0"
+        os.environ["LIBINSANE_WORKAROUND_CACHE"] = "0"
+        os.environ["LIBINSANE_WORKAROUND_CHECK_CAPABILITIES"] = "0"
+        os.environ["LIBINSANE_WORKAROUND_DEDICATED_THREAD"] = "0"
+        os.environ["LIBINSANE_WORKAROUND_LAMP"] = "0"
+        os.environ["LIBINSANE_WORKAROUND_ONE_PAGE_FLATBED"] = "0"
+        os.environ["LIBINSANE_WORKAROUND_OPT_NAMES"] = "0"
+        os.environ["LIBINSANE_WORKAROUND_OPT_VALUES"] = "0"
 
-#! [ExampleSetLogger]
+    #! [ExampleSetLogger]
     Libinsane.register_logger(ExampleLogger())
-#! [ExampleSetLogger]
+    #! [ExampleSetLogger]
 
     if len(sys.argv) <= 1 or (sys.argv[1] == "-h" or sys.argv[1] == "--help"):
-        print(
-            "Syntax: {}"
-            " <PNG output file>"
-            " [<scan dev id> [<scan source name>]]".format(sys.argv[0])
-        )
+        print("Syntax: {}" " <PNG output file>" " [<scan dev id> [<scan source name>]]".format(sys.argv[0]))
         sys.exit(1)
 
     output_file = sys.argv[1]
@@ -223,9 +231,9 @@ def main():
 
     print("Will write the scan result into {}".format(output_file))
 
-#! [ExampleInit]
+    #! [ExampleInit]
     api = Libinsane.Api.new_safebet()
-#! [ExampleInit]
+    #! [ExampleInit]
 
     dev = get_device(api, dev_id)
     try:
@@ -234,11 +242,11 @@ def main():
         list_opts(source)
 
         # set the options
-#! [ExampleOptsToSet]
-        set_opt(source, 'resolution', 300)
+        #! [ExampleOptsToSet]
+        set_opt(source, "resolution", 300)
         # set_opt(source, 'mode', "LineArt")
         # set_opt(source, 'depth', 1)
-#! [ExampleOptsToSet]
+        #! [ExampleOptsToSet]
 
         print("Scanning ...")
         scan(source, output_file)
